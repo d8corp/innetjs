@@ -11,6 +11,7 @@ import typescript from 'rollup-plugin-typescript2'
 import postcss from 'rollup-plugin-postcss'
 import autoprefixer from 'autoprefixer'
 import express from 'express'
+import json from '@rollup/plugin-json'
 
 const livereload = require('rollup-plugin-livereload')
 const exec = util.promisify(require('child_process').exec)
@@ -93,6 +94,7 @@ async function start () {
     plugins: [
       commonjs(),
       nodeResolve(),
+      json(),
       postcss({
         plugins: [autoprefixer()],
         extract: path.resolve('public/build/index.css'),
@@ -136,6 +138,7 @@ async function build () {
       plugins: [
         commonjs(),
         nodeResolve(),
+        json(),
         postcss({
           plugins: [autoprefixer()],
           extract: path.resolve('public/build/index.css'),

@@ -14,6 +14,7 @@ var typescript = require('rollup-plugin-typescript2');
 var postcss = require('rollup-plugin-postcss');
 var autoprefixer = require('autoprefixer');
 var express = require('express');
+var json = require('@rollup/plugin-json');
 var commander = require('commander');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -29,6 +30,7 @@ var typescript__default = /*#__PURE__*/_interopDefaultLegacy(typescript);
 var postcss__default = /*#__PURE__*/_interopDefaultLegacy(postcss);
 var autoprefixer__default = /*#__PURE__*/_interopDefaultLegacy(autoprefixer);
 var express__default = /*#__PURE__*/_interopDefaultLegacy(express);
+var json__default = /*#__PURE__*/_interopDefaultLegacy(json);
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -208,6 +210,7 @@ function start() {
                         plugins: [
                             commonjs__default['default'](),
                             pluginNodeResolve.nodeResolve(),
+                            json__default['default'](),
                             postcss__default['default']({
                                 plugins: [autoprefixer__default['default']()],
                                 extract: path__default['default'].resolve('public/build/index.css'),
@@ -263,6 +266,7 @@ function build() {
                                             plugins: [
                                                 commonjs__default['default'](),
                                                 pluginNodeResolve.nodeResolve(),
+                                                json__default['default'](),
                                                 postcss__default['default']({
                                                     plugins: [autoprefixer__default['default']()],
                                                     extract: path__default['default'].resolve('public/build/index.css'),
