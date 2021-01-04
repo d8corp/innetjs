@@ -20,11 +20,25 @@ program
 
 program
   .command('start')
-  .action(start)
+  .description('run development of innet boilerplate')
+  .option('-e, --error', 'show error details')
+  .action(({error}) => {
+    start().catch(e => {
+      if (error) {
+        console.error(e)
+      }
+    })
+  })
 
 program
   .command('build')
-  .action(build)
+  .action(({error}) => {
+    build().catch(e => {
+      if (error) {
+        console.error(e)
+      }
+    })
+  })
 
 program
   .parse(process.argv)

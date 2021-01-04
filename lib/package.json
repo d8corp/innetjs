@@ -31,9 +31,14 @@
     "url": "https://github.com/d8corp/innetjs/issues"
   },
   "dependencies": {
+    "autoprefixer": "^10.1.0",
     "chalk": "^4.1.0",
     "commander": "^6.2.1",
     "fs-extra": "^9.0.1",
-    "ora": "^5.2.0"
+    "node-sass": "^5.0.0",
+    "ora": "^5.2.0",
+    "postcss": "^8.2.1",
+    "rollup-plugin-livereload": "^2.0.0",
+    "rollup-plugin-postcss": "^4.0.0"
   }
 }

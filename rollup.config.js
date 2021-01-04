@@ -49,7 +49,6 @@ export default [{
     file: 'lib/bin/innet',
     format: 'cjs'
   },
-  external: ['../index'],
   plugins: [
     json(),
     typescript({

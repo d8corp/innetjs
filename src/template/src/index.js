@@ -1,3 +1,1 @@
-import innet from 'innet'
-
-innet('Hello, World!')
+console.log('Hello, World!')
