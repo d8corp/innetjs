@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs-extra'
-import ora from 'ora'
+import ora, {Ora} from 'ora'
 import chalk from 'chalk'
 import util from 'util'
 import rollup from 'rollup'
@@ -10,6 +10,7 @@ import { terser } from 'rollup-plugin-terser'
 import typescript from 'rollup-plugin-typescript2'
 import postcss from 'rollup-plugin-postcss'
 import autoprefixer from 'autoprefixer'
+import express from 'express'
 
 const livereload = require('rollup-plugin-livereload')
 const exec = util.promisify(require('child_process').exec)
@@ -76,42 +77,49 @@ async function check (projectPath): Promise<'js' | 'ts' | 'tsx'> {
 }
 
 async function start () {
+  console.log = function() {}
   const projectPath = path.resolve()
 
   const indexExtension = await check(projectPath)
 
-  await task('Bundle script', async () => {
-    const options = {
-      input: `src/index.${indexExtension}`,
-      output: {
-        sourcemap: true,
-        format: 'iife' as 'commonjs',
-        file: 'public/build/index.js',
-        inlineDynamicImports: true
-      },
-      plugins: [
-        commonjs(),
-        nodeResolve(),
-        postcss({
-          plugins: [autoprefixer()],
-          extract: path.resolve('public/build/index.css'),
-          modules: true
-        }),
-        typescript(),
-        // // serve(),
-        livereload('public')
-      ],
+  const options = {
+    input: `src/index.${indexExtension}`,
+    output: {
+      sourcemap: true,
+      format: 'iife' as 'commonjs',
+      file: 'public/build/index.js',
+      inlineDynamicImports: true
+    },
+    plugins: [
+      commonjs(),
+      nodeResolve(),
+      postcss({
+        plugins: [autoprefixer()],
+        extract: path.resolve('public/build/index.css'),
+        modules: true
+      }),
+      typescript(),
+      server(`${projectPath}/public`),
+      livereload('public', {verbose: true})
+    ],
+  }
+
+  const watcher = rollup.watch(options)
+
+  let eventTask: Ora
+
+  watcher.on('event', e => {
+    if (e.code == 'ERROR') {
+      eventTask.fail('Bundling is failed')
+    } else if (e.code === 'BUNDLE_START') {
+      if (!eventTask?.isSpinning) {
+        eventTask = ora('Start building').start()
+      }
+    } else if (e.code === 'BUNDLE_END') {
+      if (eventTask.isSpinning) {
+        eventTask.succeed('Bundle is ready')
+      }
     }
-
-    const watcher = rollup.watch(options)
-
-    watcher.on('change', () => {
-      task('Update bundle', () => new Promise(resolve => {
-        watcher.once('restart', () => {
-          resolve(undefined)
-        })
-      }))
-    })
   })
 }
 
@@ -147,6 +155,27 @@ async function build () {
     await bundle.write(outputOptions)
     await bundle.close()
   })
+}
+
+function server (rootPath: string) {
+  let app
+
+  return {
+    writeBundle () {
+      if (!app) {
+        app = express()
+        app.use(express.static(rootPath))
+        app.listen(3000, e => {
+          if (e) {
+            console.error(e)
+            process.exit(1)
+          } else {
+            process.stdout.write('Server started on http://localhost:3000\n')
+          }
+        })
+      }
+    }
+  }
 }
 
 export {
