@@ -20,7 +20,7 @@ program
 
 program
   .command('start')
-  .description('run development of innet boilerplate')
+  .description('start development with innet boilerplate')
   .option('-e, --error', 'show error details')
   .action(({error}) => {
     start().catch(e => {
@@ -32,6 +32,8 @@ program
 
 program
   .command('build')
+  .description('build production bundle')
+  .option('-e, --error', 'show error details')
   .action(({error}) => {
     build().catch(e => {
       if (error) {

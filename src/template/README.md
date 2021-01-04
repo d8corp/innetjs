@@ -33,3 +33,22 @@ You can import `.json` file into a script.
 ```typescript jsx
 import test from './index.json'
 ```
+### HTTPS
+Add `localhost.crt` and `localhost.key` to the root of the application to use HTTPS.
+### .env
+You can create and set up `.env` file to change some features.  
+These options are used by default.
+```dotenv
+# you can use remote API, for example PROXY=https://localhost:9000
+PROXY=false
+
+# you can change the static server port
+PORT=3000
+
+# you can change directory and file name of ssl certificates
+SSL_CRT_FILE=localhost.crt
+SSL_KEY_FILE=localhost.key
+
+# you can generate sourcemap for production build
+GENERATE_SOURCEMAP=false
+```

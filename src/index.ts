@@ -1,5 +1,7 @@
 import path from 'path'
 import fs from 'fs-extra'
+import http from 'http'
+import https from 'https'
 import ora, {Ora} from 'ora'
 import chalk from 'chalk'
 import util from 'util'
@@ -13,8 +15,11 @@ import autoprefixer from 'autoprefixer'
 import express from 'express'
 import json from '@rollup/plugin-json'
 
+require('dotenv').config()
+
 const livereload = require('rollup-plugin-livereload')
 const exec = util.promisify(require('child_process').exec)
+const proxy = require('express-http-proxy')
 
 async function task (name, callback) {
   const task = ora(name).start()
@@ -78,8 +83,16 @@ async function check (projectPath): Promise<'js' | 'ts' | 'tsx'> {
 }
 
 async function start () {
-  console.log = function() {}
+  console.log = function () {}
   const projectPath = path.resolve()
+  let cert
+  let key
+  try {
+    cert = fs.readFileSync(process.env.SSL_CRT_FILE || 'localhost.crt')
+  } catch (e) {}
+  try {
+    key = fs.readFileSync(process.env.SSL_KEY_FILE || 'localhost.key')
+  } catch (e) {}
 
   const indexExtension = await check(projectPath)
 
@@ -101,8 +114,12 @@ async function start () {
         modules: true
       }),
       typescript(),
-      server(`${projectPath}/public`),
-      livereload('public', {verbose: true})
+      server(`${projectPath}/public`, cert, key),
+      livereload({
+        watch: 'public',
+        verbose: false,
+        ...(key && cert ? {https: {key, cert}} : {})
+      })
     ],
   }
 
@@ -126,6 +143,7 @@ async function start () {
 }
 
 async function build () {
+  console.log = function () {}
   const projectPath = path.resolve()
 
   const indexExtension = await check(projectPath)
@@ -151,7 +169,8 @@ async function build () {
     const outputOptions = {
       format: 'iife' as 'commonjs',
       file: 'public/build/index.js',
-      plugins: [terser()]
+      plugins: [terser()],
+      sourcemap: process.env.GENERATE_SOURCEMAP === 'true'
     }
 
     const bundle = await rollup.rollup(inputOptions)
@@ -160,21 +179,27 @@ async function build () {
   })
 }
 
-function server (rootPath: string) {
+function server (rootPath: string, cert?, key?) {
   let app
 
   return {
     writeBundle () {
       if (!app) {
+        const httpsUsing = !!(cert && key)
+        const port = process.env.PORT || 3000
+
         app = express()
         app.use(express.static(rootPath))
-        app.listen(3000, e => {
-          if (e) {
-            console.error(e)
-            process.exit(1)
-          } else {
-            process.stdout.write('Server started on http://localhost:3000\n')
-          }
+
+        if (process.env.PROXY) {
+          app.use(proxy(process.env.PROXY, {
+            https: httpsUsing
+          }))
+        }
+
+        const server = httpsUsing ? https.createServer({key, cert}, app) : http.createServer(app)
+        server.listen(port, () => {
+          process.stdout.write(`Server started on http${httpsUsing ? 's' : ''}://localhost:${port}\n`)
         })
       }
     }
