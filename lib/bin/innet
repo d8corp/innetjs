@@ -1,0 +1,30 @@
+#!/usr/bin/env node
+'use strict';
+
+var index = require('../index');
+var commander = require('commander');
+
+var version = "1.0.0";
+
+commander.program
+    .version(version, '-v, --version');
+commander.program
+    .command('init <app-name>')
+    .description('create innet boilerplate')
+    .option('-e, --error', 'show error details')
+    .action(function (appName, _a) {
+    var error = _a.error;
+    index.init(appName).catch(function (e) {
+        if (error) {
+            console.error(e);
+        }
+    });
+});
+commander.program
+    .command('start')
+    .action(index.start);
+commander.program
+    .command('build')
+    .action(index.build);
+commander.program
+    .parse(process.argv);

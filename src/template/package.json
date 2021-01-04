@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "build": "npx innetjs build",
+    "start": "npx innetjs start"
+  },
+  "dependencies": {
+    "innet": "^1.0.0"
+  }
+}
