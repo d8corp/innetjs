@@ -16,22 +16,17 @@ So you can use `TypeScript` or not or use somewhere.
 If you don't want to use `TypeScript`,
 you can remove `tsconfig.json` and `declaration.d.ts`.
 
-### SASS
+### SCSS
 You can import `.css` or `.scss` into a script.
-So you can use `SASS` or not.
+So you can use `SCSS` or not.
 ```typescript jsx
 import './index.css'
 import './index.scss'
 ```
-If you import styles to a variable you get scoped styles.
-```typescript jsx
-import styles1 from './index.css'
-import styles2 from './index.scss'
-```
 ### JSON
 You can import `.json` file into a script.
 ```typescript jsx
-import test from './index.json'
+import settings from './settings.json'
 ```
 ### HTTPS
 Add `localhost.crt` and `localhost.key` to the root of the application to use HTTPS.
@@ -51,4 +46,12 @@ SSL_KEY_FILE=localhost.key
 
 # you can generate sourcemap for production build
 GENERATE_SOURCEMAP=false
+
+# by default index.js includes all styles,
+# but you can keep styles into index.css with CSS_EXTRACT=true
+CSS_EXTRACT=false
+
+# import styles from './App.css'
+# you can use css modules with CSS_MODULES=true
+CSS_MODULES=false
 ```

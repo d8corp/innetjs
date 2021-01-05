@@ -211,7 +211,6 @@ function start() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    console.log = function () { };
                     projectPath = path__default['default'].resolve();
                     try {
                         cert = fs__default['default'].readFileSync(process.env.SSL_CRT_FILE || 'localhost.crt');
@@ -229,8 +228,7 @@ function start() {
                         output: {
                             sourcemap: true,
                             format: 'iife',
-                            file: 'public/build/index.js',
-                            inlineDynamicImports: true
+                            dir: 'public/build'
                         },
                         plugins: [
                             commonjs__default['default'](),
@@ -238,8 +236,9 @@ function start() {
                             json__default['default'](),
                             postcss__default['default']({
                                 plugins: [autoprefixer__default['default']()],
-                                extract: path__default['default'].resolve('public/build/index.css'),
-                                modules: true
+                                modules: process.env.CSS_MODULES === 'true',
+                                sourceMap: true,
+                                extract: process.env.CSS_EXTRACT === 'true' && path__default['default'].resolve('public/build/index.css'),
                             }),
                             typescript__default['default'](),
                             server(projectPath + "/public", cert, key),
@@ -252,9 +251,10 @@ function start() {
                             eventTask.fail('Bundling is failed');
                         }
                         else if (e.code === 'BUNDLE_START') {
-                            if (!(eventTask === null || eventTask === void 0 ? void 0 : eventTask.isSpinning)) {
-                                eventTask = ora__default['default']('Start building').start();
+                            if (!!(eventTask === null || eventTask === void 0 ? void 0 : eventTask.isSpinning)) {
+                                eventTask.stop();
                             }
+                            eventTask = ora__default['default']('Start building\n').start();
                         }
                         else if (e.code === 'BUNDLE_END') {
                             if (eventTask.isSpinning) {
@@ -274,7 +274,6 @@ function build() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    console.log = function () { };
                     projectPath = path__default['default'].resolve();
                     return [4 /*yield*/, check(projectPath)];
                 case 1:
@@ -295,15 +294,16 @@ function build() {
                                                 json__default['default'](),
                                                 postcss__default['default']({
                                                     plugins: [autoprefixer__default['default']()],
-                                                    extract: path__default['default'].resolve('public/build/index.css'),
-                                                    modules: true
+                                                    extract: process.env.CSS_EXTRACT === 'true' && path__default['default'].resolve('public/build/index.css'),
+                                                    modules: process.env.CSS_MODULES === 'true',
+                                                    sourceMap: process.env.GENERATE_SOURCEMAP === 'true'
                                                 }),
                                                 typescript__default['default']()
                                             ]
                                         };
                                         outputOptions = {
                                             format: 'iife',
-                                            file: 'public/build/index.js',
+                                            dir: 'public/build',
                                             plugins: [rollupPluginTerser.terser()],
                                             sourcemap: process.env.GENERATE_SOURCEMAP === 'true'
                                         };
@@ -331,12 +331,13 @@ function server(rootPath, cert, key) {
     var app;
     return {
         writeBundle: function () {
+            var _a;
             if (!app) {
                 var httpsUsing_1 = !!(cert && key);
                 var port_1 = process.env.PORT || 3000;
                 app = express__default['default']();
                 app.use(express__default['default'].static(rootPath));
-                if (process.env.PROXY) {
+                if ((_a = process.env.PROXY) === null || _a === void 0 ? void 0 : _a.startsWith('http')) {
                     app.use(proxy(process.env.PROXY, {
                         https: httpsUsing_1
                     }));

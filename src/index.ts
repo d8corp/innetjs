@@ -83,7 +83,6 @@ async function check (projectPath): Promise<'js' | 'ts' | 'tsx'> {
 }
 
 async function start () {
-  console.log = function () {}
   const projectPath = path.resolve()
   let cert
   let key
@@ -101,8 +100,7 @@ async function start () {
     output: {
       sourcemap: true,
       format: 'iife' as 'commonjs',
-      file: 'public/build/index.js',
-      inlineDynamicImports: true
+      dir: 'public/build'
     },
     plugins: [
       commonjs(),
@@ -110,8 +108,9 @@ async function start () {
       json(),
       postcss({
         plugins: [autoprefixer()],
-        extract: path.resolve('public/build/index.css'),
-        modules: true
+        modules: process.env.CSS_MODULES === 'true',
+        sourceMap: true,
+        extract: process.env.CSS_EXTRACT === 'true' && path.resolve('public/build/index.css'),
       }),
       typescript(),
       server(`${projectPath}/public`, cert, key),
@@ -131,9 +130,10 @@ async function start () {
     if (e.code == 'ERROR') {
       eventTask.fail('Bundling is failed')
     } else if (e.code === 'BUNDLE_START') {
-      if (!eventTask?.isSpinning) {
-        eventTask = ora('Start building').start()
+      if (!!eventTask?.isSpinning) {
+        eventTask.stop()
       }
+      eventTask = ora('Start building\n').start()
     } else if (e.code === 'BUNDLE_END') {
       if (eventTask.isSpinning) {
         eventTask.succeed('Bundle is ready')
@@ -143,7 +143,6 @@ async function start () {
 }
 
 async function build () {
-  console.log = function () {}
   const projectPath = path.resolve()
 
   const indexExtension = await check(projectPath)
@@ -159,8 +158,9 @@ async function build () {
         json(),
         postcss({
           plugins: [autoprefixer()],
-          extract: path.resolve('public/build/index.css'),
-          modules: true
+          extract: process.env.CSS_EXTRACT === 'true' && path.resolve('public/build/index.css'),
+          modules: process.env.CSS_MODULES === 'true',
+          sourceMap: process.env.GENERATE_SOURCEMAP === 'true'
         }),
         typescript()
       ]
@@ -168,7 +168,7 @@ async function build () {
 
     const outputOptions = {
       format: 'iife' as 'commonjs',
-      file: 'public/build/index.js',
+      dir: 'public/build',
       plugins: [terser()],
       sourcemap: process.env.GENERATE_SOURCEMAP === 'true'
     }
@@ -191,7 +191,7 @@ function server (rootPath: string, cert?, key?) {
         app = express()
         app.use(express.static(rootPath))
 
-        if (process.env.PROXY) {
+        if (process.env.PROXY?.startsWith('http')) {
           app.use(proxy(process.env.PROXY, {
             https: httpsUsing
           }))
@@ -210,4 +210,5 @@ export {
   init,
   start,
   build,
+  server,
 }
