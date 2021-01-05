@@ -129,11 +129,12 @@ async function start () {
   watcher.on('event', e => {
     if (e.code == 'ERROR') {
       eventTask.fail('Bundling is failed')
+      console.log(chalk.red('└ ' + e.error.message))
     } else if (e.code === 'BUNDLE_START') {
       if (!!eventTask?.isSpinning) {
         eventTask.stop()
       }
-      eventTask = ora('Start building\n').start()
+      eventTask = ora('Bundling\n').start()
     } else if (e.code === 'BUNDLE_END') {
       if (eventTask.isSpinning) {
         eventTask.succeed('Bundle is ready')
@@ -199,7 +200,7 @@ function server (rootPath: string, cert?, key?) {
 
         const server = httpsUsing ? https.createServer({key, cert}, app) : http.createServer(app)
         server.listen(port, () => {
-          process.stdout.write(`Server started on http${httpsUsing ? 's' : ''}://localhost:${port}\n`)
+          console.log(`${chalk.green('➤')} Server started on http${httpsUsing ? 's' : ''}://localhost:${port}`)
         })
       }
     }
