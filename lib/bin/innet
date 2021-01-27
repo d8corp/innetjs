@@ -352,7 +352,7 @@ function server(rootPath, cert, key) {
     };
 }
 
-var version = "1.0.0";
+var version = "1.0.1";
 
 commander.program
     .version(version, '-v, --version');
