@@ -5,9 +5,9 @@
   },
   "dependencies": {
     "innet": "^0.1.0",
-    "watch-state": "^2.0.1"
+    "watch-state": "^2.0.2"
   },
   "devDependencies": {
-    "innetjs": "^0.1.0"
+    "innetjs": "^1.0.2"
   }
 }
