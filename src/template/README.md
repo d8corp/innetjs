@@ -54,4 +54,7 @@ CSS_EXTRACT=false
 # import styles from './App.css'
 # you can use css modules with CSS_MODULES=true
 CSS_MODULES=false
+
+# you can change the public folder
+PUBLIC_FOLDER=public
 ```

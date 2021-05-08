@@ -4,10 +4,10 @@
     "start": "npx innetjs start"
   },
   "dependencies": {
-    "innet": "^0.1.0",
+    "innet": "^0.1.1",
     "watch-state": "^2.0.2"
   },
   "devDependencies": {
-    "innetjs": "^1.0.2"
+    "innetjs": "^1.1.0"
   }
 }

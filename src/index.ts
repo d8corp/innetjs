@@ -17,6 +17,8 @@ import json from '@rollup/plugin-json'
 
 require('dotenv').config()
 
+const publicFolder = process.env.PUBLIC_FOLDER || 'public'
+
 const livereload = require('rollup-plugin-livereload')
 const exec = util.promisify(require('child_process').exec)
 const proxy = require('express-http-proxy')
@@ -50,7 +52,7 @@ async function init (appName) {
 
 async function check (projectPath): Promise<'js' | 'ts' | 'tsx'> {
   const srcPath = `${projectPath}/src`
-  const publicPath = `${projectPath}/public`
+  const publicPath = `${projectPath}/${publicFolder}`
   let indexExtension: 'js' | 'ts' | 'tsx'
 
   await task('Check src', () => {
@@ -60,7 +62,7 @@ async function check (projectPath): Promise<'js' | 'ts' | 'tsx'> {
   })
   await task('Check public', () => {
     if (!fs.existsSync(publicPath)) {
-      throw Error('public folder is missing')
+      throw Error(`public folder is missing here ${publicPath}`)
     }
   })
   await task('Check index.html', () => {
@@ -100,7 +102,7 @@ async function start () {
     output: {
       sourcemap: true,
       format: 'iife' as 'commonjs',
-      dir: 'public/build'
+      dir: `${publicFolder}/build`
     },
     plugins: [
       commonjs(),
@@ -110,12 +112,12 @@ async function start () {
         plugins: [autoprefixer()],
         modules: process.env.CSS_MODULES === 'true',
         sourceMap: true,
-        extract: process.env.CSS_EXTRACT === 'true' && path.resolve('public/build/index.css'),
+        extract: process.env.CSS_EXTRACT === 'true' && path.resolve(`${publicFolder}/build/index.css`),
       }),
       typescript(),
-      server(`${projectPath}/public`, cert, key),
+      server(`${projectPath}/${publicFolder}`, cert, key),
       livereload({
-        watch: 'public',
+        watch: publicFolder,
         verbose: false,
         ...(key && cert ? {https: {key, cert}} : {})
       })
@@ -148,7 +150,7 @@ async function build () {
 
   const indexExtension = await check(projectPath)
 
-  await task('Remove build', () => fs.remove(`${projectPath}/public/build`))
+  await task('Remove build', () => fs.remove(`${projectPath}/${publicFolder}/build`))
 
   await task('Build production bundle', async () => {
     const inputOptions = {
@@ -159,7 +161,7 @@ async function build () {
         json(),
         postcss({
           plugins: [autoprefixer()],
-          extract: process.env.CSS_EXTRACT === 'true' && path.resolve('public/build/index.css'),
+          extract: process.env.CSS_EXTRACT === 'true' && path.resolve(`${publicFolder}/build/index.css`),
           modules: process.env.CSS_MODULES === 'true',
           sourceMap: process.env.GENERATE_SOURCEMAP === 'true'
         }),
@@ -169,7 +171,7 @@ async function build () {
 
     const outputOptions = {
       format: 'iife' as 'commonjs',
-      dir: 'public/build',
+      dir: `${publicFolder}/build`,
       plugins: [terser()],
       sourcemap: process.env.GENERATE_SOURCEMAP === 'true'
     }
