@@ -1,6 +1,6 @@
 {
   "name": "innetjs",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "CLI for innet boilerplate",
   "homepage": "https://github.com/d8corp/innetjs",
   "author": "Mikhail Lysikov <d8corp@mail.ru>",
@@ -12,9 +12,9 @@
   "scripts": {
     "build": "bin/release -rollup",
     "test": "jest",
-    "patch": "bin/release -patch -rollup",
-    "minor": "bin/release -minor -rollup",
-    "major": "bin/release -major -rollup"
+    "patch": "bin/release -patch -rollup -publish",
+    "minor": "bin/release -minor -rollup -publish",
+    "major": "bin/release -major -rollup -publish"
   },
   "repository": {
     "type": "git",
