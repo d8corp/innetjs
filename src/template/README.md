@@ -30,6 +30,19 @@ import settings from './settings.json'
 ```
 ### HTTPS
 Add `localhost.crt` and `localhost.key` to the root of the application to use HTTPS.
+### base path of imports
+You can use `/` to get root of src.
+```typescript
+import App from '/components/App'
+```
+The same:
+```typescript
+import App from 'src/components/App'
+```
+The same for index file.
+```typescript
+import App from './components/App'
+```
 ### .env
 You can create and set up `.env` file to change some features.  
 These options are used by default.

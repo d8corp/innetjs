@@ -43,3 +43,45 @@ Use the command in the project folder to build it.
 ```shell
 innetjs build
 ```
+##### run
+You can run typescript files by the command.
+```shell
+innetjs run test.ts
+```
+It works like `ts-node` but uses `rollup` and supports more features.  
+For example, you can run a folder. Create `test-folder` folder and put there `index.js`, `index.ts` or `index.tsx`.
+```shell
+innetjs run test-folder
+```
+You can run `tsx` file.
+```shell
+innetjs run test.tsx
+```
+You can use `baseUrl` and other stuff from `tsconfig` file.  
+
+`./tsconfig.json`
+```json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "/": ["src"],
+      "/*": ["src/*"]
+    },
+    ...
+  },
+  "include": [
+    "src"
+  ]
+}
+```
+`./test.ts`
+```typescript
+import App from '/components/App'
+
+console.log(App)
+```
+`./src/components/App.ts`
+```typescript
+export default class App{}
+```
