@@ -257,9 +257,7 @@ async function run (file) {
   })
 
   await task('Running of the script', async () => {
-    const childProcess = require('child_process').exec(`node -r source-map-support/register ${jsFilePath}`)
-    childProcess.stdout.pipe(process.stdout)
-    childProcess.stderr.pipe(process.stderr)
+    require('child_process').spawn('node', ['-r', 'source-map-support/register', jsFilePath], {stdio: 'inherit'})
   })
 }
 
