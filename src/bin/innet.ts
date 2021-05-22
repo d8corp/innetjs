@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {init, start, build} from '../index'
+import {init, start, build, run} from '../index'
 import {version} from '../../package.json'
 import {program} from 'commander'
 
@@ -12,6 +12,18 @@ program
   .option('-e, --error', 'show error details')
   .action((appName, {error}) => {
     init(appName).catch(e => {
+      if (error) {
+        console.error(e)
+      }
+    })
+  })
+
+program
+  .command('run <file-path>')
+  .description('Run js, ts or tsx file')
+  .option('-e, --error', 'show error details')
+  .action((filePath, {error}) => {
+    run(filePath).catch(e => {
       if (error) {
         console.error(e)
       }

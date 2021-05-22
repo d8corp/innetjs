@@ -14,6 +14,7 @@ import postcss from 'rollup-plugin-postcss'
 import autoprefixer from 'autoprefixer'
 import express from 'express'
 import json from '@rollup/plugin-json'
+import tmp from 'tmp'
 
 require('dotenv').config()
 
@@ -26,8 +27,9 @@ const proxy = require('express-http-proxy')
 async function task (name, callback) {
   const task = ora(name).start()
   try {
-    await callback(task)
+    const result = await callback(task)
     task.succeed()
+    return result
   } catch (e) {
     task.fail()
     console.log(chalk.red('└ ' + (e?.message || e)))
@@ -82,6 +84,35 @@ async function check (projectPath): Promise<'js' | 'ts' | 'tsx'> {
     }
   })
   return indexExtension
+}
+
+function getFile (file) {
+  file = path.resolve(file)
+
+  if (!fs.existsSync(file)) {
+    throw Error('Cannot find the file: ' + file)
+  }
+
+  if (fs.lstatSync(file).isDirectory()) {
+    let tmpFile = file
+    if (
+      !fs.existsSync(tmpFile = path.join(file, 'index.ts')) &&
+      !fs.existsSync(tmpFile = path.join(file, 'index.tsx')) &&
+      !fs.existsSync(tmpFile = path.join(file, 'index.js'))
+    ) {
+      throw Error('Cannot find index file in: ' + file)
+    }
+
+    file = tmpFile
+  } else if (!file.endsWith('.ts') && !file.endsWith('.tsx') && !file.endsWith('.js')) {
+    throw Error('File should has `.ts` or `.tsx` or `.js` extension: ' + file)
+  }
+
+  if (!fs.existsSync(file)) {
+    throw Error('Cannot find the file: ' + file)
+  }
+
+  return file
 }
 
 async function start () {
@@ -182,6 +213,56 @@ async function build () {
   })
 }
 
+async function run (file) {
+  const input = await task('Check file', () => getFile(file))
+
+  const folder = await new Promise((resolve, reject) => {
+    tmp.dir((err, folder) => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(folder)
+      }
+    })
+  })
+
+  const jsFilePath = `${folder}/index.js`
+
+  await task('Build bundle', async () => {
+    const inputOptions = {
+      input,
+      plugins: [
+        commonjs(),
+        nodeResolve(),
+        json(),
+        typescript({
+          tsconfigOverride: {
+            compilerOptions: {
+              sourceMap: true
+            }
+          }
+        })
+      ]
+    }
+
+    const outputOptions = {
+      format: 'cjs' as 'commonjs',
+      file: jsFilePath,
+      sourcemap: true
+    }
+
+    const bundle = await rollup.rollup(inputOptions)
+    await bundle.write(outputOptions)
+    await bundle.close()
+  })
+
+  await task('Running of the script', async () => {
+    const childProcess = require('child_process').exec(`node -r source-map-support/register ${jsFilePath}`)
+    childProcess.stdout.pipe(process.stdout)
+    childProcess.stderr.pipe(process.stderr)
+  })
+}
+
 function server (rootPath: string, cert?, key?) {
   let app
 
@@ -214,4 +295,5 @@ export {
   start,
   build,
   server,
+  run,
 }
