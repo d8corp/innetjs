@@ -1,8 +1,50 @@
-declare function init(appName: any): Promise<void>;
-declare function start(): Promise<void>;
-declare function build(): Promise<void>;
-declare function run(file: any): Promise<void>;
-declare function server(rootPath: string, cert?: any, key?: any): {
-    writeBundle(): void;
-};
-export { init, start, build, server, run, };
+declare type Extensions = 'js' | 'ts' | 'tsx' | 'jsx';
+export declare function task(name: any, callback: any): Promise<any>;
+export default class InnetJS {
+    projectFolder: string;
+    publicFolder: string;
+    buildFolder: string;
+    srcFolder: string;
+    sslKey: string;
+    sslCrt: string;
+    proxy: string;
+    sourcemap: boolean;
+    cssModules: boolean;
+    cssInJs: boolean;
+    port: number;
+    private projectExtension;
+    private package;
+    constructor({ projectFolder, publicFolder, buildFolder, srcFolder, sourcemap, cssModules, cssInJs, sslKey, sslCrt, proxy, port, }?: {
+        projectFolder?: string;
+        publicFolder?: string;
+        buildFolder?: string;
+        srcFolder?: string;
+        sourcemap?: boolean;
+        cssModules?: boolean;
+        cssInJs?: boolean;
+        sslKey?: string;
+        sslCrt?: string;
+        proxy?: string;
+        port?: number;
+    });
+    init(appName: string, { template, force }?: {
+        template?: string;
+        force?: boolean;
+    }): Promise<void>;
+    build({ node }?: {
+        node?: boolean;
+    }): Promise<void>;
+    start({ node }?: {
+        node?: boolean;
+    }): Promise<void>;
+    run(file: any): Promise<void>;
+    getProjectExtension(): Promise<Extensions>;
+    getPackage(): Promise<Record<string, any>>;
+    createClient(key: any, cert: any): {
+        writeBundle: () => void;
+    };
+    createServer(external: string[]): {
+        writeBundle: () => Promise<void>;
+    };
+}
+export {};

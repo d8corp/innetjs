@@ -62,7 +62,7 @@ GENERATE_SOURCEMAP=false
 
 # by default index.js includes all styles,
 # but you can keep styles into index.css with CSS_EXTRACT=true
-CSS_EXTRACT=false
+CSS_IN_JS=false
 
 # import styles from './App.css'
 # you can use css modules with CSS_MODULES=true
@@ -70,4 +70,7 @@ CSS_MODULES=false
 
 # you can change the public folder
 PUBLIC_FOLDER=public
+
+# you can change the folder of scripts
+BUILD_FOLDER=public/build
 ```
