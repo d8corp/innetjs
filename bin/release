@@ -22,7 +22,7 @@ async function start () {
     copyLicense(),
     copyPackage(),
     copyReadme(),
-    copyTemplate(),
+    copyTemplates(),
   ])
   await publish()
   consoleEnd('deploying')
@@ -51,7 +51,7 @@ async function copyLicense () {
   await getPromise(resolve => fs.copyFile(rootDir + '/LICENSE', releaseDir + '/LICENSE', 'utf8', resolve))
   consoleEnd('copying license')
 }
-async function copyTemplate () {
+async function copyTemplates () {
   consoleStart('copying templates')
   const templatePackageJSON = require('../src/templates/fe/package.json')
   templatePackageJSON.devDependencies.innetjs = '^' + packageJSON.version
