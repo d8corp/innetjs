@@ -1,17 +1,21 @@
 #!/usr/bin/env node
-import {init, start, build, run} from '../index'
+import InnetJS from '..'
 import {version} from '../../package.json'
 import {program} from 'commander'
+
+require('dotenv').config()
+
+const innetJS = new InnetJS()
 
 program
   .version(version, '-v, --version')
 
 program
   .command('init <app-name>')
-  .description('create innet boilerplate')
-  .option('-e, --error', 'show error details')
+  .description('Create innet boilerplate')
+  .option('-e, --error', 'Show error details')
   .action((appName, {error}) => {
-    init(appName).catch(e => {
+    innetJS.init(appName).catch(e => {
       if (error) {
         console.error(e)
       }
@@ -21,9 +25,9 @@ program
 program
   .command('run <file-path>')
   .description('Run js, ts or tsx file')
-  .option('-e, --error', 'show error details')
+  .option('-e, --error', 'Show error details')
   .action((filePath, {error}) => {
-    run(filePath).catch(e => {
+    innetJS.run(filePath).catch(e => {
       if (error) {
         console.error(e)
       }
@@ -32,10 +36,11 @@ program
 
 program
   .command('start')
-  .description('start development with innet boilerplate')
-  .option('-e, --error', 'show error details')
-  .action(({error}) => {
-    start().catch(e => {
+  .description('Start development with innet boilerplate')
+  .option('-e, --error', 'Show error details')
+  .option('-n, --node', 'Start development for Node.js')
+  .action(({error, node}) => {
+    innetJS.start({node}).catch(e => {
       if (error) {
         console.error(e)
       }
@@ -44,10 +49,11 @@ program
 
 program
   .command('build')
-  .description('build production bundle')
-  .option('-e, --error', 'show error details')
-  .action(({error}) => {
-    build().catch(e => {
+  .description('Build production bundle')
+  .option('-e, --error', 'Show error details')
+  .option('-n, --node', 'Build for node.js')
+  .action(({error, node}) => {
+    innetJS.build({node}).catch(e => {
       if (error) {
         console.error(e)
       }

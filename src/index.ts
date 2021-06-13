@@ -4,7 +4,7 @@ import http from 'http'
 import https from 'https'
 import ora, {Ora} from 'ora'
 import chalk from 'chalk'
-import util from 'util'
+import {promisify} from 'util'
 import rollup from 'rollup'
 import commonjs from '@rollup/plugin-commonjs'
 import {nodeResolve} from '@rollup/plugin-node-resolve'
@@ -15,76 +15,17 @@ import autoprefixer from 'autoprefixer'
 import express from 'express'
 import json from '@rollup/plugin-json'
 import tmp from 'tmp'
+import proxy from 'express-http-proxy'
+import selector from 'cli-select'
+
+const livereload = require('rollup-plugin-livereload')
+const {string} = require('rollup-plugin-string')
+const {exec, spawn} = require('child_process')
+const execAsync = promisify(exec)
 
 require('dotenv').config()
 
-const publicFolder = process.env.PUBLIC_FOLDER || 'public'
-
-const livereload = require('rollup-plugin-livereload')
-const exec = util.promisify(require('child_process').exec)
-const proxy = require('express-http-proxy')
-
-async function task (name, callback) {
-  const task = ora(name).start()
-  try {
-    const result = await callback(task)
-    task.succeed()
-    return result
-  } catch (e) {
-    task.fail()
-    console.log(chalk.red('└ ' + (e?.message || e)))
-    return Promise.reject(e)
-  }
-}
-
-async function init (appName) {
-  const appPath = path.resolve(appName)
-  const libPath = path.resolve(__dirname + '/..')
-
-  await task('Check if app folder is available', () => {
-    if (fs.existsSync(appPath)) {
-      throw Error(`'${appPath}' already exist`)
-    }
-  })
-
-  await task('Copy files', () => fs.copy(`${libPath}/template`, appPath))
-
-  await task('Install packages', () => exec(`cd ${appPath} && npm i`))
-}
-
-async function check (projectPath): Promise<'js' | 'ts' | 'tsx'> {
-  const srcPath = `${projectPath}/src`
-  const publicPath = `${projectPath}/${publicFolder}`
-  let indexExtension: 'js' | 'ts' | 'tsx'
-
-  await task('Check src', () => {
-    if (!fs.existsSync(srcPath)) {
-      throw Error('src folder is missing')
-    }
-  })
-  await task('Check public', () => {
-    if (!fs.existsSync(publicPath)) {
-      throw Error(`public folder is missing here ${publicPath}`)
-    }
-  })
-  await task('Check index.html', () => {
-    if (!fs.existsSync(`${publicPath}/index.html`)) {
-      throw Error('index.html is missing')
-    }
-  })
-  await task('Detection of index file', () => {
-    if (fs.existsSync(`${srcPath}/index.js`)) {
-      indexExtension = 'js'
-    } else if (fs.existsSync(`${srcPath}/index.ts`)) {
-      indexExtension = 'ts'
-    } else if (fs.existsSync(`${srcPath}/index.tsx`)) {
-      indexExtension = 'tsx'
-    } else {
-      throw Error('index file is not detected')
-    }
-  })
-  return indexExtension
-}
+type Extensions = 'js' | 'ts' | 'tsx' | 'jsx'
 
 function getFile (file) {
   file = path.resolve(file)
@@ -115,125 +56,193 @@ function getFile (file) {
   return file
 }
 
-async function start () {
-  const projectPath = path.resolve()
-  let cert
-  let key
+export async function task (name, callback) {
+  const task = ora(name).start()
   try {
-    cert = fs.readFileSync(process.env.SSL_CRT_FILE || 'localhost.crt')
-  } catch (e) {}
-  try {
-    key = fs.readFileSync(process.env.SSL_KEY_FILE || 'localhost.key')
-  } catch (e) {}
-
-  const indexExtension = await check(projectPath)
-
-  const options = {
-    input: `src/index.${indexExtension}`,
-    output: {
-      sourcemap: true,
-      format: 'iife' as 'commonjs',
-      dir: `${publicFolder}/build`
-    },
-    plugins: [
-      commonjs(),
-      nodeResolve(),
-      json(),
-      postcss({
-        plugins: [autoprefixer()],
-        modules: process.env.CSS_MODULES === 'true',
-        sourceMap: true,
-        extract: process.env.CSS_EXTRACT === 'true' && path.resolve(`${publicFolder}/build/index.css`),
-      }),
-      typescript(),
-      server(`${projectPath}/${publicFolder}`, cert, key),
-      livereload({
-        watch: publicFolder,
-        verbose: false,
-        ...(key && cert ? {https: {key, cert}} : {})
-      })
-    ],
+    const result = await callback(task)
+    task.succeed()
+    process.stdout.clearLine(1)
+    return result
+  } catch (e) {
+    task.fail()
+    process.stdout.clearLine(1)
+    console.log(chalk.red('└ ' + (e?.message || e)))
+    return Promise.reject(e)
   }
-
-  const watcher = rollup.watch(options)
-
-  let eventTask: Ora
-
-  watcher.on('event', e => {
-    if (e.code == 'ERROR') {
-      eventTask.fail('Bundling is failed')
-      console.log(chalk.red('└ ' + e.error.message))
-    } else if (e.code === 'BUNDLE_START') {
-      if (!!eventTask?.isSpinning) {
-        eventTask.stop()
-      }
-      eventTask = ora('Bundling\n').start()
-    } else if (e.code === 'BUNDLE_END') {
-      if (eventTask.isSpinning) {
-        eventTask.succeed('Bundle is ready')
-      }
-    }
-  })
 }
 
-async function build () {
-  const projectPath = path.resolve()
+export default class InnetJS {
 
-  const indexExtension = await check(projectPath)
+  // Setup during initialisation
+  projectFolder: string
+  publicFolder: string
+  buildFolder: string
+  srcFolder: string
+  sslKey: string
+  sslCrt: string
+  proxy: string
+  sourcemap: boolean
+  cssModules: boolean
+  cssInJs: boolean
+  port: number
 
-  await task('Remove build', () => fs.remove(`${projectPath}/${publicFolder}/build`))
+  private projectExtension: Extensions
+  private package: object
 
-  await task('Build production bundle', async () => {
+  constructor ({
+    projectFolder = process.env.PROJECT_FOLDER || '',
+    publicFolder = process.env.PUBLIC_FOLDER || 'public',
+    buildFolder = process.env.BUILD_FOLDER || path.join('public', 'build'),
+    srcFolder = process.env.SRC_FOLDER || 'src',
+    sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === 'true' : false,
+    cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === 'true' : false,
+    cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === 'true' : false,
+    sslKey = process.env.SSL_KEY || 'localhost.key',
+    sslCrt = process.env.SSL_CRT || 'localhost.crt',
+    proxy = process.env.PROXY || '',
+    port = process.env.PORT ? +process.env.PORT : 3000,
+  } = {}) {
+    this.projectFolder = path.resolve(projectFolder)
+    this.publicFolder = path.resolve(publicFolder)
+    this.buildFolder = path.resolve(buildFolder)
+    this.srcFolder = path.resolve(srcFolder)
+    this.sourcemap = sourcemap
+    this.cssModules = cssModules
+    this.cssInJs = cssInJs
+    this.sslKey = sslKey
+    this.sslCrt = sslCrt
+    this.port = port
+    this.proxy = proxy
+  }
+
+  // Methods
+  async init (appName: string, {template = 'fe', force = false} = {}) {
+
+    const appPath = path.resolve(appName)
+
+    if (!force) {
+
+      await task('Check if app folder is available', async task => {
+
+        if (fs.existsSync(appPath)) {
+
+          task.fail()
+          console.log(chalk.red(`└ '${appPath}' already exist, what do you want?`))
+
+          const {id: result} = await selector({
+            values: ['Stop the process', 'Remove the folder', 'Merge with template']
+          })
+
+          process.stdout.moveCursor(0, -2)
+
+          if (!result) {
+            throw Error(`'${appPath}' already exist`)
+          }
+
+          if (result === 1) {
+            await fs.remove(appPath)
+          }
+        }
+      })
+    }
+
+    const libPath = path.resolve(__dirname, '..')
+    const templatePath = path.resolve(libPath, 'templates', template)
+
+    await task('Check if the template exists', () => {
+      if (!fs.existsSync(templatePath)) {
+        throw Error(`The template '${template}' is not exist`)
+      }
+    })
+
+    await task('Copy files', () => fs.copy(templatePath, appPath))
+
+    await task('Install packages', () => execAsync(`cd ${appPath} && npm i`))
+  }
+
+  async build ({node = false} = {}) {
+    const indexExtension = await this.getProjectExtension()
+
+    await task('Remove build', () => fs.remove(this.buildFolder))
+
+    const pkg = node && await this.getPackage()
     const inputOptions = {
-      input: `src/index.${indexExtension}`,
+      input: path.resolve(this.srcFolder, `index.${indexExtension}`),
       plugins: [
         commonjs(),
         nodeResolve(),
         json(),
-        postcss({
-          plugins: [autoprefixer()],
-          extract: process.env.CSS_EXTRACT === 'true' && path.resolve(`${publicFolder}/build/index.css`),
-          modules: process.env.CSS_MODULES === 'true',
-          sourceMap: process.env.GENERATE_SOURCEMAP === 'true'
+        typescript(),
+        string({
+          include: '**/*.*',
+          exclude: [
+            '**/*.ts',
+            '**/*.tsx',
+            '**/*.js',
+            '**/*.jsx',
+            '**/*.json',
+            '**/*.css',
+            '**/*.scss',
+          ]
         }),
-        typescript()
       ]
-    }
+    } as Record<string, any>
 
     const outputOptions = {
-      format: 'iife' as 'commonjs',
-      dir: `${publicFolder}/build`,
-      plugins: [terser()],
-      sourcemap: process.env.GENERATE_SOURCEMAP === 'true'
+      dir: this.buildFolder,
+      sourcemap: this.sourcemap
+    } as Record<string, any>
+
+    if (node) {
+      inputOptions.external = Object.keys(pkg?.dependencies || {})
+      outputOptions.format = 'cjs'
+    } else {
+      inputOptions.plugins.push(postcss({
+        plugins: [autoprefixer()],
+        extract: !this.cssInJs,
+        modules: this.cssModules,
+        sourceMap: this.sourcemap
+      }))
+      outputOptions.format = 'iife'
+      outputOptions.plugins = [terser()]
     }
 
-    const bundle = await rollup.rollup(inputOptions)
-    await bundle.write(outputOptions)
-    await bundle.close()
-  })
-}
-
-async function run (file) {
-  const input = await task('Check file', () => getFile(file))
-
-  const folder = await new Promise((resolve, reject) => {
-    tmp.dir((err, folder) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve(folder)
-      }
+    await task('Build production bundle', async () => {
+      const bundle = await rollup.rollup(inputOptions)
+      await bundle.write(outputOptions)
+      await bundle.close()
     })
-  })
 
-  const jsFilePath = `${folder}/index.js`
+    if (pkg) {
+      await task('Copy package.json', async () => {
+        const data = {...pkg}
+        delete data.private
+        delete data.devDependencies
 
-  await task('Build bundle', async () => {
-    const inputOptions = {
-      input,
+        await fs.writeFile(
+          path.resolve(this.buildFolder, 'package.json'),
+          JSON.stringify(data, undefined, 2),
+          'UTF-8'
+        )
+      })
+    }
+  }
+
+  async start ({node = false} = {}) {
+    const indexExtension = await this.getProjectExtension()
+
+    const pkg = node && await this.getPackage()
+
+    await task('Remove build', () => fs.remove(this.buildFolder))
+
+    const options = {
+      input: path.resolve(this.srcFolder, `index.${indexExtension}`),
+      output: {
+        dir: this.buildFolder,
+        sourcemap: true
+      },
       plugins: [
         commonjs(),
-        nodeResolve(),
         json(),
         typescript({
           tsconfigOverride: {
@@ -241,57 +250,226 @@ async function run (file) {
               sourceMap: true
             }
           }
+        }),
+      ],
+    } as Record<string, any>
+
+    if (node) {
+      options.output.format = 'cjs'
+      options.external = Object.keys(pkg?.dependencies || {})
+      options.plugins.push(
+        nodeResolve({
+          moduleDirectories: [path.resolve(this.srcFolder, 'node_modules')]
+        }),
+        string({
+          include: '**/*.*',
+          exclude: [
+            '**/*.ts',
+            '**/*.tsx',
+            '**/*.js',
+            '**/*.jsx',
+            '**/*.json',
+          ]
+        }),
+        this.createServer(options.external)
+      )
+    } else {
+      const key = path.basename(this.sslKey) !== this.sslKey
+        ? this.sslKey
+        : fs.existsSync(this.sslKey)
+          ? fs.readFileSync(this.sslKey)
+          : undefined
+
+      const cert = path.basename(this.sslCrt) !== this.sslCrt
+        ? this.sslCrt
+        : fs.existsSync(this.sslCrt)
+          ? fs.readFileSync(this.sslCrt)
+          : undefined
+
+      options.output.format = 'iife'
+      options.plugins.push(
+        nodeResolve(),
+        string({
+          include: '**/*.*',
+          exclude: [
+            '**/*.ts',
+            '**/*.tsx',
+            '**/*.js',
+            '**/*.jsx',
+            '**/*.json',
+            '**/*.css',
+            '**/*.scss',
+          ]
+        }),
+        postcss({
+          plugins: [autoprefixer()],
+          modules: this.cssModules,
+          sourceMap: true,
+          extract: !this.cssInJs,
+        }),
+        this.createClient(key, cert),
+        livereload({
+          watch: this.publicFolder,
+          verbose: false,
+          ...(key && cert ? {https: {key, cert}} : {})
         })
-      ]
+      )
     }
 
-    const outputOptions = {
-      format: 'cjs' as 'commonjs',
-      file: jsFilePath,
-      sourcemap: true
-    }
+    const watcher = rollup.watch(options)
 
-    const bundle = await rollup.rollup(inputOptions)
-    await bundle.write(outputOptions)
-    await bundle.close()
-  })
+    let eventTask: Ora
 
-  await task('Running of the script', async () => {
-    require('child_process').spawn('node', ['-r', 'source-map-support/register', jsFilePath], {stdio: 'inherit'})
-  })
-}
-
-function server (rootPath: string, cert?, key?) {
-  let app
-
-  return {
-    writeBundle () {
-      if (!app) {
-        const httpsUsing = !!(cert && key)
-        const port = process.env.PORT || 3000
-
-        app = express()
-        app.use(express.static(rootPath))
-
-        if (process.env.PROXY?.startsWith('http')) {
-          app.use(proxy(process.env.PROXY, {
-            https: httpsUsing
-          }))
+    watcher.on('event', e => {
+      if (e.code == 'ERROR') {
+        eventTask.fail('Bundling is failed')
+        console.log(chalk.red('└ ' + e.error.message))
+      } else if (e.code === 'BUNDLE_START') {
+        if (!!eventTask?.isSpinning) {
+          eventTask.stop()
         }
+        eventTask = ora('Bundling\n').start()
+      } else if (e.code === 'BUNDLE_END') {
+        if (eventTask.isSpinning) {
+          eventTask.succeed('Bundle is ready')
+        }
+      }
+    })
+  }
 
-        const server = httpsUsing ? https.createServer({key, cert}, app) : http.createServer(app)
-        server.listen(port, () => {
-          console.log(`${chalk.green('➤')} Server started on http${httpsUsing ? 's' : ''}://localhost:${port}`)
-        })
+  async run (file) {
+    const input = await task('Check file', () => getFile(file))
+
+    const folder = await new Promise((resolve, reject) => {
+      tmp.dir((err, folder) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(folder)
+        }
+      })
+    })
+
+    const jsFilePath = `${folder}/index.js`
+
+    await task('Build bundle', async () => {
+      const inputOptions = {
+        input,
+        plugins: [
+          commonjs(),
+          nodeResolve(),
+          json(),
+          typescript({
+            tsconfigOverride: {
+              compilerOptions: {
+                sourceMap: true
+              }
+            }
+          })
+        ]
+      }
+
+      const outputOptions = {
+        format: 'cjs' as 'commonjs',
+        file: jsFilePath,
+        sourcemap: true
+      }
+
+      const bundle = await rollup.rollup(inputOptions)
+      await bundle.write(outputOptions)
+      await bundle.close()
+    })
+
+    await task('Running of the script', async () => {
+      spawn('node', ['-r', 'source-map-support/register', jsFilePath], {stdio: 'inherit'})
+    })
+  }
+
+  // Utils
+  async getProjectExtension (): Promise<Extensions> {
+
+    if (this.projectExtension) {
+      return this.projectExtension
+    }
+
+    await task('Check src', () => {
+      if (!fs.existsSync(this.srcFolder)) {
+        throw Error('src folder is missing')
+      }
+    })
+
+    await task('Detection of index file', () => {
+      if (fs.existsSync(path.join(this.srcFolder, 'index.js'))) {
+        this.projectExtension = 'js'
+      } else if (fs.existsSync(path.join(this.srcFolder, 'index.ts'))) {
+        this.projectExtension = 'ts'
+      } else if (fs.existsSync(path.join(this.srcFolder, 'index.tsx'))) {
+        this.projectExtension = 'tsx'
+      } else if (fs.existsSync(path.join(this.srcFolder, 'index.jsx'))) {
+        this.projectExtension = 'jsx'
+      } else {
+        throw Error('index file is not detected')
+      }
+    })
+
+    return this.projectExtension
+  }
+  async getPackage (): Promise<Record<string, any>> {
+
+    if (this.package) {
+      return this.package
+    }
+
+    const packageFolder = path.resolve(this.projectFolder, 'package.json')
+
+    await task('Check package.json', async () => {
+      if (fs.existsSync(packageFolder)) {
+        this.package = await fs.readJson(packageFolder)
+      }
+    })
+
+    return this.package
+  }
+
+  createClient (key, cert) {
+    let app
+
+    return {
+      writeBundle: () => {
+        if (!app) {
+          const httpsUsing = !!(cert && key)
+
+          app = express()
+          app.use(express.static(this.publicFolder))
+
+          if (this.proxy?.startsWith('http')) {
+            app.use(proxy(this.proxy, {
+              https: httpsUsing
+            }))
+          }
+
+          const server = httpsUsing ? https.createServer({key, cert}, app) : http.createServer(app)
+          server.listen(this.port, () => {
+            console.log(`${chalk.green('➤')} Server started on http${httpsUsing ? 's' : ''}://localhost:${this.port}`)
+          })
+        }
       }
     }
   }
-}
 
-export {
-  init,
-  start,
-  build,
-  server,
-  run,
+  createServer (external: string[]) {
+    let app
+    return {
+      writeBundle: async () => {
+        app?.kill()
+        const filePath = path.resolve(this.buildFolder, 'index.js')
+        let data = await fs.readFile(filePath, 'UTF-8')
+        const regExp = new RegExp(`require\\('(${external.join('|')})'\\)`, 'g')
+        data = data.replace(regExp, `require('${path.resolve(this.projectFolder, 'node_modules', '$1')}')`)
+        await fs.writeFile(filePath, data)
+
+        app = spawn('node', ['-r', 'source-map-support/register', filePath], {stdio: 'inherit'})
+      }
+    }
+  }
 }

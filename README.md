@@ -1,6 +1,7 @@
-[![NPM](https://raw.githubusercontent.com/d8corp/innet/main/logo.svg)](https://github.com/d8corp/innet)
+<img src="https://raw.githubusercontent.com/d8corp/innet/main/logo.svg" align="left" width="90" height="90" alt="InnetJs logo by Mikhail Lysikov">
 
-# innetjs
+# &nbsp; innetjs
+
 [![NPM](https://img.shields.io/npm/v/innetjs.svg)](https://github.com/d8corp/innetjs/blob/master/CHANGELOG.md)
 [![downloads](https://img.shields.io/npm/dm/innetjs.svg)](https://www.npmjs.com/package/innetjs)
 [![license](https://img.shields.io/npm/l/innetjs)](https://github.com/d8corp/innetjs/blob/master/LICENSE)

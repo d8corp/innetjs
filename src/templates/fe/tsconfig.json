@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "paths": {
+      "/": ["src"],
+      "/*": ["src/*"]
+    },
     "target": "ES5",
     "lib": [
       "dom",
@@ -15,13 +19,12 @@
     "allowSyntheticDefaultImports": true,
     "strict": false,
     "forceConsistentCasingInFileNames": true,
-    "module": "ESNext",
+    "module": "ES2015",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "declaration": true,
     "jsx": "react",
     "jsxFactory": "innet.create",
-    "jsxFragmentFactory": "innet.fragment"
+    "jsxFragmentFactory": "undefined"
   },
   "include": [
     "src"
