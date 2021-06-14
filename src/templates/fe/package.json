@@ -4,8 +4,9 @@
     "start": "npx innetjs start"
   },
   "dependencies": {
-    "innet": "^0.1.1",
-    "watch-state": "^2.0.2"
+    "@watch-state/decorators": "^1.0.2",
+    "innet": "^0.2.0",
+    "watch-state": "^3.0.4"
   },
   "devDependencies": {
     "innetjs": "^1.3.1"
