@@ -4,9 +4,9 @@
 
 &nbsp;
 
-[![NPM](https://img.shields.io/npm/v/innetjs.svg)](https://github.com/d8corp/innetjs/blob/master/CHANGELOG.md)
+[![NPM](https://img.shields.io/npm/v/innetjs.svg)](https://github.com/d8corp/innetjs/blob/main/CHANGELOG.md)
 [![downloads](https://img.shields.io/npm/dm/innetjs.svg)](https://www.npmjs.com/package/innetjs)
-[![license](https://img.shields.io/npm/l/innetjs)](https://github.com/d8corp/innetjs/blob/master/LICENSE)
+[![license](https://img.shields.io/npm/l/innetjs)](https://github.com/d8corp/innetjs/blob/main/LICENSE)
 
 CLI for [innet](https://www.npmjs.com/package/innet) boilerplate.
 
