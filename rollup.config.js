@@ -14,11 +14,8 @@ export default [{
       clean: true,
       tsconfigOverride: {
         compilerOptions: {
-          module: 'esnext'
-        },
-        include: [
-          'index.ts'
-        ]
+          target: 'es6',
+        }
       }
     })
   ]
@@ -31,16 +28,7 @@ export default [{
   plugins: [
     typescript({
       rollupCommonJSResolveHack: false,
-      clean: true,
-      tsconfigOverride: {
-        compilerOptions: {
-          target: 'es6',
-          module: 'esnext'
-        },
-        include: [
-          'index.ts'
-        ]
-      }
+      clean: true
     })
   ]
 }, {
@@ -56,12 +44,8 @@ export default [{
       clean: true,
       tsconfigOverride: {
         compilerOptions: {
-          declaration: false,
-          module: 'esnext'
-        },
-        include: [
-          'index.ts'
-        ]
+          declaration: false
+        }
       }
     }),
     preserveShebangs()

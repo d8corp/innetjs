@@ -201,7 +201,8 @@ export default class InnetJS {
         plugins: [autoprefixer()],
         extract: !this.cssInJs,
         modules: this.cssModules,
-        sourceMap: this.sourcemap
+        sourceMap: this.sourcemap,
+        minimize: true
       }))
       outputOptions.format = 'iife'
       outputOptions.plugins = [terser()]
