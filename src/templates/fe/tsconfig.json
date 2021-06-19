@@ -22,9 +22,7 @@
     "module": "ES2015",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "jsx": "react",
-    "jsxFactory": "innet.create",
-    "jsxFragmentFactory": "undefined"
+    "jsx": "preserve"
   },
   "include": [
     "src"
