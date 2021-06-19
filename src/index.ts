@@ -17,6 +17,7 @@ import json from '@rollup/plugin-json'
 import tmp from 'tmp'
 import proxy from 'express-http-proxy'
 import selector from 'cli-select'
+import jsx from 'rollup-plugin-innet-jsx'
 
 const livereload = require('rollup-plugin-livereload')
 const {string} = require('rollup-plugin-string')
@@ -197,13 +198,16 @@ export default class InnetJS {
       inputOptions.external = Object.keys(pkg?.dependencies || {})
       outputOptions.format = 'cjs'
     } else {
-      inputOptions.plugins.push(postcss({
-        plugins: [autoprefixer()],
-        extract: !this.cssInJs,
-        modules: this.cssModules,
-        sourceMap: this.sourcemap,
-        minimize: true
-      }))
+      inputOptions.plugins.push(
+        postcss({
+          plugins: [autoprefixer()],
+          extract: !this.cssInJs,
+          modules: this.cssModules,
+          sourceMap: this.sourcemap,
+          minimize: true
+        }),
+        jsx()
+      )
       outputOptions.format = 'iife'
       outputOptions.plugins = [terser()]
     }
@@ -309,6 +313,7 @@ export default class InnetJS {
           extract: !this.cssInJs,
         }),
         this.createClient(key, cert),
+        jsx(),
         livereload({
           watch: this.publicFolder,
           verbose: false,
