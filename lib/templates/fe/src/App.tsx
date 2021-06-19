@@ -1,6 +1,4 @@
-import innet from 'innet'
 import {state} from '@watch-state/decorators'
-
 import styles from './App.scss'
 
 class App {

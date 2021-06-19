@@ -436,7 +436,7 @@ class InnetJS {
     }
 }
 
-var version = "1.5.0";
+var version = "1.5.1";
 
 require('dotenv').config();
 const innetJS = new InnetJS();
