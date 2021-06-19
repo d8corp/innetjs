@@ -9,6 +9,6 @@
     "watch-state": "^3.0.4"
   },
   "devDependencies": {
-    "innetjs": "^1.4.0"
+    "innetjs": "^1.5.0"
   }
 }

@@ -1,4 +1,8 @@
 # Changelog
+## v1.5
+### v1.5.0 [![14.06.2021](https://img.shields.io/date/1624116893)](https://github.com/d8corp/watch-state/tree/v1.5.0)
+- implemented new way of JSX transpiling
+- added style bundle minimize
 ## v1.4
 - added style bundle minimize
 ### v1.4.0 [![14.06.2021](https://img.shields.io/date/1623682304)](https://github.com/d8corp/watch-state/tree/v1.4.0)
