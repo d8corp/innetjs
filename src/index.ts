@@ -22,6 +22,7 @@ import jsx from 'rollup-plugin-innet-jsx'
 const livereload = require('rollup-plugin-livereload')
 const {string} = require('rollup-plugin-string')
 const {exec, spawn} = require('child_process')
+const readline = require('readline')
 const execAsync = promisify(exec)
 
 require('dotenv').config()
@@ -62,11 +63,11 @@ export async function task (name, callback) {
   try {
     const result = await callback(task)
     task.succeed()
-    process.stdout.clearLine(1)
+    readline.clearLine(process.stdout, 1)
     return result
   } catch (e) {
     task.fail()
-    process.stdout.clearLine(1)
+    readline.clearLine(process.stdout, 1)
     console.log(chalk.red('└ ' + (e?.message || e)))
     return Promise.reject(e)
   }
@@ -134,7 +135,7 @@ export default class InnetJS {
             values: ['Stop the process', 'Remove the folder', 'Merge with template']
           })
 
-          process.stdout.moveCursor(0, -2)
+          readline.moveCursor(process.stdout, 0, -2)
 
           if (!result) {
             throw Error(`'${appPath}' already exist`)
