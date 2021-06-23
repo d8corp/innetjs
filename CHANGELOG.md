@@ -1,5 +1,7 @@
 # Changelog
 ## v1.5
+### v1.5.2 [![23.06.2021](https://img.shields.io/date/1624437547)](https://github.com/d8corp/watch-state/tree/v1.5.2)
+- fixed a bug of `process.stdout.clearLine is not a function`
 ### v1.5.1 [![19.06.2021](https://img.shields.io/date/1624129830)](https://github.com/d8corp/watch-state/tree/v1.5.1)
 - updated fe template
 ### v1.5.0 [![19.06.2021](https://img.shields.io/date/1624116893)](https://github.com/d8corp/watch-state/tree/v1.5.0)

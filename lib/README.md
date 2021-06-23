@@ -15,7 +15,7 @@ CLI for [innet](https://www.npmjs.com/package/innet) framework.
 `JSX`, `TypeScript`,  
 `SASS`, `LiveReload`,  
 `Proxy`,`ServerSide`,  
-`InlineImports`
+`SmartImports`
 
 [![stars](https://img.shields.io/github/stars/d8corp/innetjs?style=social)](https://github.com/d8corp/innetjs/stargazers)
 [![watchers](https://img.shields.io/github/watchers/d8corp/innetjs?style=social)](https://github.com/d8corp/innetjs/watchers)
