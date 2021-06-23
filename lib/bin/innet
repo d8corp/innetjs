@@ -437,7 +437,7 @@ class InnetJS {
     }
 }
 
-var version = "1.5.2";
+var version = "1.5.4";
 
 require('dotenv').config();
 const innetJS = new InnetJS();
@@ -451,6 +451,7 @@ commander.program
     innetJS.init(appName).catch(e => {
         if (error) {
             console.error(e);
+            process.exit(1);
         }
     });
 });
@@ -462,6 +463,7 @@ commander.program
     innetJS.run(filePath).catch(e => {
         if (error) {
             console.error(e);
+            process.exit(1);
         }
     });
 });
@@ -474,6 +476,7 @@ commander.program
     innetJS.start({ node }).catch(e => {
         if (error) {
             console.error(e);
+            process.exit(1);
         }
     });
 });
@@ -486,6 +489,7 @@ commander.program
     innetJS.build({ node }).catch(e => {
         if (error) {
             console.error(e);
+            process.exit(1);
         }
     });
 });

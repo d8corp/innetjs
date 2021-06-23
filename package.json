@@ -1,6 +1,6 @@
 {
   "name": "innetjs",
-  "version": "1.5.2",
+  "version": "1.5.4",
   "description": "CLI for innet boilerplate",
   "homepage": "https://github.com/d8corp/innetjs",
   "author": "Mikhail Lysikov <d8corp@mail.ru>",
@@ -53,6 +53,7 @@
     "jest": "^26.6.3",
     "minimist": ">=0.2.1",
     "rimraf": "^3.0.2",
+    "rollup-plugin-preserve-shebangs": "^0.2.0",
     "ts-jest": "^26.4.4"
   },
   "dependencies": {
