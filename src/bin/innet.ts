@@ -18,6 +18,7 @@ program
     innetJS.init(appName).catch(e => {
       if (error) {
         console.error(e)
+        process.exit(1)
       }
     })
   })
@@ -30,6 +31,7 @@ program
     innetJS.run(filePath).catch(e => {
       if (error) {
         console.error(e)
+        process.exit(1)
       }
     })
   })
@@ -43,6 +45,7 @@ program
     innetJS.start({node}).catch(e => {
       if (error) {
         console.error(e)
+        process.exit(1)
       }
     })
   })
@@ -56,6 +59,7 @@ program
     innetJS.build({node}).catch(e => {
       if (error) {
         console.error(e)
+        process.exit(1)
       }
     })
   })
