@@ -1,5 +1,7 @@
 # Changelog
 ## v1.5
+### v1.5.5 [![25.06.2021](https://img.shields.io/date/1624634297)](https://github.com/d8corp/watch-state/tree/v1.5.5)
+- updated `rollup-plugin-innet-jsx` version
 ### v1.5.4 [![23.06.2021](https://img.shields.io/date/1624438104)](https://github.com/d8corp/watch-state/tree/v1.5.4)
 - added error exit process status of CLI on exception
 ### v1.5.2 [![23.06.2021](https://img.shields.io/date/1624437547)](https://github.com/d8corp/watch-state/tree/v1.5.2)
