@@ -175,6 +175,7 @@ export default class InnetJS {
         nodeResolve(),
         json(),
         typescript(),
+        jsx(),
         string({
           include: '**/*.*',
           exclude: [
@@ -207,7 +208,6 @@ export default class InnetJS {
           sourceMap: this.sourcemap,
           minimize: true
         }),
-        jsx()
       )
       outputOptions.format = 'iife'
       outputOptions.plugins = [terser()]
@@ -250,7 +250,6 @@ export default class InnetJS {
       plugins: [
         commonjs(),
         json(),
-        jsx(),
         typescript({
           tsconfigOverride: {
             compilerOptions: {
@@ -258,6 +257,7 @@ export default class InnetJS {
             }
           }
         }),
+        jsx(),
       ],
     } as Record<string, any>
 
@@ -278,7 +278,7 @@ export default class InnetJS {
             '**/*.json',
           ]
         }),
-        this.createServer(options.external)
+        this.createServer(options.external),
       )
     } else {
       const key = path.basename(this.sslKey) !== this.sslKey

@@ -1,6 +1,9 @@
 # Changelog
 ## v1.5
-### v1.5.6 [![25.06.2021](https://img.shields.io/date/1624912898)](https://github.com/d8corp/watch-state/tree/v1.5.6)
+### v1.5.7 [![29.06.2021](https://img.shields.io/date/1624915437)](https://github.com/d8corp/watch-state/tree/v1.5.7)
+- fixed rollup plugins order bug
+- removed types of CLI
+### v1.5.6 [![29.06.2021](https://img.shields.io/date/1624912898)](https://github.com/d8corp/watch-state/tree/v1.5.6)
 - fixed types location bug
 - updated readme
 ### v1.5.5 [![25.06.2021](https://img.shields.io/date/1624634297)](https://github.com/d8corp/watch-state/tree/v1.5.5)

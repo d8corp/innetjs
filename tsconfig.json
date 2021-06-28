@@ -27,6 +27,7 @@
     "src"
   ],
   "exclude": [
-    "src/templates"
+    "src/templates",
+    "src/bin"
   ]
 }

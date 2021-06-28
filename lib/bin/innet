@@ -172,6 +172,7 @@ class InnetJS {
                     pluginNodeResolve.nodeResolve(),
                     json__default['default'](),
                     typescript__default['default'](),
+                    jsx__default['default'](),
                     string({
                         include: '**/*.*',
                         exclude: [
@@ -201,7 +202,7 @@ class InnetJS {
                     modules: this.cssModules,
                     sourceMap: this.sourcemap,
                     minimize: true
-                }), jsx__default['default']());
+                }));
                 outputOptions.format = 'iife';
                 outputOptions.plugins = [rollupPluginTerser.terser()];
             }
@@ -234,7 +235,6 @@ class InnetJS {
                 plugins: [
                     commonjs__default['default'](),
                     json__default['default'](),
-                    jsx__default['default'](),
                     typescript__default['default']({
                         tsconfigOverride: {
                             compilerOptions: {
@@ -242,6 +242,7 @@ class InnetJS {
                             }
                         }
                     }),
+                    jsx__default['default'](),
                 ],
             };
             if (node) {
