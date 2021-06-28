@@ -1,5 +1,7 @@
 # Changelog
 ## v1.5
+### v1.5.8 [![29.06.2021](https://img.shields.io/date/1624916254)](https://github.com/d8corp/watch-state/tree/v1.5.8)
+- updated [rollup-plugin-innet-jsx](https://www.npmjs.com/package/rollup-plugin-innet-jsx) version to fix bugs of typescript building
 ### v1.5.7 [![29.06.2021](https://img.shields.io/date/1624915437)](https://github.com/d8corp/watch-state/tree/v1.5.7)
 - fixed rollup plugins order bug
 - removed types of CLI
