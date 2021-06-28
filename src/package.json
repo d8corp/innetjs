@@ -1,12 +1,20 @@
 {
   "name": "innetjs",
-  "version": "1.5.6",
+  "version": "1.5.5",
   "description": "CLI for innet boilerplate",
   "homepage": "https://github.com/d8corp/innetjs",
   "author": "Mikhail Lysikov <d8corp@mail.ru>",
   "license": "MIT",
+  "private": true,
   "bin": {
     "innetjs": "./bin/innet"
+  },
+  "scripts": {
+    "build": "bin/release -rollup",
+    "test": "jest",
+    "patch": "bin/release -patch -rollup -publish",
+    "minor": "bin/release -minor -rollup -publish",
+    "major": "bin/release -major -rollup -publish"
   },
   "repository": {
     "type": "git",
@@ -29,6 +37,24 @@
   ],
   "bugs": {
     "url": "https://github.com/d8corp/innetjs/issues"
+  },
+  "devDependencies": {
+    "@types/autoprefixer": "^9.7.2",
+    "@types/execa": "^2.0.0",
+    "@types/express": "^4.17.9",
+    "@types/express-http-proxy": "^1.6.1",
+    "@types/fs-extra": "^9.0.6",
+    "@types/jest": "^26.0.19",
+    "@types/node": "^14.14.13",
+    "@types/ora": "^3.2.0",
+    "@types/rollup": "^0.54.0",
+    "@types/tmp": "^0.2.0",
+    "core-js": "^3.8.1",
+    "jest": "^26.6.3",
+    "minimist": ">=0.2.1",
+    "rimraf": "^3.0.2",
+    "rollup-plugin-preserve-shebangs": "^0.2.0",
+    "ts-jest": "^26.4.4"
   },
   "dependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",

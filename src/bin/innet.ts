@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import InnetJS from '..'
-import {version} from '../../package.json'
+import {version} from '../package.json'
 import {program} from 'commander'
 
 require('dotenv').config()

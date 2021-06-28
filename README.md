@@ -4,9 +4,10 @@
 
 &nbsp;
 
-[![NPM](https://img.shields.io/npm/v/innetjs.svg)](https://github.com/d8corp/innetjs/blob/main/CHANGELOG.md)
-[![downloads](https://img.shields.io/npm/dm/innetjs.svg)](https://www.npmjs.com/package/innetjs)
+[![NPM](https://img.shields.io/npm/v/innetjs.svg)](https://www.npmjs.com/package/innetjs)
+[![downloads](https://img.shields.io/npm/dm/innetjs.svg)](https://www.npmtrends.com/innetjs)
 [![license](https://img.shields.io/npm/l/innetjs)](https://github.com/d8corp/innetjs/blob/main/LICENSE)
+[![changelog](https://img.shields.io/badge/Changelog-⋮-brightgreen)](https://changelogs.xyz/innetjs)
 
 CLI for [innet](https://www.npmjs.com/package/innet) framework.
 
@@ -20,7 +21,7 @@ CLI for [innet](https://www.npmjs.com/package/innet) framework.
 [![stars](https://img.shields.io/github/stars/d8corp/innetjs?style=social)](https://github.com/d8corp/innetjs/stargazers)
 [![watchers](https://img.shields.io/github/watchers/d8corp/innetjs?style=social)](https://github.com/d8corp/innetjs/watchers)
 
-## Installation
+## Install
 npm
 ```shell
 npm i -g innetjs

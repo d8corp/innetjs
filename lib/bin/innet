@@ -234,6 +234,7 @@ class InnetJS {
                 plugins: [
                     commonjs__default['default'](),
                     json__default['default'](),
+                    jsx__default['default'](),
                     typescript__default['default']({
                         tsconfigOverride: {
                             compilerOptions: {
@@ -287,7 +288,7 @@ class InnetJS {
                     modules: this.cssModules,
                     sourceMap: true,
                     extract: !this.cssInJs,
-                }), this.createClient(key, cert), jsx__default['default'](), livereload(Object.assign({ watch: this.publicFolder, verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
+                }), this.createClient(key, cert), livereload(Object.assign({ watch: this.publicFolder, verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
             }
             const watcher = rollup__default['default'].watch(options);
             let eventTask;

@@ -250,6 +250,7 @@ export default class InnetJS {
       plugins: [
         commonjs(),
         json(),
+        jsx(),
         typescript({
           tsconfigOverride: {
             compilerOptions: {
@@ -314,7 +315,6 @@ export default class InnetJS {
           extract: !this.cssInJs,
         }),
         this.createClient(key, cert),
-        jsx(),
         livereload({
           watch: this.publicFolder,
           verbose: false,

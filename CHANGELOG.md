@@ -1,5 +1,8 @@
 # Changelog
 ## v1.5
+### v1.5.6 [![25.06.2021](https://img.shields.io/date/1624912898)](https://github.com/d8corp/watch-state/tree/v1.5.6)
+- fixed types location bug
+- updated readme
 ### v1.5.5 [![25.06.2021](https://img.shields.io/date/1624634297)](https://github.com/d8corp/watch-state/tree/v1.5.5)
 - updated `rollup-plugin-innet-jsx` version
 ### v1.5.4 [![23.06.2021](https://img.shields.io/date/1624438104)](https://github.com/d8corp/watch-state/tree/v1.5.4)
