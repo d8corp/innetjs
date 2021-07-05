@@ -61,5 +61,6 @@ innetjs build
 ## Links
 Check [README.md](https://github.com/d8corp/innetjs/tree/main/src/templates/fe) of `fe` template
 ## Issues
-If you find a bug or have a suggestion, please file an issue on [GitHub](https://github.com/d8corp/innetjs/issues).  
+If you find a bug or have a suggestion, please file an issue on [GitHub](https://github.com/d8corp/innetjs/issues).
+
 [![issues](https://img.shields.io/github/issues-raw/d8corp/innetjs)](https://github.com/d8corp/innetjs/issues)

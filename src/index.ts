@@ -231,6 +231,12 @@ export default class InnetJS {
           'UTF-8'
         )
       })
+      const pkgLockPath = path.resolve(this.projectFolder, 'package-lock.json')
+      if (fs.existsSync(pkgLockPath)) {
+        await task('Copy package-lock.json', () => {
+          return fs.copy(pkgLockPath, path.resolve(this.buildFolder, 'package-lock.json'))
+        })
+      }
     }
   }
 

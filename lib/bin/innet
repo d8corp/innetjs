@@ -218,6 +218,12 @@ class InnetJS {
                     delete data.devDependencies;
                     yield fs__default['default'].writeFile(path__default['default'].resolve(this.buildFolder, 'package.json'), JSON.stringify(data, undefined, 2), 'UTF-8');
                 }));
+                const pkgLockPath = path__default['default'].resolve(this.projectFolder, 'package-lock.json');
+                if (fs__default['default'].existsSync(pkgLockPath)) {
+                    yield task('Copy package-lock.json', () => {
+                        return fs__default['default'].copy(pkgLockPath, path__default['default'].resolve(this.buildFolder, 'package-lock.json'));
+                    });
+                }
             }
         });
     }
