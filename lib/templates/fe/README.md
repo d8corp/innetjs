@@ -50,12 +50,18 @@ These options are used by default.
 # you can use remote API, for example PROXY=https://localhost:9000
 PROXY=false
 
+# you can set remote API URL beginning, for example API=/api/?*
+API=*
+
 # you can change the static server port
 PORT=3000
 
 # you can change directory and file name of ssl certificates
 SSL_CRT_FILE=localhost.crt
 SSL_KEY_FILE=localhost.key
+
+# add the next key if you get "Error: self signed certificate"
+# NODE_TLS_REJECT_UNAUTHORIZED=0
 
 # you can generate sourcemap for production build
 GENERATE_SOURCEMAP=false

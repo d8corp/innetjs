@@ -87,6 +87,7 @@ export default class InnetJS {
   cssModules: boolean
   cssInJs: boolean
   port: number
+  api: string
 
   private projectExtension: Extensions
   private package: object
@@ -103,6 +104,7 @@ export default class InnetJS {
     sslCrt = process.env.SSL_CRT || 'localhost.crt',
     proxy = process.env.PROXY || '',
     port = process.env.PORT ? +process.env.PORT : 3000,
+    api = process.env.API || '*',
   } = {}) {
     this.projectFolder = path.resolve(projectFolder)
     this.publicFolder = path.resolve(publicFolder)
@@ -115,6 +117,7 @@ export default class InnetJS {
     this.sslCrt = sslCrt
     this.port = port
     this.proxy = proxy
+    this.api = api
   }
 
   // Methods
@@ -456,10 +459,14 @@ export default class InnetJS {
           app.use(express.static(this.publicFolder))
 
           if (this.proxy?.startsWith('http')) {
-            app.use(proxy(this.proxy, {
+            app.use(this.api, proxy(this.proxy, {
               https: httpsUsing
             }))
           }
+
+          app.use(/\/[^.\/]+$/, (req, res) => {
+            res.sendFile(this.publicFolder + '/index.html')
+          })
 
           const server = httpsUsing ? https.createServer({key, cert}, app) : http.createServer(app)
           server.listen(this.port, () => {

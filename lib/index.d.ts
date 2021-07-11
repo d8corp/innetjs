@@ -12,9 +12,10 @@ export default class InnetJS {
     cssModules: boolean;
     cssInJs: boolean;
     port: number;
+    api: string;
     private projectExtension;
     private package;
-    constructor({ projectFolder, publicFolder, buildFolder, srcFolder, sourcemap, cssModules, cssInJs, sslKey, sslCrt, proxy, port, }?: {
+    constructor({ projectFolder, publicFolder, buildFolder, srcFolder, sourcemap, cssModules, cssInJs, sslKey, sslCrt, proxy, port, api, }?: {
         projectFolder?: string;
         publicFolder?: string;
         buildFolder?: string;
@@ -26,6 +27,7 @@ export default class InnetJS {
         sslCrt?: string;
         proxy?: string;
         port?: number;
+        api?: string;
     });
     init(appName: string, { template, force }?: {
         template?: string;

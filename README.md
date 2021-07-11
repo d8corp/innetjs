@@ -6,8 +6,8 @@
 
 [![NPM](https://img.shields.io/npm/v/innetjs.svg)](https://www.npmjs.com/package/innetjs)
 [![downloads](https://img.shields.io/npm/dm/innetjs.svg)](https://www.npmtrends.com/innetjs)
-[![license](https://img.shields.io/npm/l/innetjs)](https://github.com/d8corp/innetjs/blob/main/LICENSE)
 [![changelog](https://img.shields.io/badge/Changelog-⋮-brightgreen)](https://changelogs.xyz/innetjs)
+[![license](https://img.shields.io/npm/l/innetjs)](https://github.com/d8corp/innetjs/blob/main/LICENSE)
 
 CLI for [innet](https://www.npmjs.com/package/innet) framework.
 
@@ -60,6 +60,7 @@ innetjs build
 
 ## Links
 Check [README.md](https://github.com/d8corp/innetjs/tree/main/src/templates/fe) of `fe` template
+
 ## Issues
 If you find a bug or have a suggestion, please file an issue on [GitHub](https://github.com/d8corp/innetjs/issues).
 

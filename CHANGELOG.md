@@ -1,4 +1,8 @@
 # Changelog
+## v1.6
+### v1.6.0 [![11.07.2021](https://img.shields.io/date/1626002305)](https://github.com/d8corp/watch-state/tree/v1.6.0)
+- added `API` env param handler
+- added `index.html` as default page
 ## v1.5
 ### v1.5.9 [![05.07.2021](https://img.shields.io/date/1625479738)](https://github.com/d8corp/watch-state/tree/v1.5.9)
 - added copying of `package-lock.json` for the server builder
