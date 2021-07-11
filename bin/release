@@ -31,6 +31,7 @@ async function start () {
 async function rollUpUsage () {
   if (process.argv.includes('-rollup')) {
     consoleStart('converting js for browsers')
+    await getPromise(resolve => fs.copyFile(rootDir + '/package.json', rootDir + '/src/package.json', 'utf8', resolve))
     await getPromise(resolve => exec(`rollup -c`, {}, resolve))
     consoleEnd('converting js for browsers')
   }
