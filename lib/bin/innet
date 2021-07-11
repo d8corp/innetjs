@@ -419,7 +419,8 @@ class InnetJS {
                     app.use(express__default['default'].static(this.publicFolder));
                     if ((_a = this.proxy) === null || _a === void 0 ? void 0 : _a.startsWith('http')) {
                         app.use(this.api, proxy__default['default'](this.proxy, {
-                            https: httpsUsing
+                            https: httpsUsing,
+                            proxyReqPathResolver: req => req.originalUrl
                         }));
                     }
                     app.use(/\/[^.\/]+$/, (req, res) => {
@@ -449,7 +450,7 @@ class InnetJS {
     }
 }
 
-var version = "1.6.0";
+var version = "1.6.1";
 
 require('dotenv').config();
 const innetJS = new InnetJS();

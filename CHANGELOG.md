@@ -1,5 +1,7 @@
 # Changelog
 ## v1.6
+### v1.6.1 [![11.07.2021](https://img.shields.io/date/1626006977)](https://github.com/d8corp/watch-state/tree/v1.6.1)
+- fixed reducing of path when you use `PROXY` with `API`
 ### v1.6.0 [![11.07.2021](https://img.shields.io/date/1626002305)](https://github.com/d8corp/watch-state/tree/v1.6.0)
 - added `API` env param handler
 - added `index.html` as default page
