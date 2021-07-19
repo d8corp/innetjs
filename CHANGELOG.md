@@ -1,4 +1,12 @@
 # Changelog
+## v1.7
+### v1.7.0 [![20.07.2021](https://img.shields.io/date/1626731958)](https://github.com/d8corp/watch-state/tree/v1.7.0)
+- added code-splitting for `fe` template
+
+You can use dynamic imports
+```typescript
+import('./test').then(test => console.log(test))
+```
 ## v1.6
 ### v1.6.1 [![11.07.2021](https://img.shields.io/date/1626006977)](https://github.com/d8corp/watch-state/tree/v1.6.1)
 - fixed reducing of path when you use `PROXY` with `API`

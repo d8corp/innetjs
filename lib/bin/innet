@@ -68,6 +68,7 @@ function __awaiter(thisArg, _arguments, P, generator) {
     });
 }
 
+const iife = require('rollup-plugin-iife');
 const livereload = require('rollup-plugin-livereload');
 const { string } = require('rollup-plugin-string');
 const { exec, spawn } = require('child_process');
@@ -204,8 +205,8 @@ class InnetJS {
                     sourceMap: this.sourcemap,
                     minimize: true
                 }));
-                outputOptions.format = 'iife';
-                outputOptions.plugins = [rollupPluginTerser.terser()];
+                outputOptions.format = 'es';
+                outputOptions.plugins = [iife(), rollupPluginTerser.terser()];
             }
             yield task('Build production bundle', () => __awaiter(this, void 0, void 0, function* () {
                 const bundle = yield rollup__default['default'].rollup(inputOptions);
@@ -279,8 +280,8 @@ class InnetJS {
                     : fs__default['default'].existsSync(this.sslCrt)
                         ? fs__default['default'].readFileSync(this.sslCrt)
                         : undefined;
-                options.output.format = 'iife';
-                options.plugins.push(pluginNodeResolve.nodeResolve(), string({
+                options.output.format = 'es';
+                options.plugins.push(iife(), pluginNodeResolve.nodeResolve(), string({
                     include: '**/*.*',
                     exclude: [
                         '**/*.ts',
@@ -450,7 +451,7 @@ class InnetJS {
     }
 }
 
-var version = "1.6.1";
+var version = "1.7.0";
 
 require('dotenv').config();
 const innetJS = new InnetJS();

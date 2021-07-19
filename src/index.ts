@@ -19,6 +19,7 @@ import proxy from 'express-http-proxy'
 import selector from 'cli-select'
 import jsx from 'rollup-plugin-innet-jsx'
 
+const iife = require('rollup-plugin-iife')
 const livereload = require('rollup-plugin-livereload')
 const {string} = require('rollup-plugin-string')
 const {exec, spawn} = require('child_process')
@@ -212,8 +213,8 @@ export default class InnetJS {
           minimize: true
         }),
       )
-      outputOptions.format = 'iife'
-      outputOptions.plugins = [terser()]
+      outputOptions.format = 'es'
+      outputOptions.plugins = [iife(), terser()]
     }
 
     await task('Build production bundle', async () => {
@@ -302,8 +303,9 @@ export default class InnetJS {
           ? fs.readFileSync(this.sslCrt)
           : undefined
 
-      options.output.format = 'iife'
+      options.output.format = 'es'
       options.plugins.push(
+        iife(),
         nodeResolve(),
         string({
           include: '**/*.*',
