@@ -68,7 +68,6 @@ function __awaiter(thisArg, _arguments, P, generator) {
     });
 }
 
-const iife = require('rollup-plugin-iife');
 const livereload = require('rollup-plugin-livereload');
 const { string } = require('rollup-plugin-string');
 const { exec, spawn } = require('child_process');
@@ -206,7 +205,7 @@ class InnetJS {
                     minimize: true
                 }));
                 outputOptions.format = 'es';
-                outputOptions.plugins = [iife(), rollupPluginTerser.terser()];
+                outputOptions.plugins = [rollupPluginTerser.terser()];
             }
             yield task('Build production bundle', () => __awaiter(this, void 0, void 0, function* () {
                 const bundle = yield rollup__default['default'].rollup(inputOptions);
@@ -281,7 +280,7 @@ class InnetJS {
                         ? fs__default['default'].readFileSync(this.sslCrt)
                         : undefined;
                 options.output.format = 'es';
-                options.plugins.push(iife(), pluginNodeResolve.nodeResolve(), string({
+                options.plugins.push(pluginNodeResolve.nodeResolve(), string({
                     include: '**/*.*',
                     exclude: [
                         '**/*.ts',
@@ -424,7 +423,7 @@ class InnetJS {
                             proxyReqPathResolver: req => req.originalUrl
                         }));
                     }
-                    app.use(/\/[^.\/]+$/, (req, res) => {
+                    app.use(/^[^.]+$/, (req, res) => {
                         res.sendFile(this.publicFolder + '/index.html');
                     });
                     const server = httpsUsing ? https__default['default'].createServer({ key, cert }, app) : http__default['default'].createServer(app);
@@ -451,7 +450,7 @@ class InnetJS {
     }
 }
 
-var version = "1.7.0";
+var version = "1.7.1";
 
 require('dotenv').config();
 const innetJS = new InnetJS();
