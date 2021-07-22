@@ -19,7 +19,6 @@ import proxy from 'express-http-proxy'
 import selector from 'cli-select'
 import jsx from 'rollup-plugin-innet-jsx'
 
-const iife = require('rollup-plugin-iife')
 const livereload = require('rollup-plugin-livereload')
 const {string} = require('rollup-plugin-string')
 const {exec, spawn} = require('child_process')
@@ -214,7 +213,7 @@ export default class InnetJS {
         }),
       )
       outputOptions.format = 'es'
-      outputOptions.plugins = [iife(), terser()]
+      outputOptions.plugins = [terser()]
     }
 
     await task('Build production bundle', async () => {
@@ -305,7 +304,6 @@ export default class InnetJS {
 
       options.output.format = 'es'
       options.plugins.push(
-        iife(),
         nodeResolve(),
         string({
           include: '**/*.*',
@@ -467,7 +465,7 @@ export default class InnetJS {
             }))
           }
 
-          app.use(/\/[^.\/]+$/, (req, res) => {
+          app.use(/^[^.]+$/, (req, res) => {
             res.sendFile(this.publicFolder + '/index.html')
           })
 
