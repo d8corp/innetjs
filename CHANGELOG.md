@@ -2,7 +2,11 @@
 
 ## v1.7
 
-### v1.7.2 [![15.08.2021](https://img.shields.io/date/1629056594)](https://github.com/d8corp/watch-state/tree/v1.7.1)
+### v1.7.3 [![15.08.2021](https://img.shields.io/date/1629058607)](https://github.com/d8corp/watch-state/tree/v1.7.3)
+
+- updated dependencies
+
+### v1.7.2 [![15.08.2021](https://img.shields.io/date/1629056594)](https://github.com/d8corp/watch-state/tree/v1.7.2)
 
 - fixed bug when you have a message in a terminal during build process
 

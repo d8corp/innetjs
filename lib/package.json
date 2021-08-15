@@ -1,6 +1,6 @@
 {
   "name": "innetjs",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "description": "CLI for innet boilerplate",
   "homepage": "https://github.com/d8corp/innetjs",
   "author": "Mikhail Lysikov <d8corp@mail.ru>",
@@ -31,7 +31,7 @@
     "url": "https://github.com/d8corp/innetjs/issues"
   },
   "dependencies": {
-    "@cantinc/logger": "^1.0.5",
+    "@cantinc/logger": "^1.0.6",
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^11.0.1",
