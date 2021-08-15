@@ -1,5 +1,4 @@
 declare type Extensions = 'js' | 'ts' | 'tsx' | 'jsx';
-export declare function task(name: any, callback: any): Promise<any>;
 export default class InnetJS {
     projectFolder: string;
     publicFolder: string;

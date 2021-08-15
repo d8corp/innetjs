@@ -2,7 +2,7 @@ import path from 'path'
 import fs from 'fs-extra'
 import http from 'http'
 import https from 'https'
-import ora, {Ora} from 'ora'
+import logger from '@cantinc/logger'
 import chalk from 'chalk'
 import {promisify} from 'util'
 import rollup from 'rollup'
@@ -56,21 +56,6 @@ function getFile (file) {
   }
 
   return file
-}
-
-export async function task (name, callback) {
-  const task = ora(name).start()
-  try {
-    const result = await callback(task)
-    task.succeed()
-    readline.clearLine(process.stdout, 1)
-    return result
-  } catch (e) {
-    task.fail()
-    readline.clearLine(process.stdout, 1)
-    console.log(chalk.red('└ ' + (e?.message || e)))
-    return Promise.reject(e)
-  }
 }
 
 export default class InnetJS {
@@ -127,12 +112,11 @@ export default class InnetJS {
 
     if (!force) {
 
-      await task('Check if app folder is available', async task => {
+      await logger.start('Check if app folder is available', async () => {
 
         if (fs.existsSync(appPath)) {
 
-          task.fail()
-          console.log(chalk.red(`└ '${appPath}' already exist, what do you want?`))
+          console.log(chalk.red(`'${appPath}' already exist, what do you want?`))
 
           const {id: result} = await selector({
             values: ['Stop the process', 'Remove the folder', 'Merge with template']
@@ -154,21 +138,21 @@ export default class InnetJS {
     const libPath = path.resolve(__dirname, '..')
     const templatePath = path.resolve(libPath, 'templates', template)
 
-    await task('Check if the template exists', () => {
+    await logger.start('Check if the template exists', () => {
       if (!fs.existsSync(templatePath)) {
         throw Error(`The template '${template}' is not exist`)
       }
     })
 
-    await task('Copy files', () => fs.copy(templatePath, appPath))
+    await logger.start('Copy files', () => fs.copy(templatePath, appPath))
 
-    await task('Install packages', () => execAsync(`cd ${appPath} && npm i`))
+    await logger.start('Install packages', () => execAsync(`cd ${appPath} && npm i`))
   }
 
   async build ({node = false} = {}) {
     const indexExtension = await this.getProjectExtension()
 
-    await task('Remove build', () => fs.remove(this.buildFolder))
+    await logger.start('Remove build', () => fs.remove(this.buildFolder))
 
     const pkg = node && await this.getPackage()
     const inputOptions = {
@@ -216,14 +200,14 @@ export default class InnetJS {
       outputOptions.plugins = [terser()]
     }
 
-    await task('Build production bundle', async () => {
+    await logger.start('Build production bundle', async () => {
       const bundle = await rollup.rollup(inputOptions)
       await bundle.write(outputOptions)
       await bundle.close()
     })
 
     if (pkg) {
-      await task('Copy package.json', async () => {
+      await logger.start('Copy package.json', async () => {
         const data = {...pkg}
         delete data.private
         delete data.devDependencies
@@ -236,7 +220,7 @@ export default class InnetJS {
       })
       const pkgLockPath = path.resolve(this.projectFolder, 'package-lock.json')
       if (fs.existsSync(pkgLockPath)) {
-        await task('Copy package-lock.json', () => {
+        await logger.start('Copy package-lock.json', () => {
           return fs.copy(pkgLockPath, path.resolve(this.buildFolder, 'package-lock.json'))
         })
       }
@@ -248,7 +232,7 @@ export default class InnetJS {
 
     const pkg = node && await this.getPackage()
 
-    await task('Remove build', () => fs.remove(this.buildFolder))
+    await logger.start('Remove build', () => fs.remove(this.buildFolder))
 
     const options = {
       input: path.resolve(this.srcFolder, `index.${indexExtension}`),
@@ -334,27 +318,19 @@ export default class InnetJS {
 
     const watcher = rollup.watch(options)
 
-    let eventTask: Ora
-
     watcher.on('event', e => {
       if (e.code == 'ERROR') {
-        eventTask.fail('Bundling is failed')
-        console.log(chalk.red('└ ' + e.error.message))
+        logger.end('Bundling', e.error.message)
       } else if (e.code === 'BUNDLE_START') {
-        if (!!eventTask?.isSpinning) {
-          eventTask.stop()
-        }
-        eventTask = ora('Bundling\n').start()
+        logger.start('Bundling')
       } else if (e.code === 'BUNDLE_END') {
-        if (eventTask.isSpinning) {
-          eventTask.succeed('Bundle is ready')
-        }
+        logger.end('Bundling')
       }
     })
   }
 
   async run (file) {
-    const input = await task('Check file', () => getFile(file))
+    const input = await logger.start('Check file', () => getFile(file))
 
     const folder = await new Promise((resolve, reject) => {
       tmp.dir((err, folder) => {
@@ -368,7 +344,7 @@ export default class InnetJS {
 
     const jsFilePath = `${folder}/index.js`
 
-    await task('Build bundle', async () => {
+    await logger.start('Build bundle', async () => {
       const inputOptions = {
         input,
         plugins: [
@@ -396,25 +372,24 @@ export default class InnetJS {
       await bundle.close()
     })
 
-    await task('Running of the script', async () => {
+    await logger.start('Running of the script', async () => {
       spawn('node', ['-r', 'source-map-support/register', jsFilePath], {stdio: 'inherit'})
     })
   }
 
   // Utils
   async getProjectExtension (): Promise<Extensions> {
-
     if (this.projectExtension) {
       return this.projectExtension
     }
 
-    await task('Check src', () => {
+    await logger.start('Check src', () => {
       if (!fs.existsSync(this.srcFolder)) {
         throw Error('src folder is missing')
       }
     })
 
-    await task('Detection of index file', () => {
+    await logger.start('Detection of index file', () => {
       if (fs.existsSync(path.join(this.srcFolder, 'index.js'))) {
         this.projectExtension = 'js'
       } else if (fs.existsSync(path.join(this.srcFolder, 'index.ts'))) {
@@ -438,7 +413,7 @@ export default class InnetJS {
 
     const packageFolder = path.resolve(this.projectFolder, 'package.json')
 
-    await task('Check package.json', async () => {
+    await logger.start('Check package.json', async () => {
       if (fs.existsSync(packageFolder)) {
         this.package = await fs.readJson(packageFolder)
       }

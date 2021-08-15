@@ -1,6 +1,6 @@
 {
   "name": "innetjs",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "description": "CLI for innet boilerplate",
   "homepage": "https://github.com/d8corp/innetjs",
   "author": "Mikhail Lysikov <d8corp@mail.ru>",
@@ -12,7 +12,7 @@
   "scripts": {
     "build": "bin/release -rollup",
     "test": "jest",
-    "link": "npm run build && cd lib && sudo npm link",
+    "start": "npm run build && cd lib && sudo npm link",
     "patch": "bin/release -patch -rollup -publish",
     "minor": "bin/release -minor -rollup -publish",
     "major": "bin/release -major -rollup -publish"
@@ -47,7 +47,6 @@
     "@types/fs-extra": "^9.0.6",
     "@types/jest": "^26.0.19",
     "@types/node": "^14.14.13",
-    "@types/ora": "^3.2.0",
     "@types/rollup": "^0.54.0",
     "@types/tmp": "^0.2.0",
     "core-js": "^3.8.1",
@@ -58,6 +57,7 @@
     "ts-jest": "^26.4.4"
   },
   "dependencies": {
+    "@cantinc/logger": "^1.0.5",
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^11.0.1",
@@ -70,7 +70,6 @@
     "express-http-proxy": "^1.6.2",
     "fs-extra": "^9.0.1",
     "node-sass": "^5.0.0",
-    "ora": "^5.2.0",
     "postcss": "^8.2.1",
     "rollup": "^2.35.1",
     "rollup-plugin-innet-jsx": "^1.1.2",
