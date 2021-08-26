@@ -42,7 +42,7 @@ program
   .option('-e, --error', 'Show error details')
   .option('-n, --node', 'Start development for Node.js')
   .action(({error, node}) => {
-    innetJS.start({node}).catch(e => {
+    innetJS.start({node, error}).catch(e => {
       if (error) {
         console.error(e)
         process.exit(1)

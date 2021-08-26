@@ -35,8 +35,9 @@ export default class InnetJS {
     build({ node }?: {
         node?: boolean;
     }): Promise<void>;
-    start({ node }?: {
+    start({ node, error }?: {
         node?: boolean;
+        error?: boolean;
     }): Promise<void>;
     run(file: any): Promise<void>;
     getProjectExtension(): Promise<Extensions>;

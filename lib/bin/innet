@@ -210,7 +210,7 @@ class InnetJS {
             }
         });
     }
-    start({ node = false } = {}) {
+    start({ node = false, error = false } = {}) {
         return __awaiter(this, void 0, void 0, function* () {
             const indexExtension = yield this.getProjectExtension();
             const pkg = node && (yield this.getPackage());
@@ -283,7 +283,7 @@ class InnetJS {
             const watcher = rollup__default['default'].watch(options);
             watcher.on('event', e => {
                 if (e.code == 'ERROR') {
-                    logger__default['default'].end('Bundling', e.error.message);
+                    logger__default['default'].end('Bundling', error ? e.error.stack : e.error.message);
                 }
                 else if (e.code === 'BUNDLE_START') {
                     logger__default['default'].start('Bundling');
@@ -425,7 +425,7 @@ class InnetJS {
     }
 }
 
-var version = "1.7.3";
+var version = "1.7.4";
 
 require('dotenv').config();
 const innetJS = new InnetJS();
@@ -461,7 +461,7 @@ commander.program
     .option('-e, --error', 'Show error details')
     .option('-n, --node', 'Start development for Node.js')
     .action(({ error, node }) => {
-    innetJS.start({ node }).catch(e => {
+    innetJS.start({ node, error }).catch(e => {
         if (error) {
             console.error(e);
             process.exit(1);

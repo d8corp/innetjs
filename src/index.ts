@@ -227,7 +227,7 @@ export default class InnetJS {
     }
   }
 
-  async start ({node = false} = {}) {
+  async start ({node = false, error = false} = {}) {
     const indexExtension = await this.getProjectExtension()
 
     const pkg = node && await this.getPackage()
@@ -320,7 +320,7 @@ export default class InnetJS {
 
     watcher.on('event', e => {
       if (e.code == 'ERROR') {
-        logger.end('Bundling', e.error.message)
+        logger.end('Bundling', error ? e.error.stack : e.error.message)
       } else if (e.code === 'BUNDLE_START') {
         logger.start('Bundling')
       } else if (e.code === 'BUNDLE_END') {

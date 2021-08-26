@@ -2,6 +2,10 @@
 
 ## v1.7
 
+### v1.7.4 [![26.08.2021](https://img.shields.io/date/1630010567)](https://github.com/d8corp/watch-state/tree/v1.7.4)
+
+- added more information about errors with `-e` flag
+
 ### v1.7.3 [![15.08.2021](https://img.shields.io/date/1629058607)](https://github.com/d8corp/watch-state/tree/v1.7.3)
 
 - updated dependencies
