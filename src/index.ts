@@ -148,7 +148,7 @@ export default class InnetJS {
     const libPath = path.resolve(__dirname, '..')
     const templatePath = path.resolve(libPath, 'templates', template)
 
-    await logger.start('Check if the template exists', () => {
+    await logger.start('Check if the template exists', async () => {
       if (!fs.existsSync(templatePath)) {
         throw Error(`The template '${template}' is not exist`)
       }

@@ -2,6 +2,10 @@
 
 ## v1.8
 
+### v1.8.1 [![23.02.2022](https://img.shields.io/date/1645570173)](https://github.com/d8corp/innetjs/tree/v1.8.1)
+
+- fix template bug
+
 ### v1.8.0 [![22.02.2022](https://img.shields.io/date/1645544170)](https://github.com/d8corp/innetjs/tree/v1.8.0)
 
 - added `be` template and `-t` flag

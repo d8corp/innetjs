@@ -142,11 +142,11 @@ class InnetJS {
             }
             const libPath = path__default['default'].resolve(__dirname, '..');
             const templatePath = path__default['default'].resolve(libPath, 'templates', template);
-            yield logger__default['default'].start('Check if the template exists', () => {
+            yield logger__default['default'].start('Check if the template exists', () => __awaiter(this, void 0, void 0, function* () {
                 if (!fs__default['default'].existsSync(templatePath)) {
                     throw Error(`The template '${template}' is not exist`);
                 }
-            });
+            }));
             yield logger__default['default'].start('Copy files', () => fs__default['default'].copy(templatePath, appPath));
             yield logger__default['default'].start('Install packages', () => execAsync(`cd ${appPath} && npm i`));
         });
@@ -433,7 +433,7 @@ class InnetJS {
     }
 }
 
-var version = "1.8.0";
+var version = "1.8.1";
 
 require('dotenv').config();
 const innetJS = new InnetJS();
@@ -443,7 +443,7 @@ commander.program
     .command('init <app-name>')
     .description('Create innet boilerplate')
     .option('-e, --error', 'Show error details')
-    .option('-t, --template', 'Select template')
+    .option('-t, --template <template>', 'Select template fe or be')
     .action((appName, { error, template }) => {
     innetJS.init(appName, { template }).catch(e => {
         if (error) {
