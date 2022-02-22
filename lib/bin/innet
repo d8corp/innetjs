@@ -116,21 +116,23 @@ class InnetJS {
         return __awaiter(this, void 0, void 0, function* () {
             const appPath = path__default['default'].resolve(appName);
             if (!template) {
-                console.log(chalk__default['default'].green(`Select one of those templates?`));
+                logger__default['default'].log(chalk__default['default'].green(`Select one of those templates`));
                 const { value } = yield selector__default['default']({
                     values: ['fe', 'be']
                 });
                 template = value;
-                readline.moveCursor(process.stdout, 0, -2);
+                readline.moveCursor(process.stdout, 0, -1);
+                logger__default['default'].log(`Selected ${value} template`);
             }
             if (!force) {
                 yield logger__default['default'].start('Check if app folder is available', () => __awaiter(this, void 0, void 0, function* () {
                     if (fs__default['default'].existsSync(appPath)) {
-                        console.log(chalk__default['default'].red(`'${appPath}' already exist, what do you want?`));
-                        const { id: result } = yield selector__default['default']({
+                        logger__default['default'].log(chalk__default['default'].red(`'${appPath}' already exist, what do you want?`));
+                        const { id: result, value } = yield selector__default['default']({
                             values: ['Stop the process', 'Remove the folder', 'Merge with template']
                         });
-                        readline.moveCursor(process.stdout, 0, -2);
+                        readline.moveCursor(process.stdout, 0, -1);
+                        logger__default['default'].log(`Already exist, selected: ${value}`);
                         if (!result) {
                             throw Error(`'${appPath}' already exist`);
                         }
@@ -433,7 +435,7 @@ class InnetJS {
     }
 }
 
-var version = "1.8.1";
+var version = "1.8.2";
 
 require('dotenv').config();
 const innetJS = new InnetJS();

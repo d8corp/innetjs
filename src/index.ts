@@ -110,14 +110,16 @@ export default class InnetJS {
     const appPath = path.resolve(appName)
 
     if (!template) {
-      console.log(chalk.green(`Select one of those templates?`))
+      logger.log(chalk.green(`Select one of those templates`))
 
       const { value } = await selector({
         values: ['fe', 'be']
       })
       template = value
 
-      readline.moveCursor(process.stdout, 0, -2)
+      readline.moveCursor(process.stdout, 0, -1)
+
+      logger.log(`Selected ${value} template`)
     }
 
     if (!force) {
@@ -126,13 +128,15 @@ export default class InnetJS {
 
         if (fs.existsSync(appPath)) {
 
-          console.log(chalk.red(`'${appPath}' already exist, what do you want?`))
+          logger.log(chalk.red(`'${appPath}' already exist, what do you want?`))
 
-          const {id: result} = await selector({
+          const {id: result, value} = await selector({
             values: ['Stop the process', 'Remove the folder', 'Merge with template']
           })
 
-          readline.moveCursor(process.stdout, 0, -2)
+          readline.moveCursor(process.stdout, 0, -1)
+
+          logger.log(`Already exist, selected: ${value}`)
 
           if (!result) {
             throw Error(`'${appPath}' already exist`)

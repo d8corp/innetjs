@@ -2,6 +2,10 @@
 
 ## v1.8
 
+### v1.8.2 [![23.02.2022](https://img.shields.io/date/1645571637)](https://github.com/d8corp/innetjs/tree/v1.8.2)
+
+- fix terminal output
+
 ### v1.8.1 [![23.02.2022](https://img.shields.io/date/1645570173)](https://github.com/d8corp/innetjs/tree/v1.8.1)
 
 - fix template bug
