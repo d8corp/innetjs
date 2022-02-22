@@ -1,13 +1,13 @@
 {
   "name": "innetjs",
-  "version": "1.7.4",
+  "version": "1.8.0",
   "description": "CLI for innet boilerplate",
   "homepage": "https://github.com/d8corp/innetjs",
   "author": "Mikhail Lysikov <d8corp@mail.ru>",
   "license": "MIT",
   "private": true,
   "bin": {
-    "innetjs": "./bin/innet"
+    "innetjs": "bin/innet"
   },
   "scripts": {
     "build": "bin/release -rollup",

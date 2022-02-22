@@ -14,8 +14,9 @@ program
   .command('init <app-name>')
   .description('Create innet boilerplate')
   .option('-e, --error', 'Show error details')
-  .action((appName, {error}) => {
-    innetJS.init(appName).catch(e => {
+  .option('-t, --template', 'Select template')
+  .action((appName, {error, template}) => {
+    innetJS.init(appName, {template}).catch(e => {
       if (error) {
         console.error(e)
         process.exit(1)

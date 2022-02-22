@@ -22,7 +22,7 @@ async function start () {
     copyLicense(),
     copyPackage(),
     copyReadme(),
-    copyTemplates(),
+    copyTemplates()
   ])
   await publish()
   consoleEnd('deploying')
@@ -31,7 +31,7 @@ async function start () {
 async function rollUpUsage () {
   if (process.argv.includes('-rollup')) {
     consoleStart('converting js for browsers')
-    await getPromise(resolve => fs.copyFile(rootDir + '/package.json', rootDir + '/src/package.json', 'utf8', resolve))
+    await getPromise(resolve => fs.copyFile(rootDir + '/package.json', rootDir + '/src/package.json', undefined, resolve))
     await getPromise(resolve => exec(`rollup -c`, {}, resolve))
     consoleEnd('converting js for browsers')
   }
@@ -44,21 +44,31 @@ async function removeFiles () {
 }
 async function copyReadme () {
   consoleStart('copying readme')
-  await getPromise(resolve => fs.copyFile(rootDir + '/README.md', releaseDir + '/README.md', 'utf8', resolve))
+  await getPromise(resolve => fs.copyFile(rootDir + '/README.md', releaseDir + '/README.md', undefined, resolve))
   consoleEnd('copying readme')
 }
 async function copyLicense () {
   consoleStart('copying license')
-  await getPromise(resolve => fs.copyFile(rootDir + '/LICENSE', releaseDir + '/LICENSE', 'utf8', resolve))
+  await getPromise(resolve => fs.copyFile(rootDir + '/LICENSE', releaseDir + '/LICENSE', undefined, resolve))
   consoleEnd('copying license')
 }
-async function copyTemplates () {
-  consoleStart('copying templates')
-  const templatePackageJSON = require('../src/templates/fe/package.json')
+async function updateTemplatePackage (name) {
+  consoleStart(`updating ${name} template`)
+  const templatePackageJSON = require(`../src/templates/${name}/package.json`)
   templatePackageJSON.devDependencies.innetjs = '^' + packageJSON.version
-  await getPromise(resolve => fs.writeFile(rootDir + '/src/templates/fe/package.json', JSON.stringify(templatePackageJSON, null, 2) + '\n', 'utf8', resolve))
+  await getPromise(resolve => fs.writeFile(rootDir + `/src/templates/${name}/package.json`, JSON.stringify(templatePackageJSON, null, 2) + '\n', 'utf8', resolve))
+  consoleEnd(`updating ${name} template`)
+}
+async function copyTemplates () {
+  consoleStart(`copying templates`)
+
+  await Promise.all([
+    await updateTemplatePackage('fe'),
+    await updateTemplatePackage('be'),
+  ])
+
   await copyRecursive(rootDir + '/src/templates', releaseDir + '/templates')
-  consoleEnd('copying templates')
+  consoleEnd(`copying templates`)
 }
 async function copyPackage () {
   consoleStart('copying package.json')

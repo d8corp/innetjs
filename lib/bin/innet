@@ -112,9 +112,17 @@ class InnetJS {
         this.api = api;
     }
     // Methods
-    init(appName, { template = 'fe', force = false } = {}) {
+    init(appName, { template, force = false } = {}) {
         return __awaiter(this, void 0, void 0, function* () {
             const appPath = path__default['default'].resolve(appName);
+            if (!template) {
+                console.log(chalk__default['default'].green(`Select one of those templates?`));
+                const { value } = yield selector__default['default']({
+                    values: ['fe', 'be']
+                });
+                template = value;
+                readline.moveCursor(process.stdout, 0, -2);
+            }
             if (!force) {
                 yield logger__default['default'].start('Check if app folder is available', () => __awaiter(this, void 0, void 0, function* () {
                     if (fs__default['default'].existsSync(appPath)) {
@@ -425,7 +433,7 @@ class InnetJS {
     }
 }
 
-var version = "1.7.4";
+var version = "1.8.0";
 
 require('dotenv').config();
 const innetJS = new InnetJS();
@@ -435,8 +443,9 @@ commander.program
     .command('init <app-name>')
     .description('Create innet boilerplate')
     .option('-e, --error', 'Show error details')
-    .action((appName, { error }) => {
-    innetJS.init(appName).catch(e => {
+    .option('-t, --template', 'Select template')
+    .action((appName, { error, template }) => {
+    innetJS.init(appName, { template }).catch(e => {
         if (error) {
             console.error(e);
             process.exit(1);

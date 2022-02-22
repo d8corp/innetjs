@@ -106,9 +106,19 @@ export default class InnetJS {
   }
 
   // Methods
-  async init (appName: string, {template = 'fe', force = false} = {}) {
-
+  async init (appName: string, { template, force = false } = {} as any) {
     const appPath = path.resolve(appName)
+
+    if (!template) {
+      console.log(chalk.green(`Select one of those templates?`))
+
+      const { value } = await selector({
+        values: ['fe', 'be']
+      })
+      template = value
+
+      readline.moveCursor(process.stdout, 0, -2)
+    }
 
     if (!force) {
 

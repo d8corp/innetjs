@@ -28,10 +28,7 @@ export default class InnetJS {
         port?: number;
         api?: string;
     });
-    init(appName: string, { template, force }?: {
-        template?: string;
-        force?: boolean;
-    }): Promise<void>;
+    init(appName: string, { template, force }?: any): Promise<void>;
     build({ node }?: {
         node?: boolean;
     }): Promise<void>;
