@@ -4,10 +4,6 @@
     "paths": {
       "/": ["src"],
       "/*": ["src/*"],
-      "@cantinc/utils": ["src/@cantinc/utils"],
-      "@innet/*": ["src/@innet/*"],
-      "innet/*": ["src/@innet/innet/*"],
-      "innet": ["src/@innet/innet"],
     },
     "target": "ES6",
     "lib": [

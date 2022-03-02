@@ -4,10 +4,10 @@
     "build": "innetjs build -n"
   },
   "dependencies": {
-    "@innet/server": "^1.0.2",
+    "@innet/server": "^1.1.0",
     "innet": "^1.0.0"
   },
   "devDependencies": {
-    "innetjs": "^1.8.2"
+    "innetjs": "^1.8.3"
   }
 }

@@ -7,7 +7,7 @@ To start development run:
 npm start
 ```
 
-To build the project run:
+To build the application run:
 ```shell
 npm run build
 ```

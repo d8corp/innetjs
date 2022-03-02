@@ -1,6 +1,6 @@
 import innet from 'innet'
 import server from '@innet/server'
 
-import App from './App'
+import app from '/controller'
 
-innet(<App />, server)
+innet(app, server)
