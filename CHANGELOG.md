@@ -2,6 +2,10 @@
 
 ## v1.8
 
+### v1.8.4 [![03.03.2022](https://img.shields.io/date/1646294627)](https://github.com/d8corp/innetjs/tree/v1.8.4)
+
+- fix building errors
+
 ### v1.8.3 [![02.03.2022](https://img.shields.io/date/1646211534)](https://github.com/d8corp/innetjs/tree/v1.8.3)
 
 - updated dependencies

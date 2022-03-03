@@ -200,8 +200,32 @@ export default class InnetJS {
     if (node) {
       inputOptions.external = Object.keys(pkg?.dependencies || {})
       outputOptions.format = 'cjs'
+      outputOptions.plugins.push(
+        string({
+          include: '**/*.*',
+          exclude: [
+            '**/*.ts',
+            '**/*.tsx',
+            '**/*.js',
+            '**/*.jsx',
+            '**/*.json',
+          ]
+        }),
+      )
     } else {
       inputOptions.plugins.push(
+        string({
+          include: '**/*.*',
+          exclude: [
+            '**/*.ts',
+            '**/*.tsx',
+            '**/*.js',
+            '**/*.jsx',
+            '**/*.json',
+            '**/*.css',
+            '**/*.scss',
+          ]
+        }),
         postcss({
           plugins: [autoprefixer()],
           extract: !this.cssInJs,
