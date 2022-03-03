@@ -173,22 +173,9 @@ export default class InnetJS {
       input: path.resolve(this.srcFolder, `index.${indexExtension}`),
       plugins: [
         commonjs(),
-        nodeResolve(),
         json(),
         typescript(),
         jsx(),
-        string({
-          include: '**/*.*',
-          exclude: [
-            '**/*.ts',
-            '**/*.tsx',
-            '**/*.js',
-            '**/*.jsx',
-            '**/*.json',
-            '**/*.css',
-            '**/*.scss',
-          ]
-        }),
       ]
     } as Record<string, any>
 
@@ -198,9 +185,12 @@ export default class InnetJS {
     } as Record<string, any>
 
     if (node) {
-      inputOptions.external = Object.keys(pkg?.dependencies || {})
       outputOptions.format = 'cjs'
-      outputOptions.plugins.push(
+      inputOptions.external = Object.keys(pkg?.dependencies || {})
+      inputOptions.plugins.push(
+        nodeResolve({
+          moduleDirectories: [path.resolve(this.buildFolder, 'node_modules')]
+        }),
         string({
           include: '**/*.*',
           exclude: [
