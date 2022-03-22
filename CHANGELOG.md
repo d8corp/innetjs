@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.9
+
+### v1.9.0 [![22.03.2022](https://img.shields.io/date/1647979618)](https://github.com/d8corp/innetjs/tree/v1.9.0)
+
+- updated dependencies
+- support new getter JSX parsing feature
+
 ## v1.8
 
 ### v1.8.5 [![03.03.2022](https://img.shields.io/date/1646297680)](https://github.com/d8corp/innetjs/tree/v1.8.5)
