@@ -1,4 +1,6 @@
 import innet from 'innet'
-import App from './App'
+import dom from '@innet/dom'
 
-innet(<App />)
+import { App } from '/App'
+
+innet(<App />, dom)

@@ -71,7 +71,9 @@ GENERATE_SOURCEMAP=false
 CSS_IN_JS=false
 
 # import styles from './App.css'
-# you can use css modules with CSS_MODULES=true
+# you can use css modules with CSS_MODULES=true.
+# If CSS_MODULES equals false you still can use css modules,
+# just name the css or scss file like App.module.css
 CSS_MODULES=false
 
 # you can change the public folder
