@@ -2,6 +2,11 @@
 
 ## v1.11
 
+### v1.11.1 [![30.04.2022](https://img.shields.io/date/1651318064)](https://github.com/d8corp/innetjs/tree/v1.11.1)
+
+- reduce bundle size information
+- remove bundle size information for node app
+
 ### v1.11.0 [![30.04.2022](https://img.shields.io/date/1651315818)](https://github.com/d8corp/innetjs/tree/v1.11.0)
 
 - added displaying of bundle filesize

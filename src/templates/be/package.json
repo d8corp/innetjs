@@ -8,6 +8,6 @@
     "innet": "^1.0.0"
   },
   "devDependencies": {
-    "innetjs": "^1.11.0"
+    "innetjs": "^1.11.1"
   }
 }

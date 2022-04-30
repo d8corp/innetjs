@@ -60,7 +60,7 @@ function getFile (file) {
 }
 
 const reporter: FileSizeRender<string | Promise<string>> = (options, outputOptions, info) => {
-  logger.log(`${chalk.yellow(info.fileName)} ${chalk.green(info.bundleSize)} [ min: ${chalk.green(info.minSize)}, gzip: ${chalk.green(info.gzipSize)} ]`)
+  logger.log(`${chalk.yellow(info.fileName)} ${chalk.green(info.bundleSize)} [ gzip: ${chalk.green(info.gzipSize)} ]`)
   return ''
 }
 
@@ -182,9 +182,6 @@ export default class InnetJS {
         json(),
         typescript(),
         jsx(),
-        filesize({
-          reporter,
-        }),
       ]
     } as Record<string, any>
 
@@ -235,7 +232,12 @@ export default class InnetJS {
         }),
       )
       outputOptions.format = 'es'
-      outputOptions.plugins = [terser()]
+      outputOptions.plugins = [
+        terser(),
+        filesize({
+          reporter,
+        }),
+      ]
     }
 
     await logger.start('Build production bundle', async () => {
