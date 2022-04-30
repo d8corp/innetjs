@@ -18,6 +18,7 @@ import tmp from 'tmp'
 import proxy from 'express-http-proxy'
 import selector from 'cli-select'
 import jsx from 'rollup-plugin-innet-jsx'
+import filesize, { FileSizeRender } from 'rollup-plugin-filesize'
 
 const livereload = require('rollup-plugin-livereload')
 const {string} = require('rollup-plugin-string')
@@ -56,6 +57,11 @@ function getFile (file) {
   }
 
   return file
+}
+
+const reporter: FileSizeRender<string | Promise<string>> = (options, outputOptions, info) => {
+  logger.log(`${chalk.yellow(info.fileName)} ${chalk.green(info.bundleSize)} [ min: ${chalk.green(info.minSize)}, gzip: ${chalk.green(info.gzipSize)} ]`)
+  return ''
 }
 
 export default class InnetJS {
@@ -176,6 +182,9 @@ export default class InnetJS {
         json(),
         typescript(),
         jsx(),
+        filesize({
+          reporter,
+        }),
       ]
     } as Record<string, any>
 

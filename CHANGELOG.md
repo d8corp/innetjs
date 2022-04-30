@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.11
+
+### v1.11.0 [![30.04.2022](https://img.shields.io/date/1651315818)](https://github.com/d8corp/innetjs/tree/v1.11.0)
+
+- added displaying of bundle filesize
+
 ## v1.10
 
 ### v1.10.1 [![30.04.2022](https://img.shields.io/date/1651311854)](https://github.com/d8corp/innetjs/tree/v1.10.1)
