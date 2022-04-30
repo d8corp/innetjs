@@ -204,6 +204,7 @@ export default class InnetJS {
       )
     } else {
       inputOptions.plugins.push(
+        nodeResolve(),
         string({
           include: '**/*.*',
           exclude: [

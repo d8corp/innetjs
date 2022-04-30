@@ -2,6 +2,10 @@
 
 ## v1.10
 
+### v1.10.1 [![30.04.2022](https://img.shields.io/date/1651311854)](https://github.com/d8corp/innetjs/tree/v1.10.1)
+
+- fix fe build
+
 ### v1.10.0 [![27.04.2022](https://img.shields.io/date/1651007145)](https://github.com/d8corp/innetjs/tree/v1.10.0)
 
 - updated fe template

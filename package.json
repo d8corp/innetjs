@@ -1,6 +1,6 @@
 {
   "name": "innetjs",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "description": "CLI for innet boilerplate",
   "homepage": "https://github.com/d8corp/innetjs",
   "author": "Mikhail Lysikov <d8corp@mail.ru>",
@@ -13,6 +13,7 @@
     "build": "bin/release -rollup",
     "test": "jest",
     "start": "npm run build && cd lib && sudo npm link",
+    "stop": "npm unlink innetjs",
     "patch": "bin/release -patch -rollup -publish",
     "minor": "bin/release -minor -rollup -publish",
     "major": "bin/release -major -rollup -publish"
