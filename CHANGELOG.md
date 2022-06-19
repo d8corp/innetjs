@@ -1,5 +1,8 @@
 # Changelog
 
+### v1.12.0 [![19.06.2022](https://img.shields.io/date/1655659927)](https://github.com/d8corp/innetjs/tree/v1.12.0)
+- updated fe template
+
 ## v1.11
 
 ### v1.11.1 [![30.04.2022](https://img.shields.io/date/1651318064)](https://github.com/d8corp/innetjs/tree/v1.11.1)
