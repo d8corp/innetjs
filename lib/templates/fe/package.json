@@ -5,12 +5,12 @@
   },
   "dependencies": {
     "innet": "^1.0.0",
-    "@innet/dom": "^0.4.2",
+    "@innet/dom": "^0.4.3",
     "@innet/jsx": "^1.0.2",
     "html-classes": "^1.2.0",
     "watch-state": "^3.4.3"
   },
   "devDependencies": {
-    "innetjs": "^1.12.0"
+    "innetjs": "^1.12.1"
   }
 }
