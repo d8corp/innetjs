@@ -10,7 +10,7 @@ import commonjs from '@rollup/plugin-commonjs'
 import {nodeResolve} from '@rollup/plugin-node-resolve'
 import { terser } from 'rollup-plugin-terser'
 import typescript from 'rollup-plugin-typescript2'
-import postcss from 'rollup-plugin-postcss'
+import styles from 'rollup-plugin-styles'
 import autoprefixer from 'autoprefixer'
 import express from 'express'
 import json from '@rollup/plugin-json'
@@ -89,8 +89,8 @@ export default class InnetJS {
     buildFolder = process.env.BUILD_FOLDER || path.join('public', 'build'),
     srcFolder = process.env.SRC_FOLDER || 'src',
     sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === 'true' : false,
-    cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === 'true' : false,
-    cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === 'true' : false,
+    cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === 'true' : true,
+    cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === 'true' : true,
     sslKey = process.env.SSL_KEY || 'localhost.key',
     sslCrt = process.env.SSL_CRT || 'localhost.crt',
     proxy = process.env.PROXY || '',
@@ -177,6 +177,7 @@ export default class InnetJS {
     const pkg = node && await this.getPackage()
     const inputOptions = {
       input: path.resolve(this.srcFolder, `index.${indexExtension}`),
+      preserveEntrySignatures: 'strict',
       plugins: [
         commonjs(),
         json(),
@@ -223,12 +224,13 @@ export default class InnetJS {
             '**/*.scss',
           ]
         }),
-        postcss({
+        styles({
+          mode: this.cssInJs ? 'inject' : 'extract',
+          url: true,
           plugins: [autoprefixer()],
-          extract: !this.cssInJs,
           modules: this.cssModules,
           sourceMap: this.sourcemap,
-          minimize: true
+          minimize: true,
         }),
       )
       outputOptions.format = 'es'
@@ -267,7 +269,7 @@ export default class InnetJS {
     }
   }
 
-  async start ({node = false, error = false} = {}) {
+  async start ({ node = false, error = false } = {}) {
     const indexExtension = await this.getProjectExtension()
 
     const pkg = node && await this.getPackage()
@@ -276,6 +278,7 @@ export default class InnetJS {
 
     const options = {
       input: path.resolve(this.srcFolder, `index.${indexExtension}`),
+      preserveEntrySignatures: 'strict',
       output: {
         dir: this.buildFolder,
         sourcemap: true
@@ -341,11 +344,12 @@ export default class InnetJS {
             '**/*.scss',
           ]
         }),
-        postcss({
+        styles({
+          mode: this.cssInJs ? 'inject' : 'extract',
+          url: true,
           plugins: [autoprefixer()],
           modules: this.cssModules,
           sourceMap: true,
-          extract: !this.cssInJs,
         }),
         this.createClient(key, cert),
         livereload({
@@ -358,7 +362,7 @@ export default class InnetJS {
 
     const watcher = rollup.watch(options)
 
-    watcher.on('event', e => {
+    watcher.on('event', async e => {
       if (e.code == 'ERROR') {
         logger.end('Bundling', error ? e.error.stack : e.error.message)
       } else if (e.code === 'BUNDLE_START') {

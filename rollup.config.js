@@ -1,5 +1,5 @@
 import typescript from 'rollup-plugin-typescript2'
-import {preserveShebangs} from 'rollup-plugin-preserve-shebangs'
+import { preserveShebangs } from 'rollup-plugin-preserve-shebangs'
 import json from '@rollup/plugin-json'
 
 export default [{
@@ -48,6 +48,6 @@ export default [{
         }
       }
     }),
-    preserveShebangs()
+    preserveShebangs(),
   ]
 }]
