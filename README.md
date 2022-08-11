@@ -58,9 +58,6 @@ Use the command in the project folder to build it.
 innetjs build
 ```
 
-## Links
-Check [README.md](https://github.com/d8corp/innetjs/tree/main/src/templates/fe) of `fe` template
-
 ## Issues
 If you find a bug or have a suggestion, please file an issue on [GitHub](https://github.com/d8corp/innetjs/issues).
 
