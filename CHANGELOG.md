@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.0
+
+### v2.0.0 [![11.08.2022](https://img.shields.io/date/1660204235)](https://github.com/d8corp/innetjs/tree/v2.0.0)
+- new way of development build
+- new way of templates deliver
+- css modules by default
+- css in js by default
+- fix css code splitting bugs
+
 ## v1.12
 
 ### v1.12.1 [![19.06.2022](https://img.shields.io/date/1655671076)](https://github.com/d8corp/innetjs/tree/v1.12.1)
