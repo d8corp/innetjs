@@ -3,7 +3,11 @@ export default class InnetJS {
     projectFolder: string;
     publicFolder: string;
     buildFolder: string;
+    devBuildFolder: string;
     srcFolder: string;
+    publicIndexFile: string;
+    buildIndexFile: string;
+    devBuildIndexFile: string;
     sslKey: string;
     sslCrt: string;
     proxy: string;
@@ -39,8 +43,8 @@ export default class InnetJS {
     run(file: any): Promise<void>;
     getProjectExtension(): Promise<Extensions>;
     getPackage(): Promise<Record<string, any>>;
-    createClient(key: any, cert: any): {
-        writeBundle: () => void;
+    createClient(key: any, cert: any, pkg: any): {
+        writeBundle: () => Promise<void>;
     };
     createServer(external: string[]): {
         writeBundle: () => Promise<void>;

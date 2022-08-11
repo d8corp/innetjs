@@ -1,13 +1,14 @@
 import path from 'path'
-import fs from 'fs-extra'
+import fs, {promises as fsx} from 'fs-extra'
 import http from 'http'
 import https from 'https'
+import { promisify } from 'util'
+import axios from 'axios'
 import logger from '@cantinc/logger'
 import chalk from 'chalk'
-import {promisify} from 'util'
 import rollup from 'rollup'
 import commonjs from '@rollup/plugin-commonjs'
-import {nodeResolve} from '@rollup/plugin-node-resolve'
+import { nodeResolve } from '@rollup/plugin-node-resolve'
 import { terser } from 'rollup-plugin-terser'
 import typescript from 'rollup-plugin-typescript2'
 import styles from 'rollup-plugin-styles'
@@ -20,11 +21,14 @@ import selector from 'cli-select'
 import jsx from 'rollup-plugin-innet-jsx'
 import filesize, { FileSizeRender } from 'rollup-plugin-filesize'
 
+import { Extract } from './extract'
+
 const livereload = require('rollup-plugin-livereload')
 const {string} = require('rollup-plugin-string')
 const {exec, spawn} = require('child_process')
 const readline = require('readline')
 const execAsync = promisify(exec)
+const copyFiles = promisify(fs.copy)
 
 require('dotenv').config()
 
@@ -59,18 +63,29 @@ function getFile (file) {
   return file
 }
 
+async function convertIndexFile (data: Buffer, version: string) {
+  return data
+    .toString()
+    .replace(
+      '</head>',
+      `<script type="module" defer src="index.js${version ? `?v=${version}` : ''}"></script></head>`
+    )
+}
+
 const reporter: FileSizeRender<string | Promise<string>> = (options, outputOptions, info) => {
   logger.log(`${chalk.yellow(info.fileName)} ${chalk.green(info.bundleSize)} [ gzip: ${chalk.green(info.gzipSize)} ]`)
   return ''
 }
 
 export default class InnetJS {
-
-  // Setup during initialisation
   projectFolder: string
   publicFolder: string
   buildFolder: string
+  devBuildFolder: string
   srcFolder: string
+  publicIndexFile: string
+  buildIndexFile: string
+  devBuildIndexFile: string
   sslKey: string
   sslCrt: string
   proxy: string
@@ -86,7 +101,7 @@ export default class InnetJS {
   constructor ({
     projectFolder = process.env.PROJECT_FOLDER || '',
     publicFolder = process.env.PUBLIC_FOLDER || 'public',
-    buildFolder = process.env.BUILD_FOLDER || path.join('public', 'build'),
+    buildFolder = process.env.BUILD_FOLDER || 'build',
     srcFolder = process.env.SRC_FOLDER || 'src',
     sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === 'true' : false,
     cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === 'true' : true,
@@ -101,6 +116,10 @@ export default class InnetJS {
     this.publicFolder = path.resolve(publicFolder)
     this.buildFolder = path.resolve(buildFolder)
     this.srcFolder = path.resolve(srcFolder)
+    this.publicIndexFile = path.join(publicFolder, 'index.html')
+    this.buildIndexFile = path.join(buildFolder, 'index.html')
+    this.devBuildFolder = path.resolve(projectFolder, 'node_modules', '.cache', 'innetjs', 'build')
+    this.devBuildIndexFile = path.join(this.devBuildFolder, 'index.html')
     this.sourcemap = sourcemap
     this.cssModules = cssModules
     this.cssInJs = cssInJs
@@ -114,26 +133,29 @@ export default class InnetJS {
   // Methods
   async init (appName: string, { template, force = false } = {} as any) {
     const appPath = path.resolve(appName)
+    const { data } = await logger.start('Get templates list', async () =>
+      await axios.get('https://api.github.com/repos/d8corp/innetjs-templates/branches'))
 
-    if (!template) {
+    const templates = data.map(({ name }) => name).filter(name => name !== 'main')
+
+    if (!template || !templates.includes(template)) {
       logger.log(chalk.green(`Select one of those templates`))
 
       const { value } = await selector({
-        values: ['fe', 'be']
+        values: templates
       })
       template = value
 
       readline.moveCursor(process.stdout, 0, -1)
 
-      logger.log(`Selected ${value} template`)
+      const text = `Selected template: ${chalk.white(value)}`
+      logger.start(text)
+      logger.end(text)
     }
 
     if (!force) {
-
       await logger.start('Check if app folder is available', async () => {
-
         if (fs.existsSync(appPath)) {
-
           logger.log(chalk.red(`'${appPath}' already exist, what do you want?`))
 
           const {id: result, value} = await selector({
@@ -155,16 +177,17 @@ export default class InnetJS {
       })
     }
 
-    const libPath = path.resolve(__dirname, '..')
-    const templatePath = path.resolve(libPath, 'templates', template)
+    await logger.start('Download template', async () => {
+      const { data } = await axios.get(`https://github.com/d8corp/innetjs-templates/archive/refs/heads/${template}.zip`, {
+        responseType: 'stream'
+      })
 
-    await logger.start('Check if the template exists', async () => {
-      if (!fs.existsSync(templatePath)) {
-        throw Error(`The template '${template}' is not exist`)
-      }
+      await new Promise((resolve, reject) => {
+        data.pipe(Extract({
+          path: appPath,
+        }, template)).on('finish', resolve).on('error', reject)
+      })
     })
-
-    await logger.start('Copy files', () => fs.copy(templatePath, appPath))
 
     await logger.start('Install packages', () => execAsync(`cd ${appPath} && npm i`))
   }
@@ -246,6 +269,15 @@ export default class InnetJS {
       const bundle = await rollup.rollup(inputOptions)
       await bundle.write(outputOptions)
       await bundle.close()
+      if (!node) {
+        await copyFiles(this.publicFolder, this.buildFolder)
+        const data = await fsx.readFile(this.publicIndexFile)
+        const pkg = await this.getPackage()
+        await fsx.writeFile(
+          this.buildIndexFile,
+          await convertIndexFile(data, pkg.version),
+        )
+      }
     })
 
     if (pkg) {
@@ -271,16 +303,15 @@ export default class InnetJS {
 
   async start ({ node = false, error = false } = {}) {
     const indexExtension = await this.getProjectExtension()
+    const pkg = await this.getPackage()
 
-    const pkg = node && await this.getPackage()
-
-    await logger.start('Remove build', () => fs.remove(this.buildFolder))
+    await logger.start('Remove build', () => fs.remove(this.devBuildFolder))
 
     const options = {
       input: path.resolve(this.srcFolder, `index.${indexExtension}`),
       preserveEntrySignatures: 'strict',
       output: {
-        dir: this.buildFolder,
+        dir: this.devBuildFolder,
         sourcemap: true
       },
       plugins: [
@@ -351,7 +382,7 @@ export default class InnetJS {
           modules: this.cssModules,
           sourceMap: true,
         }),
-        this.createClient(key, cert),
+        this.createClient(key, cert, pkg),
         livereload({
           watch: this.publicFolder,
           verbose: false,
@@ -466,15 +497,27 @@ export default class InnetJS {
     return this.package
   }
 
-  createClient (key, cert) {
+  createClient (key, cert, pkg) {
     let app
 
     return {
-      writeBundle: () => {
+      writeBundle: async () => {
         if (!app) {
+          app = express()
+          const update = async () => {
+            const data = await fsx.readFile(this.publicIndexFile)
+            await fsx.writeFile(
+              this.devBuildIndexFile,
+              await convertIndexFile(data, pkg.version),
+            )
+          }
+
+          fs.watch(this.publicIndexFile, update)
+          await update()
+
           const httpsUsing = !!(cert && key)
 
-          app = express()
+          app.use(express.static(this.devBuildFolder))
           app.use(express.static(this.publicFolder))
 
           if (this.proxy?.startsWith('http')) {
@@ -485,7 +528,7 @@ export default class InnetJS {
           }
 
           app.use(/^[^.]+$/, (req, res) => {
-            res.sendFile(this.publicFolder + '/index.html')
+            res.sendFile(this.devBuildFolder + '/index.html')
           })
 
           const server = httpsUsing ? https.createServer({key, cert}, app) : http.createServer(app)
