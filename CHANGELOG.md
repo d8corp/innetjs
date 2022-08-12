@@ -2,6 +2,9 @@
 
 ## v2.0
 
+### v2.0.1 [![12.08.2022](https://img.shields.io/date/1660322538)](https://github.com/d8corp/innetjs/tree/v2.0.1)
+- add images import
+
 ### v2.0.0 [![11.08.2022](https://img.shields.io/date/1660204235)](https://github.com/d8corp/innetjs/tree/v2.0.0)
 - new way of development build
 - new way of templates deliver

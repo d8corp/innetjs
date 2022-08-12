@@ -157,6 +157,28 @@ const reporter = (options, outputOptions, info) => {
     logger__default["default"].log(`${chalk__default["default"].yellow(info.fileName)} ${chalk__default["default"].green(info.bundleSize)} [ gzip: ${chalk__default["default"].green(info.gzipSize)} ]`);
     return '';
 };
+const stringExcludeDom = [
+    '**/*.ts',
+    '**/*.tsx',
+    '**/*.js',
+    '**/*.jsx',
+    '**/*.json',
+    '**/*.css',
+    '**/*.scss',
+    '**/*.webp',
+    '**/*.gif',
+    '**/*.png',
+    '**/*.jpeg',
+    '**/*.jpg',
+    '**/*.svg',
+];
+const stringExcludeNode = [
+    '**/*.ts',
+    '**/*.tsx',
+    '**/*.js',
+    '**/*.jsx',
+    '**/*.json',
+];
 class InnetJS {
     constructor({ projectFolder = process.env.PROJECT_FOLDER || '', publicFolder = process.env.PUBLIC_FOLDER || 'public', buildFolder = process.env.BUILD_FOLDER || 'build', srcFolder = process.env.SRC_FOLDER || 'src', sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === 'true' : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === 'true' : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === 'true' : true, sslKey = process.env.SSL_KEY || 'localhost.key', sslCrt = process.env.SSL_CRT || 'localhost.crt', proxy = process.env.PROXY || '', port = process.env.PORT ? +process.env.PORT : 3000, api = process.env.API || '*', } = {}) {
         this.projectFolder = path__default["default"].resolve(projectFolder);
@@ -250,27 +272,13 @@ class InnetJS {
                     moduleDirectories: [path__default["default"].resolve(this.buildFolder, 'node_modules')]
                 }), string({
                     include: '**/*.*',
-                    exclude: [
-                        '**/*.ts',
-                        '**/*.tsx',
-                        '**/*.js',
-                        '**/*.jsx',
-                        '**/*.json',
-                    ]
+                    exclude: stringExcludeNode,
                 }));
             }
             else {
-                inputOptions.plugins.push(pluginNodeResolve.nodeResolve(), string({
+                inputOptions.plugins.push(pluginNodeResolve.nodeResolve(), image__default["default"](), string({
                     include: '**/*.*',
-                    exclude: [
-                        '**/*.ts',
-                        '**/*.tsx',
-                        '**/*.js',
-                        '**/*.jsx',
-                        '**/*.json',
-                        '**/*.css',
-                        '**/*.scss',
-                    ]
+                    exclude: stringExcludeDom,
                 }), styles__default["default"]({
                     mode: this.cssInJs ? 'inject' : 'extract',
                     url: true,
@@ -346,13 +354,7 @@ class InnetJS {
                     moduleDirectories: [path__default["default"].resolve(this.srcFolder, 'node_modules')]
                 }), string({
                     include: '**/*.*',
-                    exclude: [
-                        '**/*.ts',
-                        '**/*.tsx',
-                        '**/*.js',
-                        '**/*.jsx',
-                        '**/*.json',
-                    ]
+                    exclude: stringExcludeNode,
                 }), this.createServer(options.external));
             }
             else {
@@ -369,21 +371,7 @@ class InnetJS {
                 options.output.format = 'es';
                 options.plugins.push(pluginNodeResolve.nodeResolve(), image__default["default"](), string({
                     include: '**/*.*',
-                    exclude: [
-                        '**/*.ts',
-                        '**/*.tsx',
-                        '**/*.js',
-                        '**/*.jsx',
-                        '**/*.json',
-                        '**/*.css',
-                        '**/*.scss',
-                        '**/*.webp',
-                        '**/*.gif',
-                        '**/*.png',
-                        '**/*.jpeg',
-                        '**/*.jpg',
-                        '**/*.svg',
-                    ]
+                    exclude: stringExcludeDom,
                 }), styles__default["default"]({
                     mode: this.cssInJs ? 'inject' : 'extract',
                     url: true,
@@ -544,7 +532,7 @@ class InnetJS {
     }
 }
 
-var version = "2.0.0";
+var version = "2.0.1";
 
 require('dotenv').config();
 const innetJS = new InnetJS();
