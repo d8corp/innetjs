@@ -22,6 +22,7 @@ async function start () {
     copyLicense(),
     copyPackage(),
     copyReadme(),
+    copyDeclaration(),
   ])
   await publish()
   consoleEnd('deploying')
@@ -50,6 +51,11 @@ async function copyLicense () {
   consoleStart('copying license')
   await getPromise(resolve => fs.copyFile(rootDir + '/LICENSE', releaseDir + '/LICENSE', undefined, resolve))
   consoleEnd('copying license')
+}
+async function copyDeclaration () {
+  consoleStart('copying declaration')
+  await getPromise(resolve => fs.copyFile(rootDir + '/src/declaration.d.ts', releaseDir + '/declaration.d.ts', undefined, resolve))
+  consoleEnd('copying declaration')
 }
 async function copyPackage () {
   consoleStart('copying package.json')

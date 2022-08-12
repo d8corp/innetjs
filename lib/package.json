@@ -33,6 +33,7 @@
   "dependencies": {
     "@cantinc/logger": "^1.1.0",
     "@rollup/plugin-commonjs": "^22.0.2",
+    "@rollup/plugin-image": "^2.1.1",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "autoprefixer": "^10.4.8",
@@ -49,7 +50,6 @@
     "rollup": "^2.77.2",
     "rollup-plugin-filesize": "^9.1.2",
     "rollup-plugin-innet-jsx": "^1.3.0",
-    "rollup-plugin-lit-css": "^4.0.0",
     "rollup-plugin-livereload": "^2.0.5",
     "rollup-plugin-string": "^3.0.0",
     "rollup-plugin-styles": "^4.0.0",

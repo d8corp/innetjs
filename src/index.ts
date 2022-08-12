@@ -20,6 +20,7 @@ import proxy from 'express-http-proxy'
 import selector from 'cli-select'
 import jsx from 'rollup-plugin-innet-jsx'
 import filesize, { FileSizeRender } from 'rollup-plugin-filesize'
+import image from '@rollup/plugin-image'
 
 import { Extract } from './extract'
 
@@ -76,6 +77,29 @@ const reporter: FileSizeRender<string | Promise<string>> = (options, outputOptio
   logger.log(`${chalk.yellow(info.fileName)} ${chalk.green(info.bundleSize)} [ gzip: ${chalk.green(info.gzipSize)} ]`)
   return ''
 }
+
+const stringExcludeDom = [
+  '**/*.ts',
+  '**/*.tsx',
+  '**/*.js',
+  '**/*.jsx',
+  '**/*.json',
+  '**/*.css',
+  '**/*.scss',
+  '**/*.webp',
+  '**/*.gif',
+  '**/*.png',
+  '**/*.jpeg',
+  '**/*.jpg',
+  '**/*.svg',
+]
+const stringExcludeNode = [
+  '**/*.ts',
+  '**/*.tsx',
+  '**/*.js',
+  '**/*.jsx',
+  '**/*.json',
+]
 
 export default class InnetJS {
   projectFolder: string
@@ -223,29 +247,16 @@ export default class InnetJS {
         }),
         string({
           include: '**/*.*',
-          exclude: [
-            '**/*.ts',
-            '**/*.tsx',
-            '**/*.js',
-            '**/*.jsx',
-            '**/*.json',
-          ]
+          exclude: stringExcludeNode,
         }),
       )
     } else {
       inputOptions.plugins.push(
         nodeResolve(),
+        image(),
         string({
           include: '**/*.*',
-          exclude: [
-            '**/*.ts',
-            '**/*.tsx',
-            '**/*.js',
-            '**/*.jsx',
-            '**/*.json',
-            '**/*.css',
-            '**/*.scss',
-          ]
+          exclude: stringExcludeDom,
         }),
         styles({
           mode: this.cssInJs ? 'inject' : 'extract',
@@ -337,13 +348,7 @@ export default class InnetJS {
         }),
         string({
           include: '**/*.*',
-          exclude: [
-            '**/*.ts',
-            '**/*.tsx',
-            '**/*.js',
-            '**/*.jsx',
-            '**/*.json',
-          ]
+          exclude: stringExcludeNode,
         }),
         this.createServer(options.external),
       )
@@ -363,17 +368,10 @@ export default class InnetJS {
       options.output.format = 'es'
       options.plugins.push(
         nodeResolve(),
+        image(),
         string({
           include: '**/*.*',
-          exclude: [
-            '**/*.ts',
-            '**/*.tsx',
-            '**/*.js',
-            '**/*.jsx',
-            '**/*.json',
-            '**/*.css',
-            '**/*.scss',
-          ]
+          exclude: stringExcludeDom,
         }),
         styles({
           mode: this.cssInJs ? 'inject' : 'extract',
