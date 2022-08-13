@@ -2,6 +2,9 @@
 
 ## v2.0
 
+### v2.0.3 [![13.08.2022](https://img.shields.io/date/1660389000)](https://github.com/d8corp/innetjs/tree/v2.0.3)
+- improve errors view
+
 ### v2.0.2 [![13.08.2022](https://img.shields.io/date/1660385528)](https://github.com/d8corp/innetjs/tree/v2.0.2)
 - improve errors view
 

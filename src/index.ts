@@ -340,12 +340,18 @@ export default class InnetJS {
     watcher.on('event', async e => {
       if (e.code == 'ERROR') {
         if (e.error.code === 'UNRESOLVED_IMPORT') {
-          const [, importer, file] = e.error.message.match(/^Could not resolve '(.+)' from (.+)$/)
+          const [, importer, file] = e.error.message.match(/^Could not resolve '(.+)' from (.+)$/) || []
           const text = (await fs.readFile(file)).toString()
           const lines = new LinesAndColumns(text)
           const { line, column } = lines.locationForIndex(text.indexOf(importer))
           logger.end('Bundling', e.error.message)
           console.log(`ERROR in ${file}:${line + 1}:${column + 1}`)
+        } else if (e.error.code === 'PLUGIN_ERROR' && ['rpt2', 'commonjs'].includes(e.error.plugin)) {
+          const [, file, line, column] = e.error.message.match(/^[^(]+(src[^(]+)\((\d+),(\d+)\)/) || []
+          logger.end('Bundling', e.error.message)
+          if (file) {
+            console.log(`ERROR in ${file}:${line}:${column}`)
+          }
         } else {
           logger.end('Bundling', error ? e.error.stack : e.error.message)
         }
