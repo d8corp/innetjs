@@ -2,6 +2,10 @@
 
 ## v2.0
 
+### v2.0.4 [![13.08.2022](https://img.shields.io/date/1660391789)](https://github.com/d8corp/innetjs/tree/v2.0.4)
+- handle if a port is available
+- default API starts with `/api`
+
 ### v2.0.3 [![13.08.2022](https://img.shields.io/date/1660389000)](https://github.com/d8corp/innetjs/tree/v2.0.3)
 - improve errors view
 

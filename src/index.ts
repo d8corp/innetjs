@@ -18,6 +18,7 @@ import json from '@rollup/plugin-json'
 import tmp from 'tmp'
 import proxy from 'express-http-proxy'
 import selector from 'cli-select'
+import prompt from 'prompts'
 import jsx from 'rollup-plugin-innet-jsx'
 import filesize from 'rollup-plugin-filesize'
 import image from '@rollup/plugin-image'
@@ -72,7 +73,7 @@ export default class InnetJS {
     sslCrt = process.env.SSL_CRT || 'localhost.crt',
     proxy = process.env.PROXY || '',
     port = process.env.PORT ? +process.env.PORT : 3000,
-    api = process.env.API || '*',
+    api = process.env.API || '/api/?*',
   } = {}) {
     this.projectFolder = path.resolve(projectFolder)
     this.publicFolder = path.resolve(publicFolder)
@@ -491,8 +492,29 @@ export default class InnetJS {
           })
 
           const server = httpsUsing ? https.createServer({key, cert}, app) : http.createServer(app)
-          server.listen(this.port, () => {
-            console.log(`${chalk.green('➤')} Server started on http${httpsUsing ? 's' : ''}://localhost:${this.port}`)
+          let port = this.port
+          const listener = () => {
+            console.log(`${chalk.green('➤')} Server started on http${httpsUsing ? 's' : ''}://localhost:${port}`)
+          }
+
+          server.listen(port, listener)
+          server.on('error', async (e: any) => {
+            if (e.code === 'EADDRINUSE') {
+              port++
+              const { userPort } = await prompt({
+                name: 'userPort',
+                type: 'number',
+                message: `Port ${e.port} is reserved, please enter another one [${port}]:`
+              })
+
+              if (userPort) {
+                port = userPort
+              }
+
+              server.listen(port)
+            } else {
+              throw e
+            }
           })
         }
       }
