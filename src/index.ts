@@ -329,7 +329,7 @@ export default class InnetJS {
         }),
         this.createClient(key, cert, pkg),
         livereload({
-          watch: this.publicFolder,
+          watch: this.devBuildFolder,
           verbose: false,
           ...(key && cert ? {https: {key, cert}} : {})
         })
