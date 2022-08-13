@@ -19,14 +19,17 @@ import tmp from 'tmp'
 import proxy from 'express-http-proxy'
 import selector from 'cli-select'
 import jsx from 'rollup-plugin-innet-jsx'
-import filesize, { FileSizeRender } from 'rollup-plugin-filesize'
+import filesize from 'rollup-plugin-filesize'
 import image from '@rollup/plugin-image'
+import eslint from '@rollup/plugin-eslint'
 
 import { Extract } from './extract'
+import { stringExcludeDom, stringExcludeNode, lintIncludeDom } from './constants'
+import { convertIndexFile, reporter, getFile } from './helpers'
 
 const livereload = require('rollup-plugin-livereload')
-const {string} = require('rollup-plugin-string')
-const {exec, spawn} = require('child_process')
+const { string } = require('rollup-plugin-string')
+const { exec, spawn } = require('child_process')
 const readline = require('readline')
 const execAsync = promisify(exec)
 const copyFiles = promisify(fs.copy)
@@ -34,72 +37,6 @@ const copyFiles = promisify(fs.copy)
 require('dotenv').config()
 
 type Extensions = 'js' | 'ts' | 'tsx' | 'jsx'
-
-function getFile (file) {
-  file = path.resolve(file)
-
-  if (!fs.existsSync(file)) {
-    throw Error('Cannot find the file: ' + file)
-  }
-
-  if (fs.lstatSync(file).isDirectory()) {
-    let tmpFile = file
-    if (
-      !fs.existsSync(tmpFile = path.join(file, 'index.ts')) &&
-      !fs.existsSync(tmpFile = path.join(file, 'index.tsx')) &&
-      !fs.existsSync(tmpFile = path.join(file, 'index.js'))
-    ) {
-      throw Error('Cannot find index file in: ' + file)
-    }
-
-    file = tmpFile
-  } else if (!file.endsWith('.ts') && !file.endsWith('.tsx') && !file.endsWith('.js')) {
-    throw Error('File should has `.ts` or `.tsx` or `.js` extension: ' + file)
-  }
-
-  if (!fs.existsSync(file)) {
-    throw Error('Cannot find the file: ' + file)
-  }
-
-  return file
-}
-
-async function convertIndexFile (data: Buffer, version: string) {
-  return data
-    .toString()
-    .replace(
-      '</head>',
-      `<script type="module" defer src="index.js${version ? `?v=${version}` : ''}"></script></head>`
-    )
-}
-
-const reporter: FileSizeRender<string | Promise<string>> = (options, outputOptions, info) => {
-  logger.log(`${chalk.yellow(info.fileName)} ${chalk.green(info.bundleSize)} [ gzip: ${chalk.green(info.gzipSize)} ]`)
-  return ''
-}
-
-const stringExcludeDom = [
-  '**/*.ts',
-  '**/*.tsx',
-  '**/*.js',
-  '**/*.jsx',
-  '**/*.json',
-  '**/*.css',
-  '**/*.scss',
-  '**/*.webp',
-  '**/*.gif',
-  '**/*.png',
-  '**/*.jpeg',
-  '**/*.jpg',
-  '**/*.svg',
-]
-const stringExcludeNode = [
-  '**/*.ts',
-  '**/*.tsx',
-  '**/*.js',
-  '**/*.jsx',
-  '**/*.json',
-]
 
 export default class InnetJS {
   projectFolder: string
@@ -251,13 +188,13 @@ export default class InnetJS {
         }),
       )
     } else {
-      inputOptions.plugins.push(
+      inputOptions.plugins = [
+        eslint({
+          include: lintIncludeDom,
+        }),
+        ...inputOptions.plugins,
         nodeResolve(),
         image(),
-        string({
-          include: '**/*.*',
-          exclude: stringExcludeDom,
-        }),
         styles({
           mode: this.cssInJs ? 'inject' : 'extract',
           url: true,
@@ -266,7 +203,11 @@ export default class InnetJS {
           sourceMap: this.sourcemap,
           minimize: true,
         }),
-      )
+        string({
+          include: '**/*.*',
+          exclude: stringExcludeDom,
+        }),
+      ]
       outputOptions.format = 'es'
       outputOptions.plugins = [
         terser(),
@@ -366,13 +307,13 @@ export default class InnetJS {
           : undefined
 
       options.output.format = 'es'
-      options.plugins.push(
+      options.plugins = [
+        eslint({
+          include: lintIncludeDom,
+        }),
+        ...options.plugins,
         nodeResolve(),
         image(),
-        string({
-          include: '**/*.*',
-          exclude: stringExcludeDom,
-        }),
         styles({
           mode: this.cssInJs ? 'inject' : 'extract',
           url: true,
@@ -380,13 +321,17 @@ export default class InnetJS {
           modules: this.cssModules,
           sourceMap: true,
         }),
+        string({
+          include: '**/*.*',
+          exclude: stringExcludeDom,
+        }),
         this.createClient(key, cert, pkg),
         livereload({
           watch: this.publicFolder,
           verbose: false,
           ...(key && cert ? {https: {key, cert}} : {})
         })
-      )
+      ]
     }
 
     const watcher = rollup.watch(options)

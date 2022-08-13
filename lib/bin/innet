@@ -24,6 +24,7 @@ var selector = require('cli-select');
 var jsx = require('rollup-plugin-innet-jsx');
 var filesize = require('rollup-plugin-filesize');
 var image = require('@rollup/plugin-image');
+var eslint = require('@rollup/plugin-eslint');
 var unzipper = require('unzipper');
 var commander = require('commander');
 
@@ -49,6 +50,7 @@ var selector__default = /*#__PURE__*/_interopDefaultLegacy(selector);
 var jsx__default = /*#__PURE__*/_interopDefaultLegacy(jsx);
 var filesize__default = /*#__PURE__*/_interopDefaultLegacy(filesize);
 var image__default = /*#__PURE__*/_interopDefaultLegacy(image);
+var eslint__default = /*#__PURE__*/_interopDefaultLegacy(eslint);
 
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -117,13 +119,35 @@ function Extract(opts, template) {
     return extract;
 }
 
-const livereload = require('rollup-plugin-livereload');
-const { string } = require('rollup-plugin-string');
-const { exec, spawn } = require('child_process');
-const readline = require('readline');
-const execAsync = util.promisify(exec);
-const copyFiles = util.promisify(fs__default["default"].copy);
-require('dotenv').config();
+const lintIncludeDom = [
+    '**/*.ts',
+    '**/*.tsx',
+    '**/*.js',
+    '**/*.jsx',
+];
+const stringExcludeDom = [
+    '**/*.ts',
+    '**/*.tsx',
+    '**/*.js',
+    '**/*.jsx',
+    '**/*.json',
+    '**/*.css',
+    '**/*.scss',
+    '**/*.webp',
+    '**/*.gif',
+    '**/*.png',
+    '**/*.jpeg',
+    '**/*.jpg',
+    '**/*.svg',
+];
+const stringExcludeNode = [
+    '**/*.ts',
+    '**/*.tsx',
+    '**/*.js',
+    '**/*.jsx',
+    '**/*.json',
+];
+
 function getFile(file) {
     file = path__default["default"].resolve(file);
     if (!fs__default["default"].existsSync(file)) {
@@ -157,28 +181,14 @@ const reporter = (options, outputOptions, info) => {
     logger__default["default"].log(`${chalk__default["default"].yellow(info.fileName)} ${chalk__default["default"].green(info.bundleSize)} [ gzip: ${chalk__default["default"].green(info.gzipSize)} ]`);
     return '';
 };
-const stringExcludeDom = [
-    '**/*.ts',
-    '**/*.tsx',
-    '**/*.js',
-    '**/*.jsx',
-    '**/*.json',
-    '**/*.css',
-    '**/*.scss',
-    '**/*.webp',
-    '**/*.gif',
-    '**/*.png',
-    '**/*.jpeg',
-    '**/*.jpg',
-    '**/*.svg',
-];
-const stringExcludeNode = [
-    '**/*.ts',
-    '**/*.tsx',
-    '**/*.js',
-    '**/*.jsx',
-    '**/*.json',
-];
+
+const livereload = require('rollup-plugin-livereload');
+const { string } = require('rollup-plugin-string');
+const { exec, spawn } = require('child_process');
+const readline = require('readline');
+const execAsync = util.promisify(exec);
+const copyFiles = util.promisify(fs__default["default"].copy);
+require('dotenv').config();
 class InnetJS {
     constructor({ projectFolder = process.env.PROJECT_FOLDER || '', publicFolder = process.env.PUBLIC_FOLDER || 'public', buildFolder = process.env.BUILD_FOLDER || 'build', srcFolder = process.env.SRC_FOLDER || 'src', sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === 'true' : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === 'true' : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === 'true' : true, sslKey = process.env.SSL_KEY || 'localhost.key', sslCrt = process.env.SSL_CRT || 'localhost.crt', proxy = process.env.PROXY || '', port = process.env.PORT ? +process.env.PORT : 3000, api = process.env.API || '*', } = {}) {
         this.projectFolder = path__default["default"].resolve(projectFolder);
@@ -276,17 +286,27 @@ class InnetJS {
                 }));
             }
             else {
-                inputOptions.plugins.push(pluginNodeResolve.nodeResolve(), image__default["default"](), string({
-                    include: '**/*.*',
-                    exclude: stringExcludeDom,
-                }), styles__default["default"]({
-                    mode: this.cssInJs ? 'inject' : 'extract',
-                    url: true,
-                    plugins: [autoprefixer__default["default"]()],
-                    modules: this.cssModules,
-                    sourceMap: this.sourcemap,
-                    minimize: true,
-                }));
+                inputOptions.plugins = [
+                    eslint__default["default"]({
+                        include: lintIncludeDom,
+                        throwOnError: true,
+                    }),
+                    ...inputOptions.plugins,
+                    pluginNodeResolve.nodeResolve(),
+                    image__default["default"](),
+                    styles__default["default"]({
+                        mode: this.cssInJs ? 'inject' : 'extract',
+                        url: true,
+                        plugins: [autoprefixer__default["default"]()],
+                        modules: this.cssModules,
+                        sourceMap: this.sourcemap,
+                        minimize: true,
+                    }),
+                    string({
+                        include: '**/*.*',
+                        exclude: stringExcludeDom,
+                    }),
+                ];
                 outputOptions.format = 'es';
                 outputOptions.plugins = [
                     rollupPluginTerser.terser(),
@@ -369,16 +389,28 @@ class InnetJS {
                         ? fs__default["default"].readFileSync(this.sslCrt)
                         : undefined;
                 options.output.format = 'es';
-                options.plugins.push(pluginNodeResolve.nodeResolve(), image__default["default"](), string({
-                    include: '**/*.*',
-                    exclude: stringExcludeDom,
-                }), styles__default["default"]({
-                    mode: this.cssInJs ? 'inject' : 'extract',
-                    url: true,
-                    plugins: [autoprefixer__default["default"]()],
-                    modules: this.cssModules,
-                    sourceMap: true,
-                }), this.createClient(key, cert, pkg), livereload(Object.assign({ watch: this.publicFolder, verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
+                options.plugins = [
+                    eslint__default["default"]({
+                        include: lintIncludeDom,
+                        throwOnError: false,
+                    }),
+                    ...options.plugins,
+                    pluginNodeResolve.nodeResolve(),
+                    image__default["default"](),
+                    styles__default["default"]({
+                        mode: this.cssInJs ? 'inject' : 'extract',
+                        url: true,
+                        plugins: [autoprefixer__default["default"]()],
+                        modules: this.cssModules,
+                        sourceMap: true,
+                    }),
+                    string({
+                        include: '**/*.*',
+                        exclude: stringExcludeDom,
+                    }),
+                    this.createClient(key, cert, pkg),
+                    livereload(Object.assign({ watch: this.publicFolder, verbose: false }, (key && cert ? { https: { key, cert } } : {})))
+                ];
             }
             const watcher = rollup__default["default"].watch(options);
             watcher.on('event', (e) => __awaiter(this, void 0, void 0, function* () {
