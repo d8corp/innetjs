@@ -1,6 +1,6 @@
 {
   "name": "innetjs",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "CLI for innet boilerplate",
   "homepage": "https://github.com/d8corp/innetjs",
   "author": "Mikhail Lysikov <d8corp@mail.ru>",
@@ -75,6 +75,7 @@
     "express": "^4.18.1",
     "express-http-proxy": "^1.6.3",
     "fs-extra": "^10.1.0",
+    "lines-and-columns": "^2.0.3",
     "node-sass": "^7.0.1",
     "postcss": "^8.4.16",
     "rollup": "^2.77.2",

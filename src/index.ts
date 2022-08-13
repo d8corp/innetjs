@@ -22,6 +22,7 @@ import jsx from 'rollup-plugin-innet-jsx'
 import filesize from 'rollup-plugin-filesize'
 import image from '@rollup/plugin-image'
 import eslint from '@rollup/plugin-eslint'
+import { LinesAndColumns } from 'lines-and-columns'
 
 import { Extract } from './extract'
 import { stringExcludeDom, stringExcludeNode, lintIncludeDom } from './constants'
@@ -338,7 +339,16 @@ export default class InnetJS {
 
     watcher.on('event', async e => {
       if (e.code == 'ERROR') {
-        logger.end('Bundling', error ? e.error.stack : e.error.message)
+        if (e.error.code === 'UNRESOLVED_IMPORT') {
+          const [, importer, file] = e.error.message.match(/^Could not resolve '(.+)' from (.+)$/)
+          const text = (await fs.readFile(file)).toString()
+          const lines = new LinesAndColumns(text)
+          const { line, column } = lines.locationForIndex(text.indexOf(importer))
+          logger.end('Bundling', e.error.message)
+          console.log(`ERROR in ${file}:${line + 1}:${column + 1}`)
+        } else {
+          logger.end('Bundling', error ? e.error.stack : e.error.message)
+        }
       } else if (e.code === 'BUNDLE_START') {
         logger.start('Bundling')
       } else if (e.code === 'BUNDLE_END') {
