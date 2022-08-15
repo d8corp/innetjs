@@ -410,7 +410,7 @@ class InnetJS {
                         exclude: stringExcludeDom,
                     }),
                     this.createClient(key, cert, pkg),
-                    livereload(Object.assign({ watch: this.devBuildFolder, verbose: false }, (key && cert ? { https: { key, cert } } : {})))
+                    livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {})))
                 ];
             }
             const watcher = rollup__default["default"].watch(options);
@@ -601,7 +601,7 @@ class InnetJS {
     }
 }
 
-var version = "2.0.5";
+var version = "2.0.6";
 
 require('dotenv').config();
 const innetJS = new InnetJS();

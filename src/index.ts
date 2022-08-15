@@ -329,7 +329,8 @@ export default class InnetJS {
         }),
         this.createClient(key, cert, pkg),
         livereload({
-          watch: this.devBuildFolder,
+          exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'],
+          watch: [this.devBuildFolder, this.publicFolder],
           verbose: false,
           ...(key && cert ? {https: {key, cert}} : {})
         })
@@ -491,7 +492,7 @@ export default class InnetJS {
             res.sendFile(this.devBuildFolder + '/index.html')
           })
 
-          const server = httpsUsing ? https.createServer({key, cert}, app) : http.createServer(app)
+          const server = httpsUsing ? https.createServer({ key, cert }, app) : http.createServer(app)
           let port = this.port
           const listener = () => {
             console.log(`${chalk.green('➤')} Server started on http${httpsUsing ? 's' : ''}://localhost:${port}`)
