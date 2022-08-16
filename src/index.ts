@@ -23,6 +23,7 @@ import jsx from 'rollup-plugin-innet-jsx'
 import filesize from 'rollup-plugin-filesize'
 import image from '@rollup/plugin-image'
 import eslint from '@rollup/plugin-eslint'
+import injectEnv from 'rollup-plugin-inject-process-env'
 import { LinesAndColumns } from 'lines-and-columns'
 
 import { Extract } from './extract'
@@ -37,6 +38,13 @@ const execAsync = promisify(exec)
 const copyFiles = promisify(fs.copy)
 
 require('dotenv').config()
+
+const innetEnv = Object.keys(process.env).reduce((result, key) => {
+  if (key.startsWith('INNETJS_')) {
+    result[key] = process.env[key]
+  }
+  return result
+}, {})
 
 type Extensions = 'js' | 'ts' | 'tsx' | 'jsx'
 
@@ -209,6 +217,7 @@ export default class InnetJS {
           include: '**/*.*',
           exclude: stringExcludeDom,
         }),
+        injectEnv(innetEnv),
       ]
       outputOptions.format = 'es'
       outputOptions.plugins = [
@@ -333,7 +342,8 @@ export default class InnetJS {
           watch: [this.devBuildFolder, this.publicFolder],
           verbose: false,
           ...(key && cert ? {https: {key, cert}} : {})
-        })
+        }),
+        injectEnv(innetEnv),
       ]
     }
 

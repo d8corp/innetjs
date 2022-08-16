@@ -26,6 +26,7 @@ var jsx = require('rollup-plugin-innet-jsx');
 var filesize = require('rollup-plugin-filesize');
 var image = require('@rollup/plugin-image');
 var eslint = require('@rollup/plugin-eslint');
+var injectEnv = require('rollup-plugin-inject-process-env');
 var linesAndColumns = require('lines-and-columns');
 var unzipper = require('unzipper');
 var commander = require('commander');
@@ -54,6 +55,7 @@ var jsx__default = /*#__PURE__*/_interopDefaultLegacy(jsx);
 var filesize__default = /*#__PURE__*/_interopDefaultLegacy(filesize);
 var image__default = /*#__PURE__*/_interopDefaultLegacy(image);
 var eslint__default = /*#__PURE__*/_interopDefaultLegacy(eslint);
+var injectEnv__default = /*#__PURE__*/_interopDefaultLegacy(injectEnv);
 
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -192,6 +194,12 @@ const readline = require('readline');
 const execAsync = util.promisify(exec);
 const copyFiles = util.promisify(fs__default["default"].copy);
 require('dotenv').config();
+const innetEnv = Object.keys(process.env).reduce((result, key) => {
+    if (key.startsWith('INNETJS_')) {
+        result[key] = process.env[key];
+    }
+    return result;
+}, {});
 class InnetJS {
     constructor({ projectFolder = process.env.PROJECT_FOLDER || '', publicFolder = process.env.PUBLIC_FOLDER || 'public', buildFolder = process.env.BUILD_FOLDER || 'build', srcFolder = process.env.SRC_FOLDER || 'src', sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === 'true' : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === 'true' : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === 'true' : true, sslKey = process.env.SSL_KEY || 'localhost.key', sslCrt = process.env.SSL_CRT || 'localhost.crt', proxy = process.env.PROXY || '', port = process.env.PORT ? +process.env.PORT : 3000, api = process.env.API || '/api/?*', } = {}) {
         this.projectFolder = path__default["default"].resolve(projectFolder);
@@ -308,6 +316,7 @@ class InnetJS {
                         include: '**/*.*',
                         exclude: stringExcludeDom,
                     }),
+                    injectEnv__default["default"](innetEnv),
                 ];
                 outputOptions.format = 'es';
                 outputOptions.plugins = [
@@ -410,7 +419,8 @@ class InnetJS {
                         exclude: stringExcludeDom,
                     }),
                     this.createClient(key, cert, pkg),
-                    livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {})))
+                    livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))),
+                    injectEnv__default["default"](innetEnv),
                 ];
             }
             const watcher = rollup__default["default"].watch(options);
@@ -601,7 +611,7 @@ class InnetJS {
     }
 }
 
-var version = "2.0.6";
+var version = "2.0.7";
 
 require('dotenv').config();
 const innetJS = new InnetJS();

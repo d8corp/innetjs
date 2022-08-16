@@ -2,6 +2,9 @@
 
 ## v2.0
 
+### v2.0.7 [![16.08.2022](https://img.shields.io/date/1660649542)](https://github.com/d8corp/innetjs/tree/v2.0.7)
+- add `INNETJS_` env variables
+
 ### v2.0.6 [![15.08.2022](https://img.shields.io/date/1660547108)](https://github.com/d8corp/innetjs/tree/v2.0.6)
 - fix live reload
 
