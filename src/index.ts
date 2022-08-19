@@ -203,7 +203,9 @@ export default class InnetJS {
           include: lintIncludeDom,
         }),
         ...inputOptions.plugins,
-        nodeResolve(),
+        nodeResolve({
+          browser: true,
+        }),
         image(),
         styles({
           mode: this.cssInJs ? 'inject' : 'extract',
@@ -323,7 +325,9 @@ export default class InnetJS {
           include: lintIncludeDom,
         }),
         ...options.plugins,
-        nodeResolve(),
+        nodeResolve({
+          browser: true,
+        }),
         image(),
         styles({
           mode: this.cssInJs ? 'inject' : 'extract',
