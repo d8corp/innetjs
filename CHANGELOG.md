@@ -2,6 +2,9 @@
 
 ## v2.0
 
+### v2.0.9 [![24.08.2022](https://img.shields.io/date/1661341931)](https://github.com/d8corp/innetjs/tree/v2.0.9)
+- add `BASE_URL`
+
 ### v2.0.8 [![19.08.2022](https://img.shields.io/date/1660928100)](https://github.com/d8corp/innetjs/tree/v2.0.8)
 - fix browser node resolver
 

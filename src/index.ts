@@ -49,6 +49,7 @@ const innetEnv = Object.keys(process.env).reduce((result, key) => {
 type Extensions = 'js' | 'ts' | 'tsx' | 'jsx'
 
 export default class InnetJS {
+  baseUrl: string
   projectFolder: string
   publicFolder: string
   buildFolder: string
@@ -71,6 +72,7 @@ export default class InnetJS {
 
   constructor ({
     projectFolder = process.env.PROJECT_FOLDER || '',
+    baseUrl = process.env.BASE_URL || '/',
     publicFolder = process.env.PUBLIC_FOLDER || 'public',
     buildFolder = process.env.BUILD_FOLDER || 'build',
     srcFolder = process.env.SRC_FOLDER || 'src',
@@ -99,6 +101,7 @@ export default class InnetJS {
     this.port = port
     this.proxy = proxy
     this.api = api
+    this.baseUrl = baseUrl
   }
 
   // Methods
@@ -240,7 +243,7 @@ export default class InnetJS {
         const pkg = await this.getPackage()
         await fsx.writeFile(
           this.buildIndexFile,
-          await convertIndexFile(data, pkg.version),
+          await convertIndexFile(data, pkg.version, this.baseUrl),
         )
       }
     })
@@ -277,7 +280,7 @@ export default class InnetJS {
       preserveEntrySignatures: 'strict',
       output: {
         dir: this.devBuildFolder,
-        sourcemap: true
+        sourcemap: true,
       },
       plugins: [
         commonjs(),
@@ -483,7 +486,7 @@ export default class InnetJS {
             const data = await fsx.readFile(this.publicIndexFile)
             await fsx.writeFile(
               this.devBuildIndexFile,
-              await convertIndexFile(data, pkg.version),
+              await convertIndexFile(data, pkg.version, this.baseUrl),
             )
           }
 

@@ -175,11 +175,11 @@ function getFile(file) {
     }
     return file;
 }
-function convertIndexFile(data, version) {
+function convertIndexFile(data, version, baseUrl) {
     return __awaiter(this, void 0, void 0, function* () {
         return data
             .toString()
-            .replace('</head>', `<script type="module" defer src="index.js${version ? `?v=${version}` : ''}"></script></head>`);
+            .replace('</head>', `<script type="module" defer src="${baseUrl}index.js${version ? `?v=${version}` : ''}"></script></head>`);
     });
 }
 const reporter = (options, outputOptions, info) => {
@@ -201,7 +201,7 @@ const innetEnv = Object.keys(process.env).reduce((result, key) => {
     return result;
 }, {});
 class InnetJS {
-    constructor({ projectFolder = process.env.PROJECT_FOLDER || '', publicFolder = process.env.PUBLIC_FOLDER || 'public', buildFolder = process.env.BUILD_FOLDER || 'build', srcFolder = process.env.SRC_FOLDER || 'src', sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === 'true' : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === 'true' : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === 'true' : true, sslKey = process.env.SSL_KEY || 'localhost.key', sslCrt = process.env.SSL_CRT || 'localhost.crt', proxy = process.env.PROXY || '', port = process.env.PORT ? +process.env.PORT : 3000, api = process.env.API || '/api/?*', } = {}) {
+    constructor({ projectFolder = process.env.PROJECT_FOLDER || '', baseUrl = process.env.BASE_URL || '/', publicFolder = process.env.PUBLIC_FOLDER || 'public', buildFolder = process.env.BUILD_FOLDER || 'build', srcFolder = process.env.SRC_FOLDER || 'src', sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === 'true' : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === 'true' : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === 'true' : true, sslKey = process.env.SSL_KEY || 'localhost.key', sslCrt = process.env.SSL_CRT || 'localhost.crt', proxy = process.env.PROXY || '', port = process.env.PORT ? +process.env.PORT : 3000, api = process.env.API || '/api/?*', } = {}) {
         this.projectFolder = path__default["default"].resolve(projectFolder);
         this.publicFolder = path__default["default"].resolve(publicFolder);
         this.buildFolder = path__default["default"].resolve(buildFolder);
@@ -218,6 +218,7 @@ class InnetJS {
         this.port = port;
         this.proxy = proxy;
         this.api = api;
+        this.baseUrl = baseUrl;
     }
     // Methods
     init(appName, { template, force = false } = {}) {
@@ -336,7 +337,7 @@ class InnetJS {
                     yield copyFiles(this.publicFolder, this.buildFolder);
                     const data = yield fs.promises.readFile(this.publicIndexFile);
                     const pkg = yield this.getPackage();
-                    yield fs.promises.writeFile(this.buildIndexFile, yield convertIndexFile(data, pkg.version));
+                    yield fs.promises.writeFile(this.buildIndexFile, yield convertIndexFile(data, pkg.version, this.baseUrl));
                 }
             }));
             if (pkg) {
@@ -365,7 +366,7 @@ class InnetJS {
                 preserveEntrySignatures: 'strict',
                 output: {
                     dir: this.devBuildFolder,
-                    sourcemap: true
+                    sourcemap: true,
                 },
                 plugins: [
                     commonjs__default["default"](),
@@ -556,7 +557,7 @@ class InnetJS {
                     app = express__default["default"]();
                     const update = () => __awaiter(this, void 0, void 0, function* () {
                         const data = yield fs.promises.readFile(this.publicIndexFile);
-                        yield fs.promises.writeFile(this.devBuildIndexFile, yield convertIndexFile(data, pkg.version));
+                        yield fs.promises.writeFile(this.devBuildIndexFile, yield convertIndexFile(data, pkg.version, this.baseUrl));
                     });
                     fs__default["default"].watch(this.publicIndexFile, update);
                     yield update();
@@ -615,7 +616,7 @@ class InnetJS {
     }
 }
 
-var version = "2.0.8";
+var version = "2.0.9";
 
 require('dotenv').config();
 const innetJS = new InnetJS();

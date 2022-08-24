@@ -1,5 +1,6 @@
 declare type Extensions = 'js' | 'ts' | 'tsx' | 'jsx';
 export default class InnetJS {
+    baseUrl: string;
     projectFolder: string;
     publicFolder: string;
     buildFolder: string;
@@ -18,8 +19,9 @@ export default class InnetJS {
     api: string;
     private projectExtension;
     private package;
-    constructor({ projectFolder, publicFolder, buildFolder, srcFolder, sourcemap, cssModules, cssInJs, sslKey, sslCrt, proxy, port, api, }?: {
+    constructor({ projectFolder, baseUrl, publicFolder, buildFolder, srcFolder, sourcemap, cssModules, cssInJs, sslKey, sslCrt, proxy, port, api, }?: {
         projectFolder?: string;
+        baseUrl?: string;
         publicFolder?: string;
         buildFolder?: string;
         srcFolder?: string;
