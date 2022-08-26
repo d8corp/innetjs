@@ -570,7 +570,7 @@ class InnetJS {
                             proxyReqPathResolver: req => req.originalUrl
                         }));
                     }
-                    app.use(/^[^.]+$/, (req, res) => {
+                    app.use(/^([^.]*|.*\.[^.]{5,})$/, (req, res) => {
                         res.sendFile(this.devBuildFolder + '/index.html');
                     });
                     const server = httpsUsing ? https__default["default"].createServer({ key, cert }, app) : http__default["default"].createServer(app);
@@ -616,7 +616,7 @@ class InnetJS {
     }
 }
 
-var version = "2.0.9";
+var version = "2.0.10";
 
 require('dotenv').config();
 const innetJS = new InnetJS();

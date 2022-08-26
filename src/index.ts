@@ -505,7 +505,7 @@ export default class InnetJS {
             }))
           }
 
-          app.use(/^[^.]+$/, (req, res) => {
+          app.use(/^([^.]*|.*\.[^.]{5,})$/, (req, res) => {
             res.sendFile(this.devBuildFolder + '/index.html')
           })
 
