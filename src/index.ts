@@ -1,6 +1,7 @@
 import path from 'path'
 import fs, {promises as fsx} from 'fs-extra'
 import http from 'http'
+import address from 'address'
 import https from 'https'
 import { promisify } from 'util'
 import axios from 'axios'
@@ -512,7 +513,7 @@ export default class InnetJS {
           const server = httpsUsing ? https.createServer({ key, cert }, app) : http.createServer(app)
           let port = this.port
           const listener = () => {
-            console.log(`${chalk.green('➤')} Server started on http${httpsUsing ? 's' : ''}://localhost:${port}`)
+            console.log(`${chalk.green('➤')} Started on http${httpsUsing ? 's' : ''}://localhost:${port} and http${httpsUsing ? 's' : ''}://${address.ip()}:${port}`)
           }
 
           server.listen(port, listener)

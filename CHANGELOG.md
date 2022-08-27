@@ -2,6 +2,9 @@
 
 ## v2.0
 
+### v2.0.11 [![27.08.2022](https://img.shields.io/date/1661594844)](https://github.com/d8corp/innetjs/tree/v2.0.11)
+- add displaying of local network server URL
+
 ### v2.0.10 [![26.08.2022](https://img.shields.io/date/1661511430)](https://github.com/d8corp/innetjs/tree/v2.0.10)
 - change index page detection bug
 

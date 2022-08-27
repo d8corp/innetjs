@@ -1,6 +1,6 @@
 {
   "name": "innetjs",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "CLI for innet boilerplate",
   "homepage": "https://github.com/d8corp/innetjs",
   "author": "Mikhail Lysikov <d8corp@mail.ru>",
@@ -67,6 +67,7 @@
     "@rollup/plugin-image": "^2.1.1",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.3.0",
+    "address": "^1.2.0",
     "autoprefixer": "^10.4.8",
     "axios": "^0.27.2",
     "chalk": "^4.1.2",
