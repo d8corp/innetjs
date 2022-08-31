@@ -48,7 +48,7 @@ export default class InnetJS {
     createClient(key: any, cert: any, pkg: any): {
         writeBundle: () => Promise<void>;
     };
-    createServer(external: string[]): {
+    createServer(): {
         writeBundle: () => Promise<void>;
     };
 }

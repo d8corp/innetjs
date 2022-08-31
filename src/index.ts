@@ -302,13 +302,13 @@ export default class InnetJS {
       options.external = Object.keys(pkg?.dependencies || {})
       options.plugins.push(
         nodeResolve({
-          moduleDirectories: [path.resolve(this.srcFolder, 'node_modules')]
+          moduleDirectories: [path.resolve(this.srcFolder, 'node_modules')],
         }),
         string({
           include: '**/*.*',
           exclude: stringExcludeNode,
         }),
-        this.createServer(options.external),
+        this.createServer(),
       )
     } else {
       const key = path.basename(this.sslKey) !== this.sslKey
@@ -540,16 +540,12 @@ export default class InnetJS {
     }
   }
 
-  createServer (external: string[]) {
+  createServer () {
     let app
     return {
       writeBundle: async () => {
         app?.kill()
-        const filePath = path.resolve(this.buildFolder, 'index.js')
-        let data = await fs.readFile(filePath, 'UTF-8')
-        const regExp = new RegExp(`require\\('(${external.join('|')})'\\)`, 'g')
-        data = data.replace(regExp, `require('${path.resolve(this.projectFolder, 'node_modules', '$1')}')`)
-        await fs.writeFile(filePath, data)
+        const filePath = path.resolve(this.devBuildFolder, 'index.js')
 
         app = spawn('node', ['-r', 'source-map-support/register', filePath], {stdio: 'inherit'})
       }
