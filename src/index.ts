@@ -40,6 +40,8 @@ const copyFiles = promisify(fs.copy)
 
 require('dotenv').config()
 
+const REG_CLEAR_TEXT = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g
+
 function normalizeEnv (value?: string) {
   if (value) {
     return value.replace(
@@ -300,7 +302,7 @@ export default class InnetJS {
             compilerOptions: {
               sourceMap: true
             }
-          }
+          },
         }),
         jsx(),
       ],
@@ -376,7 +378,9 @@ export default class InnetJS {
           logger.end('Bundling', e.error.message)
           console.log(`ERROR in ${file}:${line + 1}:${column + 1}`)
         } else if (e.error.code === 'PLUGIN_ERROR' && ['rpt2', 'commonjs'].includes(e.error.plugin)) {
-          const [, file, line, column] = e.error.message.match(/^[^(]+(src[^(]+)\((\d+),(\d+)\)/) || []
+          const [, file, line, column] = e.error.message
+            .replace(REG_CLEAR_TEXT, '')
+            .match(/^(src[^:]+):(\d+):(\d+)/) || []
           logger.end('Bundling', e.error.message)
           if (file) {
             console.log(`ERROR in ${file}:${line}:${column}`)
