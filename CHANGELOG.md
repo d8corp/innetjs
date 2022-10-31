@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.1
+
+### v2.1.0 [![31.10.2022](https://img.shields.io/date/1667243220)](https://github.com/d8corp/innetjs/tree/v2.1.0)
+- update depends
+- add `env` override
+
 ## v2.0
 
 ### v2.0.12 [![31.08.2022](https://img.shields.io/date/1661935829)](https://github.com/d8corp/innetjs/tree/v2.0.12)

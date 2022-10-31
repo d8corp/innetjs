@@ -40,10 +40,19 @@ const copyFiles = promisify(fs.copy)
 
 require('dotenv').config()
 
+function normalizeEnv (value?: string) {
+  if (value) {
+    return value.replace(
+      /\${([a-zA-Z0-9]+)}/g,
+      (placeholder, placeholderId) => process.env[placeholderId] ?? placeholder)
+  }
+}
+
 const innetEnv = Object.keys(process.env).reduce((result, key) => {
   if (key.startsWith('INNETJS_')) {
-    result[key] = process.env[key]
+    result[key] = normalizeEnv(process.env[key])
   }
+
   return result
 }, {})
 
