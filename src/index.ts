@@ -24,6 +24,7 @@ import jsx from 'rollup-plugin-innet-jsx'
 import filesize from 'rollup-plugin-filesize'
 import image from '@rollup/plugin-image'
 import eslint from '@rollup/plugin-eslint'
+import polyfill from 'rollup-plugin-polyfill-node'
 import injectEnv from 'rollup-plugin-inject-process-env'
 import { LinesAndColumns } from 'lines-and-columns'
 
@@ -221,6 +222,7 @@ export default class InnetJS {
         nodeResolve({
           browser: true,
         }),
+        polyfill(),
         image(),
         styles({
           mode: this.cssInJs ? 'inject' : 'extract',
@@ -343,6 +345,7 @@ export default class InnetJS {
         nodeResolve({
           browser: true,
         }),
+        polyfill(),
         image(),
         styles({
           mode: this.cssInJs ? 'inject' : 'extract',

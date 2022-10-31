@@ -27,6 +27,7 @@ var jsx = require('rollup-plugin-innet-jsx');
 var filesize = require('rollup-plugin-filesize');
 var image = require('@rollup/plugin-image');
 var eslint = require('@rollup/plugin-eslint');
+var polyfill = require('rollup-plugin-polyfill-node');
 var injectEnv = require('rollup-plugin-inject-process-env');
 var linesAndColumns = require('lines-and-columns');
 var unzipper = require('unzipper');
@@ -57,6 +58,7 @@ var jsx__default = /*#__PURE__*/_interopDefaultLegacy(jsx);
 var filesize__default = /*#__PURE__*/_interopDefaultLegacy(filesize);
 var image__default = /*#__PURE__*/_interopDefaultLegacy(image);
 var eslint__default = /*#__PURE__*/_interopDefaultLegacy(eslint);
+var polyfill__default = /*#__PURE__*/_interopDefaultLegacy(polyfill);
 var injectEnv__default = /*#__PURE__*/_interopDefaultLegacy(injectEnv);
 
 /******************************************************************************
@@ -314,6 +316,7 @@ class InnetJS {
                     pluginNodeResolve.nodeResolve({
                         browser: true,
                     }),
+                    polyfill__default["default"](),
                     image__default["default"](),
                     styles__default["default"]({
                         mode: this.cssInJs ? 'inject' : 'extract',
@@ -419,6 +422,7 @@ class InnetJS {
                     pluginNodeResolve.nodeResolve({
                         browser: true,
                     }),
+                    polyfill__default["default"](),
                     image__default["default"](),
                     styles__default["default"]({
                         mode: this.cssInJs ? 'inject' : 'extract',
@@ -622,7 +626,7 @@ class InnetJS {
     }
 }
 
-var version = "2.1.1";
+var version = "2.1.2";
 
 require('dotenv').config();
 const innetJS = new InnetJS();

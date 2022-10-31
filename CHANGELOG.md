@@ -2,6 +2,9 @@
 
 ## v2.1
 
+### v2.1.2 [![31.10.2022](https://img.shields.io/date/1667247079)](https://github.com/d8corp/innetjs/tree/v2.1.2)
+- add polyfill for node dependencies
+
 ### v2.1.1 [![31.10.2022](https://img.shields.io/date/1667246009)](https://github.com/d8corp/innetjs/tree/v2.1.1)
 - fix bugs after depends update
 
