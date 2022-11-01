@@ -2,6 +2,9 @@
 
 ## v2.1
 
+### v2.1.6 [![01.11.2022](https://img.shields.io/date/1667297464)](https://github.com/d8corp/innetjs/tree/v2.1.6)
+- add using of all environments
+
 ### v2.1.2 [![31.10.2022](https://img.shields.io/date/1667247079)](https://github.com/d8corp/innetjs/tree/v2.1.2)
 - add polyfill for node dependencies
 

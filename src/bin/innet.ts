@@ -1,9 +1,10 @@
 #!/usr/bin/env node
+const dotenvConfigOutput = require('dotenv').config()
+require('dotenv-expand').expand(dotenvConfigOutput)
+
 import InnetJS from '..'
 import { version } from '../package.json'
 import { program } from 'commander'
-
-require('dotenv').config()
 
 const innetJS = new InnetJS()
 

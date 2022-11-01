@@ -39,7 +39,8 @@ const readline = require('readline')
 const execAsync = promisify(exec)
 const copyFiles = promisify(fs.copy)
 
-require('dotenv').config()
+const dotenvConfigOutput = require('dotenv').config()
+require('dotenv-expand').expand(dotenvConfigOutput)
 
 const REG_CLEAR_TEXT = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g
 
