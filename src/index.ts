@@ -71,6 +71,7 @@ export interface ReleaseOptions {
   node?: boolean
   index?: string
   release?: string
+  pub?: boolean
 }
 
 export const scriptExtensions = ['ts', 'js', 'tsx', 'jsx']
@@ -484,11 +485,7 @@ export class InnetJS {
     })
   }
 
-  async release ({
-    node = false,
-    index = 'index',
-    release,
-  }: ReleaseOptions = {}) {
+  async release ({ node = false, index = 'index', release, pub }: ReleaseOptions = {}) {
     const { releaseFolder, cssModules } = this
     await logger.start('Remove previous release', () => fs.remove(releaseFolder))
 
@@ -670,6 +667,13 @@ export class InnetJS {
     if (fs.existsSync(this.declarationFile)) {
       await logger.start('Copy declaration', async () => {
         await fsx.copyFile(this.declarationFile, this.declarationReleaseFile)
+      })
+    }
+
+    if (pub) {
+      const date = (Date.now() / 1000) | 0
+      await logger.start(`publishing v${pkg.version} ${date}`, async () => {
+        await execAsync(`npm publish ${this.releaseFolder}`)
       })
     }
   }

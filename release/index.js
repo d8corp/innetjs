@@ -1,7 +1,8 @@
-#!/usr/bin/env node
 'use strict';
 
-var commander = require('commander');
+Object.defineProperty(exports, '__esModule', { value: true });
+
+var tslib = require('tslib');
 var logger = require('@cantinc/logger');
 var commonjs = require('@rollup/plugin-commonjs');
 var eslint = require('@rollup/plugin-eslint');
@@ -17,10 +18,10 @@ var express = require('express');
 var proxy = require('express-http-proxy');
 var fs = require('fs-extra');
 var glob = require('glob');
-var http = require('http');
-var https = require('https');
+var http = require('node:http');
+var https = require('node:https');
 var linesAndColumns = require('lines-and-columns');
-var path$1 = require('path');
+var path = require('node:path');
 var prompt = require('prompts');
 var rollup = require('rollup');
 var filesize = require('rollup-plugin-filesize');
@@ -33,8 +34,10 @@ var styles = require('rollup-plugin-styles');
 var rollupPluginTerser = require('rollup-plugin-terser');
 var typescript = require('rollup-plugin-typescript2');
 var tmp = require('tmp');
-var util = require('util');
-var unzipper = require('unzipper');
+var node_util = require('node:util');
+var constants = require('./constants.js');
+var extract = require('./extract.js');
+var helpers = require('./helpers.js');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -54,7 +57,7 @@ var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 var glob__default = /*#__PURE__*/_interopDefaultLegacy(glob);
 var http__default = /*#__PURE__*/_interopDefaultLegacy(http);
 var https__default = /*#__PURE__*/_interopDefaultLegacy(https);
-var path__default = /*#__PURE__*/_interopDefaultLegacy(path$1);
+var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 var prompt__default = /*#__PURE__*/_interopDefaultLegacy(prompt);
 var rollup__default = /*#__PURE__*/_interopDefaultLegacy(rollup);
 var filesize__default = /*#__PURE__*/_interopDefaultLegacy(filesize);
@@ -66,144 +69,14 @@ var styles__default = /*#__PURE__*/_interopDefaultLegacy(styles);
 var typescript__default = /*#__PURE__*/_interopDefaultLegacy(typescript);
 var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
 
-/******************************************************************************
-Copyright (c) Microsoft Corporation.
-
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE.
-***************************************************************************** */
-
-function __awaiter(thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-}
-
-const lintInclude = [
-    '**/*.ts',
-    '**/*.tsx',
-    '**/*.js',
-    '**/*.jsx',
-];
-const stringExcludeDom = [
-    '**/*.ts',
-    '**/*.tsx',
-    '**/*.js',
-    '**/*.jsx',
-    '**/*.json',
-    '**/*.css',
-    '**/*.scss',
-    '**/*.webp',
-    '**/*.gif',
-    '**/*.png',
-    '**/*.jpeg',
-    '**/*.jpg',
-    '**/*.svg',
-];
-const stringExcludeNode = [
-    '**/*.ts',
-    '**/*.tsx',
-    '**/*.js',
-    '**/*.jsx',
-    '**/*.json',
-];
-
-const Writer = require('fstream').Writer;
-const path = require('path');
-const stream = require('stream');
-const duplexer2 = require('duplexer2');
-const Promise$1 = require('bluebird');
-function Extract(opts, template) {
-    const reduceCount = 19 + template.length;
-    // make sure path is normalized before using it
-    opts.path = path.resolve(path.normalize(opts.path));
-    // @ts-expect-error
-    const parser = new unzipper.Parse(opts);
-    const outStream = new stream.Writable({ objectMode: true });
-    outStream._write = function (entry, encoding, cb) {
-        if (entry.type === 'Directory')
-            return cb();
-        const extractPath = path.join(opts.path, entry.path.slice(reduceCount));
-        if (extractPath.indexOf(opts.path) !== 0) {
-            return cb();
-        }
-        const writer = opts.getWriter ? opts.getWriter({ path: extractPath }) : Writer({ path: extractPath });
-        entry.pipe(writer)
-            .on('error', cb)
-            .on('close', cb);
-    };
-    const extract = duplexer2(parser, outStream);
-    parser.once('crx-header', function (crxHeader) {
-        extract.crxHeader = crxHeader;
-    });
-    parser
-        .pipe(outStream)
-        .on('finish', function () {
-        extract.emit('close');
-    });
-    extract.promise = function () {
-        return new Promise$1(function (resolve, reject) {
-            extract.on('close', resolve);
-            extract.on('error', reject);
-        });
-    };
-    return extract;
-}
-
-function getFile(file) {
-    file = path__default["default"].resolve(file);
-    if (!fs__default["default"].existsSync(file)) {
-        throw Error('Cannot find the file: ' + file);
-    }
-    if (fs__default["default"].lstatSync(file).isDirectory()) {
-        let tmpFile = file;
-        if (!fs__default["default"].existsSync(tmpFile = path__default["default"].join(file, 'index.ts')) &&
-            !fs__default["default"].existsSync(tmpFile = path__default["default"].join(file, 'index.tsx')) &&
-            !fs__default["default"].existsSync(tmpFile = path__default["default"].join(file, 'index.js'))) {
-            throw Error('Cannot find index file in: ' + file);
-        }
-        file = tmpFile;
-    }
-    else if (!file.endsWith('.ts') && !file.endsWith('.tsx') && !file.endsWith('.js')) {
-        throw Error('File should has `.ts` or `.tsx` or `.js` extension: ' + file);
-    }
-    if (!fs__default["default"].existsSync(file)) {
-        throw Error('Cannot find the file: ' + file);
-    }
-    return file;
-}
-function convertIndexFile(data, version, baseUrl) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return data
-            .toString()
-            .replace('</head>', `<script type="module" defer src="${baseUrl}index.js${version ? `?v=${version}` : ''}"></script></head>`);
-    });
-}
-const reporter = (options, outputOptions, info) => {
-    logger__default["default"].log(`${chalk__default["default"].yellow(info.fileName)} ${chalk__default["default"].green(info.bundleSize)} [ gzip: ${chalk__default["default"].green(info.gzipSize)} ]`);
-    return '';
-};
-
 const livereload = require('rollup-plugin-livereload');
 const { string } = require('rollup-plugin-string');
 const { exec, spawn } = require('child_process');
 const readline = require('readline');
-const execAsync = util.promisify(exec);
-const copyFiles = util.promisify(fs__default["default"].copy);
-const dotenvConfigOutput$1 = require('dotenv').config();
-require('dotenv-expand').expand(dotenvConfigOutput$1);
+const execAsync = node_util.promisify(exec);
+const copyFiles = node_util.promisify(fs__default["default"].copy);
+const dotenvConfigOutput = require('dotenv').config();
+require('dotenv-expand').expand(dotenvConfigOutput);
 const REG_CLEAR_TEXT = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
 function normalizeEnv(value) {
     if (value) {
@@ -247,9 +120,9 @@ class InnetJS {
     }
     // Methods
     init(appName, { template, force = false } = {}) {
-        return __awaiter(this, void 0, void 0, function* () {
+        return tslib.__awaiter(this, void 0, void 0, function* () {
             const appPath = path__default["default"].resolve(appName);
-            const { data } = yield logger__default["default"].start('Get templates list', () => __awaiter(this, void 0, void 0, function* () { return yield axios__default["default"].get('https://api.github.com/repos/d8corp/innetjs-templates/branches'); }));
+            const { data } = yield logger__default["default"].start('Get templates list', () => tslib.__awaiter(this, void 0, void 0, function* () { return yield axios__default["default"].get('https://api.github.com/repos/d8corp/innetjs-templates/branches'); }));
             const templates = data.map(({ name }) => name).filter(name => name !== 'main');
             if (!template || !templates.includes(template)) {
                 logger__default["default"].log(chalk__default["default"].green('Select one of those templates'));
@@ -263,7 +136,7 @@ class InnetJS {
                 logger__default["default"].end(text);
             }
             if (!force) {
-                yield logger__default["default"].start('Check if app folder is available', () => __awaiter(this, void 0, void 0, function* () {
+                yield logger__default["default"].start('Check if app folder is available', () => tslib.__awaiter(this, void 0, void 0, function* () {
                     if (fs__default["default"].existsSync(appPath)) {
                         logger__default["default"].log(chalk__default["default"].red(`'${appPath}' already exist, what do you want?`));
                         const { id: result, value } = yield selector__default["default"]({
@@ -280,12 +153,12 @@ class InnetJS {
                     }
                 }));
             }
-            yield logger__default["default"].start('Download template', () => __awaiter(this, void 0, void 0, function* () {
+            yield logger__default["default"].start('Download template', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 const { data } = yield axios__default["default"].get(`https://github.com/d8corp/innetjs-templates/archive/refs/heads/${template}.zip`, {
                     responseType: 'stream',
                 });
                 yield new Promise((resolve, reject) => {
-                    data.pipe(Extract({
+                    data.pipe(extract.Extract({
                         path: appPath,
                     }, template)).on('finish', resolve).on('error', reject);
                 });
@@ -294,7 +167,7 @@ class InnetJS {
         });
     }
     build({ node = false, index = 'index' } = {}) {
-        return __awaiter(this, void 0, void 0, function* () {
+        return tslib.__awaiter(this, void 0, void 0, function* () {
             const input = glob__default["default"].sync(`src/${index}.{${indexExt}}`);
             if (!input.length) {
                 throw Error('index file is not detected');
@@ -310,7 +183,7 @@ class InnetJS {
                     typescript__default["default"](),
                     jsx__default["default"](),
                     eslint__default["default"]({
-                        include: lintInclude,
+                        include: constants.lintInclude,
                     }),
                 ],
             };
@@ -325,7 +198,7 @@ class InnetJS {
                     moduleDirectories: [path__default["default"].resolve(this.buildFolder, 'node_modules')],
                 }), string({
                     include: '**/*.*',
-                    exclude: stringExcludeNode,
+                    exclude: constants.stringExcludeNode,
                 }));
             }
             else {
@@ -340,17 +213,17 @@ class InnetJS {
                     minimize: true,
                 }), string({
                     include: '**/*.*',
-                    exclude: stringExcludeDom,
+                    exclude: constants.stringExcludeDom,
                 }), injectEnv__default["default"](innetEnv));
                 outputOptions.format = 'es';
                 outputOptions.plugins = [
                     rollupPluginTerser.terser(),
                     filesize__default["default"]({
-                        reporter,
+                        reporter: helpers.reporter,
                     }),
                 ];
             }
-            yield logger__default["default"].start('Build production bundle', () => __awaiter(this, void 0, void 0, function* () {
+            yield logger__default["default"].start('Build production bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 const bundle = yield rollup__default["default"].rollup(inputOptions);
                 yield bundle.write(outputOptions);
                 yield bundle.close();
@@ -358,11 +231,11 @@ class InnetJS {
                     yield copyFiles(this.publicFolder, this.buildFolder);
                     const data = yield fs.promises.readFile(this.publicIndexFile);
                     const pkg = yield this.getPackage();
-                    yield fs.promises.writeFile(this.buildIndexFile, yield convertIndexFile(data, pkg.version, this.baseUrl));
+                    yield fs.promises.writeFile(this.buildIndexFile, yield helpers.convertIndexFile(data, pkg.version, this.baseUrl));
                 }
             }));
             if (pkg) {
-                yield logger__default["default"].start('Copy package.json', () => __awaiter(this, void 0, void 0, function* () {
+                yield logger__default["default"].start('Copy package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
                     const data = Object.assign({}, pkg);
                     delete data.private;
                     delete data.devDependencies;
@@ -378,7 +251,7 @@ class InnetJS {
         });
     }
     start({ node = false, error = false, index = 'index' } = {}) {
-        return __awaiter(this, void 0, void 0, function* () {
+        return tslib.__awaiter(this, void 0, void 0, function* () {
             const pkg = yield this.getPackage();
             const input = glob__default["default"].sync(`src/${index}.{${indexExt}}`);
             if (!input.length) {
@@ -404,7 +277,7 @@ class InnetJS {
                     }),
                     jsx__default["default"](),
                     eslint__default["default"]({
-                        include: lintInclude,
+                        include: constants.lintInclude,
                     }),
                 ],
             };
@@ -416,7 +289,7 @@ class InnetJS {
                     moduleDirectories: [path__default["default"].resolve(this.srcFolder, 'node_modules')],
                 }), string({
                     include: '**/*.*',
-                    exclude: stringExcludeNode,
+                    exclude: constants.stringExcludeNode,
                 }), this.createServer());
             }
             else {
@@ -442,11 +315,11 @@ class InnetJS {
                     sourceMap: true,
                 }), string({
                     include: '**/*.*',
-                    exclude: stringExcludeDom,
+                    exclude: constants.stringExcludeDom,
                 }), this.createClient(key, cert, pkg), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))), injectEnv__default["default"](innetEnv));
             }
             const watcher = rollup__default["default"].watch(options);
-            watcher.on('event', (e) => __awaiter(this, void 0, void 0, function* () {
+            watcher.on('event', (e) => tslib.__awaiter(this, void 0, void 0, function* () {
                 if (e.code === 'ERROR') {
                     if (e.error.code === 'UNRESOLVED_IMPORT') {
                         const [, importer, file] = e.error.message.match(/^Could not resolve '(.+)' from (.+)$/) || [];
@@ -479,8 +352,8 @@ class InnetJS {
         });
     }
     run(file) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const input = yield logger__default["default"].start('Check file', () => getFile(file));
+        return tslib.__awaiter(this, void 0, void 0, function* () {
+            const input = yield logger__default["default"].start('Check file', () => helpers.getFile(file));
             const folder = yield new Promise((resolve, reject) => {
                 tmp__default["default"].dir((err, folder) => {
                     if (err) {
@@ -492,7 +365,7 @@ class InnetJS {
                 });
             });
             const jsFilePath = `${folder}/index.js`;
-            yield logger__default["default"].start('Build bundle', () => __awaiter(this, void 0, void 0, function* () {
+            yield logger__default["default"].start('Build bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 const inputOptions = {
                     input,
                     plugins: [
@@ -517,17 +390,17 @@ class InnetJS {
                 yield bundle.write(outputOptions);
                 yield bundle.close();
             }));
-            yield logger__default["default"].start('Running of the script', () => __awaiter(this, void 0, void 0, function* () {
+            yield logger__default["default"].start('Running of the script', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 spawn('node', ['-r', 'source-map-support/register', jsFilePath], { stdio: 'inherit' });
             }));
         });
     }
-    release({ node = false, index = 'index', release, } = {}) {
-        return __awaiter(this, void 0, void 0, function* () {
+    release({ node = false, index = 'index', release, pub } = {}) {
+        return tslib.__awaiter(this, void 0, void 0, function* () {
             const { releaseFolder, cssModules } = this;
             yield logger__default["default"].start('Remove previous release', () => fs__default["default"].remove(releaseFolder));
             const pkg = yield this.getPackage();
-            yield logger__default["default"].start('Prepare package.json', () => __awaiter(this, void 0, void 0, function* () {
+            yield logger__default["default"].start('Prepare package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 const version = pkg.version.split('.');
                 switch (release) {
                     case 'patch': {
@@ -552,7 +425,7 @@ class InnetJS {
             }));
             function build(format) {
                 var _a, _b;
-                return __awaiter(this, void 0, void 0, function* () {
+                return tslib.__awaiter(this, void 0, void 0, function* () {
                     const ext = format === 'es'
                         ? ((_a = (pkg.module || pkg.esnext || pkg['jsnext:main'])) === null || _a === void 0 ? void 0 : _a.replace('index', '')) || '.mjs'
                         : ((_b = pkg.main) === null || _b === void 0 ? void 0 : _b.replace('index', '')) || '.js';
@@ -579,7 +452,7 @@ class InnetJS {
                             }),
                             jsx__default["default"](),
                             eslint__default["default"]({
-                                include: lintInclude,
+                                include: constants.lintInclude,
                             }),
                         ],
                     };
@@ -590,7 +463,7 @@ class InnetJS {
                             externals__default["default"](),
                             string({
                                 include: '**/*.*',
-                                exclude: stringExcludeNode,
+                                exclude: constants.stringExcludeNode,
                             }),
                         ];
                     }
@@ -599,7 +472,7 @@ class InnetJS {
                             ...options.plugins,
                             string({
                                 include: '**/*.*',
-                                exclude: stringExcludeDom,
+                                exclude: constants.stringExcludeDom,
                             }),
                             polyfill__default["default"](),
                             image__default["default"](),
@@ -618,20 +491,20 @@ class InnetJS {
                     yield bundle.close();
                 });
             }
-            yield logger__default["default"].start('Build cjs bundle', () => __awaiter(this, void 0, void 0, function* () {
+            yield logger__default["default"].start('Build cjs bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 yield build('cjs');
             }));
-            yield logger__default["default"].start('Build es6 bundle', () => __awaiter(this, void 0, void 0, function* () {
+            yield logger__default["default"].start('Build es6 bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 yield build('es');
             }));
-            yield logger__default["default"].start('Copy package.json', () => __awaiter(this, void 0, void 0, function* () {
+            yield logger__default["default"].start('Copy package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 const data = Object.assign({}, pkg);
                 delete data.private;
                 delete data.devDependencies;
                 yield fs__default["default"].writeFile(path__default["default"].resolve(this.releaseFolder, 'package.json'), JSON.stringify(data, undefined, 2), 'UTF-8');
             }));
             if (pkg.bin) {
-                yield logger__default["default"].start('Build bin', () => __awaiter(this, void 0, void 0, function* () {
+                yield logger__default["default"].start('Build bin', () => tslib.__awaiter(this, void 0, void 0, function* () {
                     const { bin } = pkg;
                     for (const name in bin) {
                         const value = bin[name];
@@ -666,29 +539,35 @@ class InnetJS {
                 }));
             }
             if (fs__default["default"].existsSync(this.licenseFile)) {
-                yield logger__default["default"].start('Copy license', () => __awaiter(this, void 0, void 0, function* () {
+                yield logger__default["default"].start('Copy license', () => tslib.__awaiter(this, void 0, void 0, function* () {
                     yield fs.promises.copyFile(this.licenseFile, this.licenseReleaseFile);
                 }));
             }
             if (fs__default["default"].existsSync(this.readmeFile)) {
-                yield logger__default["default"].start('Copy readme', () => __awaiter(this, void 0, void 0, function* () {
+                yield logger__default["default"].start('Copy readme', () => tslib.__awaiter(this, void 0, void 0, function* () {
                     yield fs.promises.copyFile(this.readmeFile, this.readmeReleaseFile);
                 }));
             }
             if (fs__default["default"].existsSync(this.declarationFile)) {
-                yield logger__default["default"].start('Copy declaration', () => __awaiter(this, void 0, void 0, function* () {
+                yield logger__default["default"].start('Copy declaration', () => tslib.__awaiter(this, void 0, void 0, function* () {
                     yield fs.promises.copyFile(this.declarationFile, this.declarationReleaseFile);
+                }));
+            }
+            if (pub) {
+                const date = (Date.now() / 1000) | 0;
+                yield logger__default["default"].start(`publishing v${pkg.version} ${date}`, () => tslib.__awaiter(this, void 0, void 0, function* () {
+                    yield execAsync(`npm publish ${this.releaseFolder}`);
                 }));
             }
         });
     }
     getPackage() {
-        return __awaiter(this, void 0, void 0, function* () {
+        return tslib.__awaiter(this, void 0, void 0, function* () {
             if (this.package) {
                 return this.package;
             }
             const packageFolder = path__default["default"].resolve(this.projectFolder, 'package.json');
-            yield logger__default["default"].start('Check package.json', () => __awaiter(this, void 0, void 0, function* () {
+            yield logger__default["default"].start('Check package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 if (fs__default["default"].existsSync(packageFolder)) {
                     this.package = yield fs__default["default"].readJson(packageFolder);
                 }
@@ -700,13 +579,13 @@ class InnetJS {
         let app;
         return {
             name: 'client',
-            writeBundle: () => __awaiter(this, void 0, void 0, function* () {
+            writeBundle: () => tslib.__awaiter(this, void 0, void 0, function* () {
                 var _a;
                 if (!app) {
                     app = express__default["default"]();
-                    const update = () => __awaiter(this, void 0, void 0, function* () {
+                    const update = () => tslib.__awaiter(this, void 0, void 0, function* () {
                         const data = yield fs.promises.readFile(this.publicIndexFile);
-                        yield fs.promises.writeFile(this.devBuildIndexFile, yield convertIndexFile(data, pkg.version, this.baseUrl));
+                        yield fs.promises.writeFile(this.devBuildIndexFile, yield helpers.convertIndexFile(data, pkg.version, this.baseUrl));
                     });
                     fs__default["default"].watch(this.publicIndexFile, update);
                     yield update();
@@ -728,7 +607,7 @@ class InnetJS {
                         console.log(`${chalk__default["default"].green('➤')} Started on http${httpsUsing ? 's' : ''}://localhost:${port} and http${httpsUsing ? 's' : ''}://${address__default["default"].ip()}:${port}`);
                     };
                     server.listen(port, listener);
-                    server.on('error', (e) => __awaiter(this, void 0, void 0, function* () {
+                    server.on('error', (e) => tslib.__awaiter(this, void 0, void 0, function* () {
                         if (e.code === 'EADDRINUSE') {
                             port++;
                             const { userPort } = yield prompt__default["default"]({
@@ -753,7 +632,7 @@ class InnetJS {
         let app;
         return {
             name: 'server',
-            writeBundle: () => __awaiter(this, void 0, void 0, function* () {
+            writeBundle: () => tslib.__awaiter(this, void 0, void 0, function* () {
                 app === null || app === void 0 ? void 0 : app.kill();
                 const filePath = path__default["default"].resolve(this.devBuildFolder, 'index.js');
                 app = spawn('node', ['-r', 'source-map-support/register', filePath], { stdio: 'inherit' });
@@ -762,83 +641,6 @@ class InnetJS {
     }
 }
 
-var version = "2.2.0";
-
-const dotenvConfigOutput = require('dotenv').config();
-require('dotenv-expand').expand(dotenvConfigOutput);
-const innetJS = new InnetJS();
-const errorOption = new commander.Option('-e, --error', 'Show error details');
-const releaseOption = new commander.Option('-r, --release <release>', 'Select release type')
-    .choices(['patch', 'minor', 'major']);
-commander.program
-    .version(version, '-v, --version');
-commander.program
-    .command('init <app-name>')
-    .description('Create innet boilerplate')
-    .option('-t, --template <template>', 'Select template fe or be')
-    .addOption(errorOption)
-    .action((appName, { error, template }) => {
-    innetJS.init(appName, { template }).catch(e => {
-        if (error) {
-            console.error(e);
-            process.exit(1);
-        }
-    });
-});
-commander.program
-    .command('run <file-path>')
-    .description('Run js, ts or tsx file')
-    .addOption(errorOption)
-    .action((filePath, { error }) => {
-    innetJS.run(filePath).catch(e => {
-        if (error) {
-            console.error(e);
-            process.exit(1);
-        }
-    });
-});
-commander.program
-    .command('start')
-    .description('Start development with innet boilerplate')
-    .option('-n, --node', 'Start development for Node.js')
-    .option('-i, --index <index>', 'Root index file name', 'index')
-    .addOption(errorOption)
-    .action(({ error, node, index }) => {
-    innetJS.start({ node, error, index }).catch(e => {
-        if (error) {
-            console.error(e);
-            process.exit(1);
-        }
-    });
-});
-commander.program
-    .command('build')
-    .description('Build production bundle')
-    .addOption(errorOption)
-    .option('-n, --node', 'Build for node.js')
-    .option('-i, --index <index>', 'Root index file name', 'index')
-    .action(({ error, node, index }) => {
-    innetJS.build({ node, index }).catch(e => {
-        if (error) {
-            console.error(e);
-            process.exit(1);
-        }
-    });
-});
-commander.program
-    .command('release')
-    .description('Release new version of a library')
-    .option('-n, --node', 'Release for node.js')
-    .option('-i, --index <index>', 'Root index file name', 'index')
-    .addOption(releaseOption)
-    .addOption(errorOption)
-    .action(({ error, node, index, release }) => {
-    innetJS.release({ node, index, release }).catch(e => {
-        if (error) {
-            console.error(e);
-            process.exit(1);
-        }
-    });
-});
-commander.program
-    .parse(process.argv);
+exports.InnetJS = InnetJS;
+exports.indexExt = indexExt;
+exports.scriptExtensions = scriptExtensions;

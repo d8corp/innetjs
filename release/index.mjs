@@ -1,3 +1,4 @@
+import { __awaiter } from 'tslib';
 import logger from '@cantinc/logger';
 import commonjs from '@rollup/plugin-commonjs';
 import eslint from '@rollup/plugin-eslint';
@@ -13,10 +14,10 @@ import express from 'express';
 import proxy from 'express-http-proxy';
 import fs, { promises } from 'fs-extra';
 import glob from 'glob';
-import http from 'http';
-import https from 'https';
+import http from 'node:http';
+import https from 'node:https';
 import { LinesAndColumns } from 'lines-and-columns';
-import path$1 from 'path';
+import path from 'node:path';
 import prompt from 'prompts';
 import rollup from 'rollup';
 import filesize from 'rollup-plugin-filesize';
@@ -29,138 +30,10 @@ import styles from 'rollup-plugin-styles';
 import { terser } from 'rollup-plugin-terser';
 import typescript from 'rollup-plugin-typescript2';
 import tmp from 'tmp';
-import { promisify } from 'util';
-import { Parse } from 'unzipper';
-
-/******************************************************************************
-Copyright (c) Microsoft Corporation.
-
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE.
-***************************************************************************** */
-
-function __awaiter(thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-}
-
-const lintInclude = [
-    '**/*.ts',
-    '**/*.tsx',
-    '**/*.js',
-    '**/*.jsx',
-];
-const stringExcludeDom = [
-    '**/*.ts',
-    '**/*.tsx',
-    '**/*.js',
-    '**/*.jsx',
-    '**/*.json',
-    '**/*.css',
-    '**/*.scss',
-    '**/*.webp',
-    '**/*.gif',
-    '**/*.png',
-    '**/*.jpeg',
-    '**/*.jpg',
-    '**/*.svg',
-];
-const stringExcludeNode = [
-    '**/*.ts',
-    '**/*.tsx',
-    '**/*.js',
-    '**/*.jsx',
-    '**/*.json',
-];
-
-const Writer = require('fstream').Writer;
-const path = require('path');
-const stream = require('stream');
-const duplexer2 = require('duplexer2');
-const Promise$1 = require('bluebird');
-function Extract(opts, template) {
-    const reduceCount = 19 + template.length;
-    // make sure path is normalized before using it
-    opts.path = path.resolve(path.normalize(opts.path));
-    // @ts-expect-error
-    const parser = new Parse(opts);
-    const outStream = new stream.Writable({ objectMode: true });
-    outStream._write = function (entry, encoding, cb) {
-        if (entry.type === 'Directory')
-            return cb();
-        const extractPath = path.join(opts.path, entry.path.slice(reduceCount));
-        if (extractPath.indexOf(opts.path) !== 0) {
-            return cb();
-        }
-        const writer = opts.getWriter ? opts.getWriter({ path: extractPath }) : Writer({ path: extractPath });
-        entry.pipe(writer)
-            .on('error', cb)
-            .on('close', cb);
-    };
-    const extract = duplexer2(parser, outStream);
-    parser.once('crx-header', function (crxHeader) {
-        extract.crxHeader = crxHeader;
-    });
-    parser
-        .pipe(outStream)
-        .on('finish', function () {
-        extract.emit('close');
-    });
-    extract.promise = function () {
-        return new Promise$1(function (resolve, reject) {
-            extract.on('close', resolve);
-            extract.on('error', reject);
-        });
-    };
-    return extract;
-}
-
-function getFile(file) {
-    file = path$1.resolve(file);
-    if (!fs.existsSync(file)) {
-        throw Error('Cannot find the file: ' + file);
-    }
-    if (fs.lstatSync(file).isDirectory()) {
-        let tmpFile = file;
-        if (!fs.existsSync(tmpFile = path$1.join(file, 'index.ts')) &&
-            !fs.existsSync(tmpFile = path$1.join(file, 'index.tsx')) &&
-            !fs.existsSync(tmpFile = path$1.join(file, 'index.js'))) {
-            throw Error('Cannot find index file in: ' + file);
-        }
-        file = tmpFile;
-    }
-    else if (!file.endsWith('.ts') && !file.endsWith('.tsx') && !file.endsWith('.js')) {
-        throw Error('File should has `.ts` or `.tsx` or `.js` extension: ' + file);
-    }
-    if (!fs.existsSync(file)) {
-        throw Error('Cannot find the file: ' + file);
-    }
-    return file;
-}
-function convertIndexFile(data, version, baseUrl) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return data
-            .toString()
-            .replace('</head>', `<script type="module" defer src="${baseUrl}index.js${version ? `?v=${version}` : ''}"></script></head>`);
-    });
-}
-const reporter = (options, outputOptions, info) => {
-    logger.log(`${chalk.yellow(info.fileName)} ${chalk.green(info.bundleSize)} [ gzip: ${chalk.green(info.gzipSize)} ]`);
-    return '';
-};
+import { promisify } from 'node:util';
+import { lintInclude, stringExcludeNode, stringExcludeDom } from './constants.mjs';
+import { Extract } from './extract.mjs';
+import { reporter, convertIndexFile, getFile } from './helpers.mjs';
 
 const livereload = require('rollup-plugin-livereload');
 const { string } = require('rollup-plugin-string');
@@ -186,21 +59,21 @@ const scriptExtensions = ['ts', 'js', 'tsx', 'jsx'];
 const indexExt = scriptExtensions.join(',');
 class InnetJS {
     constructor({ projectFolder = process.env.PROJECT_FOLDER || '', baseUrl = process.env.BASE_URL || '/', publicFolder = process.env.PUBLIC_FOLDER || 'public', releaseFolder = process.env.RELEASE_FOLDER || 'release', buildFolder = process.env.BUILD_FOLDER || 'build', srcFolder = process.env.SRC_FOLDER || 'src', sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === 'true' : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === 'true' : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === 'true' : true, sslKey = process.env.SSL_KEY || 'localhost.key', sslCrt = process.env.SSL_CRT || 'localhost.crt', proxy = process.env.PROXY || '', port = process.env.PORT ? +process.env.PORT : 3000, api = process.env.API || '/api/?*', } = {}) {
-        this.projectFolder = path$1.resolve(projectFolder);
-        this.publicFolder = path$1.resolve(publicFolder);
-        this.releaseFolder = path$1.resolve(releaseFolder);
-        this.buildFolder = path$1.resolve(buildFolder);
-        this.srcFolder = path$1.resolve(srcFolder);
-        this.licenseFile = path$1.join(projectFolder, 'LICENSE');
-        this.licenseReleaseFile = path$1.join(releaseFolder, 'LICENSE');
-        this.readmeFile = path$1.join(projectFolder, 'README.md');
-        this.readmeReleaseFile = path$1.join(releaseFolder, 'README.md');
-        this.declarationFile = path$1.join(srcFolder, 'declaration.d.ts');
-        this.declarationReleaseFile = path$1.join(releaseFolder, 'declaration.d.ts');
-        this.publicIndexFile = path$1.join(publicFolder, 'index.html');
-        this.buildIndexFile = path$1.join(buildFolder, 'index.html');
-        this.devBuildFolder = path$1.resolve(projectFolder, 'node_modules', '.cache', 'innetjs', 'build');
-        this.devBuildIndexFile = path$1.join(this.devBuildFolder, 'index.html');
+        this.projectFolder = path.resolve(projectFolder);
+        this.publicFolder = path.resolve(publicFolder);
+        this.releaseFolder = path.resolve(releaseFolder);
+        this.buildFolder = path.resolve(buildFolder);
+        this.srcFolder = path.resolve(srcFolder);
+        this.licenseFile = path.join(projectFolder, 'LICENSE');
+        this.licenseReleaseFile = path.join(releaseFolder, 'LICENSE');
+        this.readmeFile = path.join(projectFolder, 'README.md');
+        this.readmeReleaseFile = path.join(releaseFolder, 'README.md');
+        this.declarationFile = path.join(srcFolder, 'declaration.d.ts');
+        this.declarationReleaseFile = path.join(releaseFolder, 'declaration.d.ts');
+        this.publicIndexFile = path.join(publicFolder, 'index.html');
+        this.buildIndexFile = path.join(buildFolder, 'index.html');
+        this.devBuildFolder = path.resolve(projectFolder, 'node_modules', '.cache', 'innetjs', 'build');
+        this.devBuildIndexFile = path.join(this.devBuildFolder, 'index.html');
         this.sourcemap = sourcemap;
         this.cssModules = cssModules;
         this.cssInJs = cssInJs;
@@ -214,7 +87,7 @@ class InnetJS {
     // Methods
     init(appName, { template, force = false } = {}) {
         return __awaiter(this, void 0, void 0, function* () {
-            const appPath = path$1.resolve(appName);
+            const appPath = path.resolve(appName);
             const { data } = yield logger.start('Get templates list', () => __awaiter(this, void 0, void 0, function* () { return yield axios.get('https://api.github.com/repos/d8corp/innetjs-templates/branches'); }));
             const templates = data.map(({ name }) => name).filter(name => name !== 'main');
             if (!template || !templates.includes(template)) {
@@ -288,7 +161,7 @@ class InnetJS {
                 outputOptions.format = 'cjs';
                 inputOptions.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
                 inputOptions.plugins.push(nodeResolve({
-                    moduleDirectories: [path$1.resolve(this.buildFolder, 'node_modules')],
+                    moduleDirectories: [path.resolve(this.buildFolder, 'node_modules')],
                 }), string({
                     include: '**/*.*',
                     exclude: stringExcludeNode,
@@ -332,12 +205,12 @@ class InnetJS {
                     const data = Object.assign({}, pkg);
                     delete data.private;
                     delete data.devDependencies;
-                    yield fs.writeFile(path$1.resolve(this.buildFolder, 'package.json'), JSON.stringify(data, undefined, 2), 'UTF-8');
+                    yield fs.writeFile(path.resolve(this.buildFolder, 'package.json'), JSON.stringify(data, undefined, 2), 'UTF-8');
                 }));
-                const pkgLockPath = path$1.resolve(this.projectFolder, 'package-lock.json');
+                const pkgLockPath = path.resolve(this.projectFolder, 'package-lock.json');
                 if (fs.existsSync(pkgLockPath)) {
                     yield logger.start('Copy package-lock.json', () => {
-                        return fs.copy(pkgLockPath, path$1.resolve(this.buildFolder, 'package-lock.json'));
+                        return fs.copy(pkgLockPath, path.resolve(this.buildFolder, 'package-lock.json'));
                     });
                 }
             }
@@ -379,19 +252,19 @@ class InnetJS {
                 options.output.format = 'cjs';
                 options.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
                 options.plugins.push(nodeResolve({
-                    moduleDirectories: [path$1.resolve(this.srcFolder, 'node_modules')],
+                    moduleDirectories: [path.resolve(this.srcFolder, 'node_modules')],
                 }), string({
                     include: '**/*.*',
                     exclude: stringExcludeNode,
                 }), this.createServer());
             }
             else {
-                const key = path$1.basename(this.sslKey) !== this.sslKey
+                const key = path.basename(this.sslKey) !== this.sslKey
                     ? this.sslKey
                     : fs.existsSync(this.sslKey)
                         ? fs.readFileSync(this.sslKey)
                         : undefined;
-                const cert = path$1.basename(this.sslCrt) !== this.sslCrt
+                const cert = path.basename(this.sslCrt) !== this.sslCrt
                     ? this.sslCrt
                     : fs.existsSync(this.sslCrt)
                         ? fs.readFileSync(this.sslCrt)
@@ -488,7 +361,7 @@ class InnetJS {
             }));
         });
     }
-    release({ node = false, index = 'index', release, } = {}) {
+    release({ node = false, index = 'index', release, pub } = {}) {
         return __awaiter(this, void 0, void 0, function* () {
             const { releaseFolder, cssModules } = this;
             yield logger.start('Remove previous release', () => fs.remove(releaseFolder));
@@ -514,7 +387,7 @@ class InnetJS {
                     default: return;
                 }
                 pkg.version = version.join('.');
-                yield fs.writeFile(path$1.resolve(this.projectFolder, 'package.json'), JSON.stringify(pkg, undefined, 2), 'UTF-8');
+                yield fs.writeFile(path.resolve(this.projectFolder, 'package.json'), JSON.stringify(pkg, undefined, 2), 'UTF-8');
             }));
             function build(format) {
                 var _a, _b;
@@ -594,7 +467,7 @@ class InnetJS {
                 const data = Object.assign({}, pkg);
                 delete data.private;
                 delete data.devDependencies;
-                yield fs.writeFile(path$1.resolve(this.releaseFolder, 'package.json'), JSON.stringify(data, undefined, 2), 'UTF-8');
+                yield fs.writeFile(path.resolve(this.releaseFolder, 'package.json'), JSON.stringify(data, undefined, 2), 'UTF-8');
             }));
             if (pkg.bin) {
                 yield logger.start('Build bin', () => __awaiter(this, void 0, void 0, function* () {
@@ -602,7 +475,7 @@ class InnetJS {
                     for (const name in bin) {
                         const value = bin[name];
                         const input = glob.sync(`src/${value}.{${scriptExtensions.join(',')}}`);
-                        const file = path$1.join(this.releaseFolder, value);
+                        const file = path.join(this.releaseFolder, value);
                         const options = {
                             input,
                             external: [...Object.keys(pkg.dependencies), 'tslib'],
@@ -646,6 +519,12 @@ class InnetJS {
                     yield promises.copyFile(this.declarationFile, this.declarationReleaseFile);
                 }));
             }
+            if (pub) {
+                const date = (Date.now() / 1000) | 0;
+                yield logger.start(`publishing v${pkg.version} ${date}`, () => __awaiter(this, void 0, void 0, function* () {
+                    yield execAsync(`npm publish ${this.releaseFolder}`);
+                }));
+            }
         });
     }
     getPackage() {
@@ -653,7 +532,7 @@ class InnetJS {
             if (this.package) {
                 return this.package;
             }
-            const packageFolder = path$1.resolve(this.projectFolder, 'package.json');
+            const packageFolder = path.resolve(this.projectFolder, 'package.json');
             yield logger.start('Check package.json', () => __awaiter(this, void 0, void 0, function* () {
                 if (fs.existsSync(packageFolder)) {
                     this.package = yield fs.readJson(packageFolder);
@@ -721,7 +600,7 @@ class InnetJS {
             name: 'server',
             writeBundle: () => __awaiter(this, void 0, void 0, function* () {
                 app === null || app === void 0 ? void 0 : app.kill();
-                const filePath = path$1.resolve(this.devBuildFolder, 'index.js');
+                const filePath = path.resolve(this.devBuildFolder, 'index.js');
                 app = spawn('node', ['-r', 'source-map-support/register', filePath], { stdio: 'inherit' });
             }),
         };

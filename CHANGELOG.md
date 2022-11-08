@@ -2,6 +2,9 @@
 
 ## v2.2
 
+### v2.2.1 [![09.11.2022](https://img.shields.io/date/1667947493)](https://github.com/d8corp/innetjs/tree/v2.2.1)
+- change folder `lib` to `release`
+
 ### v2.2.0 [![09.11.2022](https://img.shields.io/date/1667947493)](https://github.com/d8corp/innetjs/tree/v2.2.0)
 - add method of `release`
 

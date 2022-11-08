@@ -3,6 +3,7 @@ export interface ReleaseOptions {
     node?: boolean;
     index?: string;
     release?: string;
+    pub?: boolean;
 }
 export declare const scriptExtensions: string[];
 export declare const indexExt: string;
@@ -59,7 +60,7 @@ export declare class InnetJS {
         index?: string;
     }): Promise<void>;
     run(file: any): Promise<void>;
-    release({ node, index, release, }?: ReleaseOptions): Promise<void>;
+    release({ node, index, release, pub }?: ReleaseOptions): Promise<void>;
     getPackage(): Promise<Record<string, any>>;
     createClient(key: any, cert: any, pkg: any): rollup.Plugin;
     createServer(): rollup.Plugin;
