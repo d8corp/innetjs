@@ -1,8 +1,8 @@
-import path from 'path'
-import fs from 'fs-extra'
-import { FileSizeRender } from 'rollup-plugin-filesize'
 import logger from '@cantinc/logger'
 import chalk from 'chalk'
+import fs from 'fs-extra'
+import path from 'path'
+import { FileSizeRender } from 'rollup-plugin-filesize'
 
 export function getFile (file) {
   file = path.resolve(file)
@@ -38,7 +38,7 @@ export async function convertIndexFile (data: Buffer, version: string, baseUrl: 
     .toString()
     .replace(
       '</head>',
-      `<script type="module" defer src="${baseUrl}index.js${version ? `?v=${version}` : ''}"></script></head>`
+      `<script type="module" defer src="${baseUrl}index.js${version ? `?v=${version}` : ''}"></script></head>`,
     )
 }
 

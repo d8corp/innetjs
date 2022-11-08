@@ -1,4 +1,4 @@
-export const lintIncludeDom = [
+export const lintInclude = [
   '**/*.ts',
   '**/*.tsx',
   '**/*.js',

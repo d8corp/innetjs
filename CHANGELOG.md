@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2
+
+### v2.2.0 [![09.11.2022](https://img.shields.io/date/1667947493)](https://github.com/d8corp/innetjs/tree/v2.2.0)
+- add method of `release`
+
 ## v2.1
 
 ### v2.1.6 [![01.11.2022](https://img.shields.io/date/1667297464)](https://github.com/d8corp/innetjs/tree/v2.1.6)

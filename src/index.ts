@@ -1,36 +1,43 @@
-import path from 'path'
-import fs, {promises as fsx} from 'fs-extra'
-import http from 'http'
-import address from 'address'
-import https from 'https'
-import { promisify } from 'util'
-import axios from 'axios'
 import logger from '@cantinc/logger'
-import chalk from 'chalk'
-import rollup from 'rollup'
 import commonjs from '@rollup/plugin-commonjs'
+import eslint from '@rollup/plugin-eslint'
+import image from '@rollup/plugin-image'
+import json from '@rollup/plugin-json'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
+import address from 'address'
+import autoprefixer from 'autoprefixer'
+import axios from 'axios'
+import chalk from 'chalk'
+import selector from 'cli-select'
+import express from 'express'
+import proxy from 'express-http-proxy'
+import fs, { promises as fsx } from 'fs-extra'
+import glob from 'glob'
+import http from 'http'
+import https from 'https'
+import { LinesAndColumns } from 'lines-and-columns'
+import path from 'path'
+import prompt from 'prompts'
+import rollup from 'rollup'
+import filesize from 'rollup-plugin-filesize'
+import injectEnv from 'rollup-plugin-inject-process-env'
+import jsx from 'rollup-plugin-innet-jsx'
+import externals from 'rollup-plugin-node-externals'
+import polyfill from 'rollup-plugin-polyfill-node'
+import { preserveShebangs } from 'rollup-plugin-preserve-shebangs'
+import styles from 'rollup-plugin-styles'
 import { terser } from 'rollup-plugin-terser'
 import typescript from 'rollup-plugin-typescript2'
-import styles from 'rollup-plugin-styles'
-import autoprefixer from 'autoprefixer'
-import express from 'express'
-import json from '@rollup/plugin-json'
 import tmp from 'tmp'
-import proxy from 'express-http-proxy'
-import selector from 'cli-select'
-import prompt from 'prompts'
-import jsx from 'rollup-plugin-innet-jsx'
-import filesize from 'rollup-plugin-filesize'
-import image from '@rollup/plugin-image'
-import eslint from '@rollup/plugin-eslint'
-import polyfill from 'rollup-plugin-polyfill-node'
-import injectEnv from 'rollup-plugin-inject-process-env'
-import { LinesAndColumns } from 'lines-and-columns'
+import { promisify } from 'util'
 
+import {
+  lintInclude,
+  stringExcludeDom,
+  stringExcludeNode,
+} from './constants'
 import { Extract } from './extract'
-import { stringExcludeDom, stringExcludeNode, lintIncludeDom } from './constants'
-import { convertIndexFile, reporter, getFile } from './helpers'
+import { convertIndexFile, getFile, reporter } from './helpers'
 
 const livereload = require('rollup-plugin-livereload')
 const { string } = require('rollup-plugin-string')
@@ -60,12 +67,26 @@ const innetEnv = Object.keys(process.env).reduce((result, key) => {
   return result
 }, {})
 
-type Extensions = 'js' | 'ts' | 'tsx' | 'jsx'
+export interface ReleaseOptions {
+  node?: boolean
+  index?: string
+  release?: string
+}
 
-export default class InnetJS {
+export const scriptExtensions = ['ts', 'js', 'tsx', 'jsx']
+export const indexExt = scriptExtensions.join(',')
+
+export class InnetJS {
   baseUrl: string
   projectFolder: string
   publicFolder: string
+  releaseFolder: string
+  licenseFile: string
+  licenseReleaseFile: string
+  readmeFile: string
+  readmeReleaseFile: string
+  declarationFile: string
+  declarationReleaseFile: string
   buildFolder: string
   devBuildFolder: string
   srcFolder: string
@@ -81,13 +102,13 @@ export default class InnetJS {
   port: number
   api: string
 
-  private projectExtension: Extensions
   private package: object
 
   constructor ({
     projectFolder = process.env.PROJECT_FOLDER || '',
     baseUrl = process.env.BASE_URL || '/',
     publicFolder = process.env.PUBLIC_FOLDER || 'public',
+    releaseFolder = process.env.RELEASE_FOLDER || 'release',
     buildFolder = process.env.BUILD_FOLDER || 'build',
     srcFolder = process.env.SRC_FOLDER || 'src',
     sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === 'true' : false,
@@ -101,8 +122,15 @@ export default class InnetJS {
   } = {}) {
     this.projectFolder = path.resolve(projectFolder)
     this.publicFolder = path.resolve(publicFolder)
+    this.releaseFolder = path.resolve(releaseFolder)
     this.buildFolder = path.resolve(buildFolder)
     this.srcFolder = path.resolve(srcFolder)
+    this.licenseFile = path.join(projectFolder, 'LICENSE')
+    this.licenseReleaseFile = path.join(releaseFolder, 'LICENSE')
+    this.readmeFile = path.join(projectFolder, 'README.md')
+    this.readmeReleaseFile = path.join(releaseFolder, 'README.md')
+    this.declarationFile = path.join(srcFolder, 'declaration.d.ts')
+    this.declarationReleaseFile = path.join(releaseFolder, 'declaration.d.ts')
     this.publicIndexFile = path.join(publicFolder, 'index.html')
     this.buildIndexFile = path.join(buildFolder, 'index.html')
     this.devBuildFolder = path.resolve(projectFolder, 'node_modules', '.cache', 'innetjs', 'build')
@@ -127,10 +155,10 @@ export default class InnetJS {
     const templates = data.map(({ name }) => name).filter(name => name !== 'main')
 
     if (!template || !templates.includes(template)) {
-      logger.log(chalk.green(`Select one of those templates`))
+      logger.log(chalk.green('Select one of those templates'))
 
       const { value } = await selector({
-        values: templates
+        values: templates,
       })
       template = value
 
@@ -146,8 +174,8 @@ export default class InnetJS {
         if (fs.existsSync(appPath)) {
           logger.log(chalk.red(`'${appPath}' already exist, what do you want?`))
 
-          const {id: result, value} = await selector({
-            values: ['Stop the process', 'Remove the folder', 'Merge with template']
+          const { id: result, value } = await selector({
+            values: ['Stop the process', 'Remove the folder', 'Merge with template'],
           })
 
           readline.moveCursor(process.stdout, 0, -1)
@@ -167,7 +195,7 @@ export default class InnetJS {
 
     await logger.start('Download template', async () => {
       const { data } = await axios.get(`https://github.com/d8corp/innetjs-templates/archive/refs/heads/${template}.zip`, {
-        responseType: 'stream'
+        responseType: 'stream',
       })
 
       await new Promise((resolve, reject) => {
@@ -180,26 +208,33 @@ export default class InnetJS {
     await logger.start('Install packages', () => execAsync(`cd ${appPath} && npm i`))
   }
 
-  async build ({node = false} = {}) {
-    const indexExtension = await this.getProjectExtension()
+  async build ({ node = false, index = 'index' } = {}) {
+    const input = glob.sync(`src/${index}.{${indexExt}}`)
+
+    if (!input.length) {
+      throw Error('index file is not detected')
+    }
 
     await logger.start('Remove build', () => fs.remove(this.buildFolder))
 
     const pkg = node && await this.getPackage()
     const inputOptions = {
-      input: path.resolve(this.srcFolder, `index.${indexExtension}`),
+      input,
       preserveEntrySignatures: 'strict',
       plugins: [
         commonjs(),
         json(),
         typescript(),
         jsx(),
-      ]
+        eslint({
+          include: lintInclude,
+        }),
+      ],
     } as Record<string, any>
 
     const outputOptions = {
       dir: this.buildFolder,
-      sourcemap: this.sourcemap
+      sourcemap: this.sourcemap,
     } as Record<string, any>
 
     if (node) {
@@ -207,7 +242,7 @@ export default class InnetJS {
       inputOptions.external = Object.keys(pkg?.dependencies || {})
       inputOptions.plugins.push(
         nodeResolve({
-          moduleDirectories: [path.resolve(this.buildFolder, 'node_modules')]
+          moduleDirectories: [path.resolve(this.buildFolder, 'node_modules')],
         }),
         string({
           include: '**/*.*',
@@ -215,11 +250,7 @@ export default class InnetJS {
         }),
       )
     } else {
-      inputOptions.plugins = [
-        eslint({
-          include: lintIncludeDom,
-        }),
-        ...inputOptions.plugins,
+      inputOptions.plugins.push(
         nodeResolve({
           browser: true,
         }),
@@ -238,7 +269,7 @@ export default class InnetJS {
           exclude: stringExcludeDom,
         }),
         injectEnv(innetEnv),
-      ]
+      )
       outputOptions.format = 'es'
       outputOptions.plugins = [
         terser(),
@@ -265,14 +296,14 @@ export default class InnetJS {
 
     if (pkg) {
       await logger.start('Copy package.json', async () => {
-        const data = {...pkg}
+        const data = { ...pkg }
         delete data.private
         delete data.devDependencies
 
         await fs.writeFile(
           path.resolve(this.buildFolder, 'package.json'),
           JSON.stringify(data, undefined, 2),
-          'UTF-8'
+          'UTF-8',
         )
       })
       const pkgLockPath = path.resolve(this.projectFolder, 'package-lock.json')
@@ -284,14 +315,18 @@ export default class InnetJS {
     }
   }
 
-  async start ({ node = false, error = false } = {}) {
-    const indexExtension = await this.getProjectExtension()
+  async start ({ node = false, error = false, index = 'index' } = {}) {
     const pkg = await this.getPackage()
+    const input = glob.sync(`src/${index}.{${indexExt}}`)
+
+    if (!input.length) {
+      throw Error('index file is not detected')
+    }
 
     await logger.start('Remove build', () => fs.remove(this.devBuildFolder))
 
-    const options = {
-      input: path.resolve(this.srcFolder, `index.${indexExtension}`),
+    const options: rollup.RollupOptions = {
+      input,
       preserveEntrySignatures: 'strict',
       output: {
         dir: this.devBuildFolder,
@@ -303,15 +338,19 @@ export default class InnetJS {
         typescript({
           tsconfigOverride: {
             compilerOptions: {
-              sourceMap: true
-            }
+              sourceMap: true,
+            },
           },
         }),
         jsx(),
+        eslint({
+          include: lintInclude,
+        }),
       ],
-    } as Record<string, any>
+    }
 
     if (node) {
+      // @ts-expect-error
       options.output.format = 'cjs'
       options.external = Object.keys(pkg?.dependencies || {})
       options.plugins.push(
@@ -337,12 +376,9 @@ export default class InnetJS {
           ? fs.readFileSync(this.sslCrt)
           : undefined
 
+      // @ts-expect-error
       options.output.format = 'es'
-      options.plugins = [
-        eslint({
-          include: lintIncludeDom,
-        }),
-        ...options.plugins,
+      options.plugins.push(
         nodeResolve({
           browser: true,
         }),
@@ -364,16 +400,16 @@ export default class InnetJS {
           exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'],
           watch: [this.devBuildFolder, this.publicFolder],
           verbose: false,
-          ...(key && cert ? {https: {key, cert}} : {})
+          ...(key && cert ? { https: { key, cert } } : {}),
         }),
         injectEnv(innetEnv),
-      ]
+      )
     }
 
     const watcher = rollup.watch(options)
 
     watcher.on('event', async e => {
-      if (e.code == 'ERROR') {
+      if (e.code === 'ERROR') {
         if (e.error.code === 'UNRESOLVED_IMPORT') {
           const [, importer, file] = e.error.message.match(/^Could not resolve '(.+)' from (.+)$/) || []
           const text = (await fs.readFile(file)).toString()
@@ -403,7 +439,7 @@ export default class InnetJS {
   async run (file) {
     const input = await logger.start('Check file', () => getFile(file))
 
-    const folder = await new Promise((resolve, reject) => {
+    const folder = await new Promise<string>((resolve, reject) => {
       tmp.dir((err, folder) => {
         if (err) {
           reject(err)
@@ -425,17 +461,17 @@ export default class InnetJS {
           typescript({
             tsconfigOverride: {
               compilerOptions: {
-                sourceMap: true
-              }
-            }
-          })
-        ]
+                sourceMap: true,
+              },
+            },
+          }),
+        ],
       }
 
       const outputOptions = {
         format: 'cjs' as 'commonjs',
         file: jsFilePath,
-        sourcemap: true
+        sourcemap: true,
       }
 
       const bundle = await rollup.rollup(inputOptions)
@@ -444,40 +480,201 @@ export default class InnetJS {
     })
 
     await logger.start('Running of the script', async () => {
-      spawn('node', ['-r', 'source-map-support/register', jsFilePath], {stdio: 'inherit'})
+      spawn('node', ['-r', 'source-map-support/register', jsFilePath], { stdio: 'inherit' })
     })
   }
 
-  // Utils
-  async getProjectExtension (): Promise<Extensions> {
-    if (this.projectExtension) {
-      return this.projectExtension
-    }
+  async release ({
+    node = false,
+    index = 'index',
+    release,
+  }: ReleaseOptions = {}) {
+    const { releaseFolder, cssModules } = this
+    await logger.start('Remove previous release', () => fs.remove(releaseFolder))
 
-    await logger.start('Check src', () => {
-      if (!fs.existsSync(this.srcFolder)) {
-        throw Error('src folder is missing')
+    const pkg = await this.getPackage()
+
+    await logger.start('Prepare package.json', async () => {
+      const version = pkg.version.split('.')
+
+      switch (release) {
+        case 'patch': {
+          version[2]++
+          break
+        }
+        case 'minor': {
+          version[1]++
+          version[2] = 0
+          break
+        }
+        case 'major': {
+          version[1] = 0
+          version[2] = 0
+          version[0]++
+          break
+        }
+        default: return
       }
+
+      pkg.version = version.join('.')
+
+      await fs.writeFile(
+        path.resolve(this.projectFolder, 'package.json'),
+        JSON.stringify(pkg, undefined, 2),
+        'UTF-8',
+      )
     })
 
-    await logger.start('Detection of index file', () => {
-      if (fs.existsSync(path.join(this.srcFolder, 'index.js'))) {
-        this.projectExtension = 'js'
-      } else if (fs.existsSync(path.join(this.srcFolder, 'index.ts'))) {
-        this.projectExtension = 'ts'
-      } else if (fs.existsSync(path.join(this.srcFolder, 'index.tsx'))) {
-        this.projectExtension = 'tsx'
-      } else if (fs.existsSync(path.join(this.srcFolder, 'index.jsx'))) {
-        this.projectExtension = 'jsx'
-      } else {
+    async function build (format: rollup.ModuleFormat) {
+      const ext: string = format === 'es'
+        ? (pkg.module || pkg.esnext || pkg['jsnext:main'])?.replace('index', '') || '.mjs'
+        : pkg.main?.replace('index', '') || '.js'
+
+      const indexFiles = scriptExtensions.map(ext => `src/${index}.${ext}`).join(',')
+      const otherFiles = scriptExtensions.map(ext => `src/**/index.${ext}`).join(',')
+      const input = glob.sync(`{${indexFiles},${otherFiles}}`)
+
+      if (!input.length) {
         throw Error('index file is not detected')
       }
+
+      const options: rollup.RollupOptions = {
+        input,
+        preserveEntrySignatures: 'strict',
+        output: {
+          dir: releaseFolder,
+          entryFileNames: `[name]${ext}`,
+          format,
+          preserveModules: true,
+        },
+        plugins: [
+          json(),
+          typescript({
+            rollupCommonJSResolveHack: false,
+            clean: true,
+          }),
+          jsx(),
+          eslint({
+            include: lintInclude,
+          }),
+        ],
+      }
+
+      if (node) {
+        options.external = [...Object.keys(pkg.dependencies), 'tslib']
+        options.plugins = [
+          ...options.plugins,
+          externals(),
+          string({
+            include: '**/*.*',
+            exclude: stringExcludeNode,
+          }),
+        ]
+      } else {
+        options.plugins = [
+          ...options.plugins,
+          string({
+            include: '**/*.*',
+            exclude: stringExcludeDom,
+          }),
+          polyfill(),
+          image(),
+          styles({
+            mode: 'inject',
+            url: true,
+            plugins: [autoprefixer()],
+            modules: cssModules,
+            minimize: true,
+          }),
+          injectEnv(innetEnv),
+        ]
+      }
+
+      const bundle = await rollup.rollup(options)
+      await bundle.write(options.output as rollup.OutputOptions)
+      await bundle.close()
+    }
+
+    await logger.start('Build cjs bundle', async () => {
+      await build('cjs')
     })
 
-    return this.projectExtension
-  }
-  async getPackage (): Promise<Record<string, any>> {
+    await logger.start('Build es6 bundle', async () => {
+      await build('es')
+    })
 
+    await logger.start('Copy package.json', async () => {
+      const data = { ...pkg }
+
+      delete data.private
+      delete data.devDependencies
+
+      await fs.writeFile(
+        path.resolve(this.releaseFolder, 'package.json'),
+        JSON.stringify(data, undefined, 2),
+        'UTF-8',
+      )
+    })
+
+    if (pkg.bin) {
+      await logger.start('Build bin', async () => {
+        const { bin } = pkg
+
+        for (const name in bin) {
+          const value = bin[name]
+          const input = glob.sync(`src/${value}.{${scriptExtensions.join(',')}}`)
+          const file = path.join(this.releaseFolder, value)
+
+          const options: rollup.RollupOptions = {
+            input,
+            external: [...Object.keys(pkg.dependencies), 'tslib'],
+            output: {
+              file,
+              format: 'cjs',
+            },
+            plugins: [
+              preserveShebangs(),
+              json(),
+              typescript({
+                clean: true,
+                tsconfigOverride: {
+                  compilerOptions: {
+                    declaration: false,
+                  },
+                },
+              }),
+              externals(),
+              jsx(),
+            ],
+          }
+
+          const bundle = await rollup.rollup(options)
+          await bundle.write(options.output as rollup.OutputOptions)
+          await bundle.close()
+        }
+      })
+    }
+
+    if (fs.existsSync(this.licenseFile)) {
+      await logger.start('Copy license', async () => {
+        await fsx.copyFile(this.licenseFile, this.licenseReleaseFile)
+      })
+    }
+
+    if (fs.existsSync(this.readmeFile)) {
+      await logger.start('Copy readme', async () => {
+        await fsx.copyFile(this.readmeFile, this.readmeReleaseFile)
+      })
+    }
+
+    if (fs.existsSync(this.declarationFile)) {
+      await logger.start('Copy declaration', async () => {
+        await fsx.copyFile(this.declarationFile, this.declarationReleaseFile)
+      })
+    }
+  }
+
+  async getPackage (): Promise<Record<string, any>> {
     if (this.package) {
       return this.package
     }
@@ -493,10 +690,11 @@ export default class InnetJS {
     return this.package
   }
 
-  createClient (key, cert, pkg) {
+  createClient (key, cert, pkg): rollup.Plugin {
     let app
 
     return {
+      name: 'client',
       writeBundle: async () => {
         if (!app) {
           app = express()
@@ -519,7 +717,7 @@ export default class InnetJS {
           if (this.proxy?.startsWith('http')) {
             app.use(this.api, proxy(this.proxy, {
               https: httpsUsing,
-              proxyReqPathResolver: req => req.originalUrl
+              proxyReqPathResolver: req => req.originalUrl,
             }))
           }
 
@@ -540,7 +738,7 @@ export default class InnetJS {
               const { userPort } = await prompt({
                 name: 'userPort',
                 type: 'number',
-                message: `Port ${e.port} is reserved, please enter another one [${port}]:`
+                message: `Port ${e.port} is reserved, please enter another one [${port}]:`,
               })
 
               if (userPort) {
@@ -553,19 +751,20 @@ export default class InnetJS {
             }
           })
         }
-      }
+      },
     }
   }
 
-  createServer () {
+  createServer (): rollup.Plugin {
     let app
     return {
+      name: 'server',
       writeBundle: async () => {
         app?.kill()
         const filePath = path.resolve(this.devBuildFolder, 'index.js')
 
-        app = spawn('node', ['-r', 'source-map-support/register', filePath], {stdio: 'inherit'})
-      }
+        app = spawn('node', ['-r', 'source-map-support/register', filePath], { stdio: 'inherit' })
+      },
     }
   }
 }
