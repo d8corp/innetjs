@@ -403,9 +403,7 @@ class InnetJS {
                     const ext = format === 'es'
                         ? ((_a = (pkg.module || pkg.esnext || pkg['jsnext:main'])) === null || _a === void 0 ? void 0 : _a.replace('index', '')) || '.mjs'
                         : ((_b = pkg.main) === null || _b === void 0 ? void 0 : _b.replace('index', '')) || '.js';
-                    const indexFiles = scriptExtensions.map(ext => `src/${index}.${ext}`).join(',');
-                    const otherFiles = scriptExtensions.map(ext => `src/**/index.${ext}`).join(',');
-                    const input = glob__default["default"].sync(`{${indexFiles},${otherFiles}}`);
+                    const input = glob__default["default"].sync(`src/${index}.{${indexExt}}`);
                     if (!input.length) {
                         throw Error('index file is not detected');
                     }

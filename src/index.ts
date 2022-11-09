@@ -489,9 +489,7 @@ export class InnetJS {
         ? (pkg.module || pkg.esnext || pkg['jsnext:main'])?.replace('index', '') || '.mjs'
         : pkg.main?.replace('index', '') || '.js'
 
-      const indexFiles = scriptExtensions.map(ext => `src/${index}.${ext}`).join(',')
-      const otherFiles = scriptExtensions.map(ext => `src/**/index.${ext}`).join(',')
-      const input = glob.sync(`{${indexFiles},${otherFiles}}`)
+      const input = glob.sync(`src/${index}.{${indexExt}}`)
 
       if (!input.length) {
         throw Error('index file is not detected')
