@@ -19,9 +19,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "declaration": true,
-    "jsx": "react",
-    "jsxFactory": "innet.create",
-    "jsxFragmentFactory": "innet.fragment"
+    "jsx": "preserve"
   },
   "include": [
     "src"

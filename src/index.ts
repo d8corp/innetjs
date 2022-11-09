@@ -286,7 +286,7 @@ export class InnetJS {
         const pkg = await this.getPackage()
         await fsx.writeFile(
           this.buildIndexFile,
-          await convertIndexFile(data, pkg.version, this.baseUrl),
+          await convertIndexFile(data, pkg.version, this.baseUrl, index),
         )
       }
     })
@@ -389,7 +389,7 @@ export class InnetJS {
           include: '**/*.*',
           exclude: stringExcludeDom,
         }),
-        this.createClient(key, cert, pkg),
+        this.createClient(key, cert, pkg, index),
         livereload({
           exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'],
           watch: [this.devBuildFolder, this.publicFolder],
@@ -692,7 +692,7 @@ export class InnetJS {
     return this.package
   }
 
-  createClient (key, cert, pkg): rollup.Plugin {
+  createClient (key, cert, pkg, index: string): rollup.Plugin {
     let app
 
     return {
@@ -704,7 +704,7 @@ export class InnetJS {
             const data = await fsx.readFile(this.publicIndexFile)
             await fsx.writeFile(
               this.devBuildIndexFile,
-              await convertIndexFile(data, pkg.version, this.baseUrl),
+              await convertIndexFile(data, pkg.version, this.baseUrl, index),
             )
           }
 

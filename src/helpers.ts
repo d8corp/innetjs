@@ -33,12 +33,12 @@ export function getFile (file) {
   return file
 }
 
-export async function convertIndexFile (data: Buffer, version: string, baseUrl: string) {
+export async function convertIndexFile (data: Buffer, version: string, baseUrl: string, index: string) {
   return data
     .toString()
     .replace(
       '</head>',
-      `<script type="module" defer src="${baseUrl}index.js${version ? `?v=${version}` : ''}"></script></head>`,
+      `<script type="module" defer src="${baseUrl}${index}.js${version ? `?v=${version}` : ''}"></script></head>`,
     )
 }
 

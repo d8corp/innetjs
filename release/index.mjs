@@ -196,7 +196,7 @@ class InnetJS {
                     yield copyFiles(this.publicFolder, this.buildFolder);
                     const data = yield promises.readFile(this.publicIndexFile);
                     const pkg = yield this.getPackage();
-                    yield promises.writeFile(this.buildIndexFile, yield convertIndexFile(data, pkg.version, this.baseUrl));
+                    yield promises.writeFile(this.buildIndexFile, yield convertIndexFile(data, pkg.version, this.baseUrl, index));
                 }
             }));
             if (pkg) {
@@ -279,7 +279,7 @@ class InnetJS {
                 }), string({
                     include: '**/*.*',
                     exclude: stringExcludeDom,
-                }), this.createClient(key, cert, pkg), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))), injectEnv(innetEnv));
+                }), this.createClient(key, cert, pkg, index), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))), injectEnv(innetEnv));
             }
             const watcher = rollup.watch(options);
             watcher.on('event', (e) => __awaiter(this, void 0, void 0, function* () {
@@ -544,7 +544,7 @@ class InnetJS {
             return this.package;
         });
     }
-    createClient(key, cert, pkg) {
+    createClient(key, cert, pkg, index) {
         let app;
         return {
             name: 'client',
@@ -554,7 +554,7 @@ class InnetJS {
                     app = express();
                     const update = () => __awaiter(this, void 0, void 0, function* () {
                         const data = yield promises.readFile(this.publicIndexFile);
-                        yield promises.writeFile(this.devBuildIndexFile, yield convertIndexFile(data, pkg.version, this.baseUrl));
+                        yield promises.writeFile(this.devBuildIndexFile, yield convertIndexFile(data, pkg.version, this.baseUrl, index));
                     });
                     fs.watch(this.publicIndexFile, update);
                     yield update();

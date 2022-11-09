@@ -27,11 +27,11 @@ function getFile(file) {
     }
     return file;
 }
-function convertIndexFile(data, version, baseUrl) {
+function convertIndexFile(data, version, baseUrl, index) {
     return __awaiter(this, void 0, void 0, function* () {
         return data
             .toString()
-            .replace('</head>', `<script type="module" defer src="${baseUrl}index.js${version ? `?v=${version}` : ''}"></script></head>`);
+            .replace('</head>', `<script type="module" defer src="${baseUrl}${index}.js${version ? `?v=${version}` : ''}"></script></head>`);
     });
 }
 const reporter = (options, outputOptions, info) => {
