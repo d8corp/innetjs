@@ -39,6 +39,7 @@ var node_util = require('node:util');
 var constants = require('./constants.js');
 var extract = require('./extract.js');
 var helpers = require('./helpers.js');
+var updateDotenv = require('./updateDotenv.js');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -76,8 +77,7 @@ const { exec, spawn } = require('child_process');
 const readline = require('readline');
 const execAsync = node_util.promisify(exec);
 const copyFiles = node_util.promisify(fs__default["default"].copy);
-const dotenvConfigOutput = require('dotenv').config();
-require('dotenv-expand').expand(dotenvConfigOutput);
+updateDotenv.updateDotenv();
 const REG_CLEAR_TEXT = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
 function normalizeEnv(value) {
     if (value) {

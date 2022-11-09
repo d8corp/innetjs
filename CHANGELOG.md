@@ -2,6 +2,9 @@
 
 ## v2.2
 
+### v2.2.5 [![09.11.2022](https://img.shields.io/date/1667988850)](https://github.com/d8corp/innetjs/tree/v2.2.5)
+- fix env bugs
+
 ### v2.2.2 [![09.11.2022](https://img.shields.io/date/1667984556)](https://github.com/d8corp/innetjs/tree/v2.2.2)
 - add env ejection for `release`
 

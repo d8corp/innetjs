@@ -35,6 +35,7 @@ import { promisify } from 'node:util';
 import { lintInclude, stringExcludeNode, stringExcludeDom } from './constants.mjs';
 import { Extract } from './extract.mjs';
 import { reporter, convertIndexFile, getFile } from './helpers.mjs';
+import { updateDotenv } from './updateDotenv.mjs';
 
 const livereload = require('rollup-plugin-livereload');
 const { string } = require('rollup-plugin-string');
@@ -42,8 +43,7 @@ const { exec, spawn } = require('child_process');
 const readline = require('readline');
 const execAsync = promisify(exec);
 const copyFiles = promisify(fs.copy);
-const dotenvConfigOutput = require('dotenv').config();
-require('dotenv-expand').expand(dotenvConfigOutput);
+updateDotenv();
 const REG_CLEAR_TEXT = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
 function normalizeEnv(value) {
     if (value) {

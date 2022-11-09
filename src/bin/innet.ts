@@ -2,9 +2,9 @@
 import { Option, program } from 'commander'
 
 import { InnetJS } from '..'
+import { updateDotenv } from '../updateDotenv'
 
-const dotenvConfigOutput = require('dotenv').config()
-require('dotenv-expand').expand(dotenvConfigOutput)
+updateDotenv()
 
 const innetJS = new InnetJS()
 

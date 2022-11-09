@@ -184,14 +184,22 @@ const reporter = (options, outputOptions, info) => {
     return '';
 };
 
+function updateDotenv() {
+    const { INNETJS_INNETJS_PACKAGE_VERSION } = process.env;
+    delete process.env.INNETJS_INNETJS_PACKAGE_VERSION;
+    require('dotenv-expand').expand(require('dotenv').config());
+    if (!('INNETJS_INNETJS_PACKAGE_VERSION' in process.env)) {
+        process.env.INNETJS_INNETJS_PACKAGE_VERSION = INNETJS_INNETJS_PACKAGE_VERSION;
+    }
+}
+
 const livereload = require('rollup-plugin-livereload');
 const { string } = require('rollup-plugin-string');
 const { exec, spawn } = require('child_process');
 const readline = require('readline');
 const execAsync = node_util.promisify(exec);
 const copyFiles = node_util.promisify(fs__default["default"].copy);
-const dotenvConfigOutput$1 = require('dotenv').config();
-require('dotenv-expand').expand(dotenvConfigOutput$1);
+updateDotenv();
 const REG_CLEAR_TEXT = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
 function normalizeEnv(value) {
     if (value) {
@@ -758,8 +766,7 @@ class InnetJS {
     }
 }
 
-const dotenvConfigOutput = require('dotenv').config();
-require('dotenv-expand').expand(dotenvConfigOutput);
+updateDotenv();
 const innetJS = new InnetJS();
 const errorOption = new commander.Option('-e, --error', 'Show error details');
 const releaseOption = new commander.Option('-r, --release <release>', 'Select release type')

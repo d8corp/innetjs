@@ -1,6 +1,6 @@
 {
   "name": "innetjs",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "CLI for innet boilerplate",
   "homepage": "https://github.com/d8corp/innetjs",
   "author": "Mikhail Lysikov <d8corp@mail.ru>",
@@ -21,9 +21,10 @@
     "start": "npm run build && cd release && npm link",
     "stop": "npm unlink innetjs -g",
     "restart": "npm run stop && npm start",
-    "patch": "innetjs release -n -p -r patch",
-    "minor": "innetjs release -n -p -r minor",
-    "major": "innetjs release -n -p -r major"
+    "release": "innetjs release -n -p",
+    "patch": "innetjs patch",
+    "minor": "innetjs minor",
+    "major": "innetjs major"
   },
   "repository": {
     "type": "git",

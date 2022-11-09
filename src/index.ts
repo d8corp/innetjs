@@ -38,6 +38,7 @@ import {
 } from './constants'
 import { Extract } from './extract'
 import { convertIndexFile, getFile, reporter } from './helpers'
+import { updateDotenv } from './updateDotenv'
 
 const livereload = require('rollup-plugin-livereload')
 const { string } = require('rollup-plugin-string')
@@ -46,8 +47,7 @@ const readline = require('readline')
 const execAsync = promisify(exec)
 const copyFiles = promisify(fs.copy)
 
-const dotenvConfigOutput = require('dotenv').config()
-require('dotenv-expand').expand(dotenvConfigOutput)
+updateDotenv()
 
 const REG_CLEAR_TEXT = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g
 
