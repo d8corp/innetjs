@@ -1,7 +1,7 @@
 'use strict';
 
 (function() {
-    const env = {"INNETJS_INNETJS_PACKAGE_VERSION":"2.2.3"};
+    const env = {"INNETJS_INNETJS_PACKAGE_VERSION":"2.2.6"};
     try {
         if (process) {
             process.env = Object.assign({}, process.env);
