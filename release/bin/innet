@@ -68,7 +68,7 @@ var typescript__default = /*#__PURE__*/_interopDefaultLegacy(typescript);
 var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
 
 (function() {
-    const env = {"INNETJS_INNETJS_PACKAGE_VERSION":"2.2.8"};
+    const env = {"INNETJS_INNETJS_PACKAGE_VERSION":"2.2.9"};
     try {
         if (process) {
             process.env = Object.assign({}, process.env);
@@ -548,7 +548,9 @@ class InnetJS {
                             eslint__default["default"]({
                                 include: lintInclude,
                             }),
-                            injectEnv__default["default"](innetEnv),
+                            injectEnv__default["default"](innetEnv, {
+                                include: input,
+                            }),
                         ],
                     };
                     if (node) {
@@ -624,7 +626,9 @@ class InnetJS {
                                 }),
                                 externals__default["default"](),
                                 jsx__default["default"](),
-                                injectEnv__default["default"](innetEnv),
+                                injectEnv__default["default"](innetEnv, {
+                                    include: input,
+                                }),
                             ],
                         };
                         const bundle = yield rollup__default["default"].rollup(options);

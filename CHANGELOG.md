@@ -2,6 +2,9 @@
 
 ## v2.2
 
+### v2.2.9 [![09.11.2022](https://img.shields.io/date/1668022128)](https://github.com/d8corp/innetjs/tree/v2.2.9)
+- fix env injection
+
 ### v2.2.8 [![09.11.2022](https://img.shields.io/date/1668004881)](https://github.com/d8corp/innetjs/tree/v2.2.8)
 - fix `index` file for `release`
 
