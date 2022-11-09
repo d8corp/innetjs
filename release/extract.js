@@ -2,6 +2,7 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
+require('./_virtual/_rollup-plugin-inject-process-env.js');
 var unzipper = require('unzipper');
 
 const Writer = require('fstream').Writer;

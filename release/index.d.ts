@@ -2,7 +2,6 @@ import rollup from 'rollup';
 export interface ReleaseOptions {
     node?: boolean;
     index?: string;
-    release?: string;
     pub?: boolean;
 }
 export declare const scriptExtensions: string[];
@@ -60,7 +59,8 @@ export declare class InnetJS {
         index?: string;
     }): Promise<void>;
     run(file: any): Promise<void>;
-    release({ node, index, release, pub }?: ReleaseOptions): Promise<void>;
+    release({ node, index, pub }?: ReleaseOptions): Promise<void>;
+    increaseVersion(release: string): Promise<void>;
     getPackage(): Promise<Record<string, any>>;
     createClient(key: any, cert: any, pkg: any): rollup.Plugin;
     createServer(): rollup.Plugin;

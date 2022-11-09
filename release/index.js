@@ -2,6 +2,7 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
+require('./_virtual/_rollup-plugin-inject-process-env.js');
 var tslib = require('tslib');
 var logger = require('@cantinc/logger');
 var commonjs = require('@rollup/plugin-commonjs');
@@ -194,9 +195,7 @@ class InnetJS {
             if (node) {
                 outputOptions.format = 'cjs';
                 inputOptions.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
-                inputOptions.plugins.push(pluginNodeResolve.nodeResolve({
-                    moduleDirectories: [path__default["default"].resolve(this.buildFolder, 'node_modules')],
-                }), string({
+                inputOptions.plugins.push(string({
                     include: '**/*.*',
                     exclude: constants.stringExcludeNode,
                 }));
@@ -285,9 +284,7 @@ class InnetJS {
                 // @ts-expect-error
                 options.output.format = 'cjs';
                 options.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
-                options.plugins.push(pluginNodeResolve.nodeResolve({
-                    moduleDirectories: [path__default["default"].resolve(this.srcFolder, 'node_modules')],
-                }), string({
+                options.plugins.push(string({
                     include: '**/*.*',
                     exclude: constants.stringExcludeNode,
                 }), this.createServer());
@@ -395,34 +392,11 @@ class InnetJS {
             }));
         });
     }
-    release({ node = false, index = 'index', release, pub } = {}) {
+    release({ node = false, index = 'index', pub } = {}) {
         return tslib.__awaiter(this, void 0, void 0, function* () {
             const { releaseFolder, cssModules } = this;
             yield logger__default["default"].start('Remove previous release', () => fs__default["default"].remove(releaseFolder));
             const pkg = yield this.getPackage();
-            yield logger__default["default"].start('Prepare package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                const version = pkg.version.split('.');
-                switch (release) {
-                    case 'patch': {
-                        version[2]++;
-                        break;
-                    }
-                    case 'minor': {
-                        version[1]++;
-                        version[2] = 0;
-                        break;
-                    }
-                    case 'major': {
-                        version[1] = 0;
-                        version[2] = 0;
-                        version[0]++;
-                        break;
-                    }
-                    default: return;
-                }
-                pkg.version = version.join('.');
-                yield fs__default["default"].writeFile(path__default["default"].resolve(this.projectFolder, 'package.json'), JSON.stringify(pkg, undefined, 2), 'UTF-8');
-            }));
             function build(format) {
                 var _a, _b;
                 return tslib.__awaiter(this, void 0, void 0, function* () {
@@ -560,6 +534,34 @@ class InnetJS {
                     yield execAsync(`npm publish ${this.releaseFolder}`);
                 }));
             }
+        });
+    }
+    increaseVersion(release) {
+        return tslib.__awaiter(this, void 0, void 0, function* () {
+            const pkg = yield this.getPackage();
+            yield logger__default["default"].start('Prepare package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
+                const version = pkg.version.split('.');
+                switch (release) {
+                    case 'patch': {
+                        version[2]++;
+                        break;
+                    }
+                    case 'minor': {
+                        version[1]++;
+                        version[2] = 0;
+                        break;
+                    }
+                    case 'major': {
+                        version[1] = 0;
+                        version[2] = 0;
+                        version[0]++;
+                        break;
+                    }
+                    default: return;
+                }
+                pkg.version = version.join('.');
+                yield fs__default["default"].writeFile(path__default["default"].resolve(this.projectFolder, 'package.json'), JSON.stringify(pkg, undefined, 2), 'UTF-8');
+            }));
         });
     }
     getPackage() {

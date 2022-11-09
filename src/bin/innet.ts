@@ -80,8 +80,47 @@ program
   .option('-p, --public', 'Public the package')
   .addOption(releaseOption)
   .addOption(errorOption)
-  .action(({ error, node, index, release, public: pub }) => {
-    innetJS.release({ node, index, release, pub }).catch(e => {
+  .action(({ error, node, index, public: pub }) => {
+    innetJS.release({ node, index, pub }).catch(e => {
+      if (error) {
+        console.error(e)
+        process.exit(1)
+      }
+    })
+  })
+
+program
+  .command('patch')
+  .description('Increase patch version of package')
+  .addOption(errorOption)
+  .action(({ error }) => {
+    innetJS.increaseVersion('patch').catch(e => {
+      if (error) {
+        console.error(e)
+        process.exit(1)
+      }
+    })
+  })
+
+program
+  .command('minor')
+  .description('Increase minor version of package')
+  .addOption(errorOption)
+  .action(({ error }) => {
+    innetJS.increaseVersion('minor').catch(e => {
+      if (error) {
+        console.error(e)
+        process.exit(1)
+      }
+    })
+  })
+
+program
+  .command('major')
+  .description('Increase major version of package')
+  .addOption(errorOption)
+  .action(({ error }) => {
+    innetJS.increaseVersion('major').catch(e => {
       if (error) {
         console.error(e)
         process.exit(1)

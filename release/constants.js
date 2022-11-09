@@ -2,6 +2,8 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
+require('./_virtual/_rollup-plugin-inject-process-env.js');
+
 const lintInclude = [
     '**/*.ts',
     '**/*.tsx',

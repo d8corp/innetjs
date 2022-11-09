@@ -67,6 +67,18 @@ var styles__default = /*#__PURE__*/_interopDefaultLegacy(styles);
 var typescript__default = /*#__PURE__*/_interopDefaultLegacy(typescript);
 var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
 
+(function() {
+    const env = {"INNETJS_INNETJS_PACKAGE_VERSION":"2.2.3"};
+    try {
+        if (process) {
+            process.env = Object.assign({}, process.env);
+            Object.assign(process.env, env);
+            return;
+        }
+    } catch (e) {} // avoid ReferenceError: process is not defined
+    globalThis.process = { env:env };
+})();
+
 const lintInclude = [
     '**/*.ts',
     '**/*.tsx',
@@ -297,9 +309,7 @@ class InnetJS {
             if (node) {
                 outputOptions.format = 'cjs';
                 inputOptions.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
-                inputOptions.plugins.push(pluginNodeResolve.nodeResolve({
-                    moduleDirectories: [path__default["default"].resolve(this.buildFolder, 'node_modules')],
-                }), string({
+                inputOptions.plugins.push(string({
                     include: '**/*.*',
                     exclude: stringExcludeNode,
                 }));
@@ -388,9 +398,7 @@ class InnetJS {
                 // @ts-expect-error
                 options.output.format = 'cjs';
                 options.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
-                options.plugins.push(pluginNodeResolve.nodeResolve({
-                    moduleDirectories: [path__default["default"].resolve(this.srcFolder, 'node_modules')],
-                }), string({
+                options.plugins.push(string({
                     include: '**/*.*',
                     exclude: stringExcludeNode,
                 }), this.createServer());
@@ -498,34 +506,11 @@ class InnetJS {
             }));
         });
     }
-    release({ node = false, index = 'index', release, pub } = {}) {
+    release({ node = false, index = 'index', pub } = {}) {
         return tslib.__awaiter(this, void 0, void 0, function* () {
             const { releaseFolder, cssModules } = this;
             yield logger__default["default"].start('Remove previous release', () => fs__default["default"].remove(releaseFolder));
             const pkg = yield this.getPackage();
-            yield logger__default["default"].start('Prepare package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                const version = pkg.version.split('.');
-                switch (release) {
-                    case 'patch': {
-                        version[2]++;
-                        break;
-                    }
-                    case 'minor': {
-                        version[1]++;
-                        version[2] = 0;
-                        break;
-                    }
-                    case 'major': {
-                        version[1] = 0;
-                        version[2] = 0;
-                        version[0]++;
-                        break;
-                    }
-                    default: return;
-                }
-                pkg.version = version.join('.');
-                yield fs__default["default"].writeFile(path__default["default"].resolve(this.projectFolder, 'package.json'), JSON.stringify(pkg, undefined, 2), 'UTF-8');
-            }));
             function build(format) {
                 var _a, _b;
                 return tslib.__awaiter(this, void 0, void 0, function* () {
@@ -665,6 +650,34 @@ class InnetJS {
             }
         });
     }
+    increaseVersion(release) {
+        return tslib.__awaiter(this, void 0, void 0, function* () {
+            const pkg = yield this.getPackage();
+            yield logger__default["default"].start('Prepare package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
+                const version = pkg.version.split('.');
+                switch (release) {
+                    case 'patch': {
+                        version[2]++;
+                        break;
+                    }
+                    case 'minor': {
+                        version[1]++;
+                        version[2] = 0;
+                        break;
+                    }
+                    case 'major': {
+                        version[1] = 0;
+                        version[2] = 0;
+                        version[0]++;
+                        break;
+                    }
+                    default: return;
+                }
+                pkg.version = version.join('.');
+                yield fs__default["default"].writeFile(path__default["default"].resolve(this.projectFolder, 'package.json'), JSON.stringify(pkg, undefined, 2), 'UTF-8');
+            }));
+        });
+    }
     getPackage() {
         return tslib.__awaiter(this, void 0, void 0, function* () {
             if (this.package) {
@@ -752,7 +765,7 @@ const errorOption = new commander.Option('-e, --error', 'Show error details');
 const releaseOption = new commander.Option('-r, --release <release>', 'Select release type')
     .choices(['patch', 'minor', 'major']);
 commander.program
-    .version('2.2.2', '-v, --version');
+    .version(process.env.INNETJS_INNETJS_PACKAGE_VERSION, '-v, --version');
 commander.program
     .command('init <app-name>')
     .description('Create innet boilerplate')
@@ -814,8 +827,44 @@ commander.program
     .option('-p, --public', 'Public the package')
     .addOption(releaseOption)
     .addOption(errorOption)
-    .action(({ error, node, index, release, public: pub }) => {
-    innetJS.release({ node, index, release, pub }).catch(e => {
+    .action(({ error, node, index, public: pub }) => {
+    innetJS.release({ node, index, pub }).catch(e => {
+        if (error) {
+            console.error(e);
+            process.exit(1);
+        }
+    });
+});
+commander.program
+    .command('patch')
+    .description('Increase patch version of package')
+    .addOption(errorOption)
+    .action(({ error }) => {
+    innetJS.increaseVersion('patch').catch(e => {
+        if (error) {
+            console.error(e);
+            process.exit(1);
+        }
+    });
+});
+commander.program
+    .command('minor')
+    .description('Increase minor version of package')
+    .addOption(errorOption)
+    .action(({ error }) => {
+    innetJS.increaseVersion('minor').catch(e => {
+        if (error) {
+            console.error(e);
+            process.exit(1);
+        }
+    });
+});
+commander.program
+    .command('major')
+    .description('Increase major version of package')
+    .addOption(errorOption)
+    .action(({ error }) => {
+    innetJS.increaseVersion('major').catch(e => {
         if (error) {
             console.error(e);
             process.exit(1);

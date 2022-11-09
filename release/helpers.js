@@ -2,6 +2,7 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
+require('./_virtual/_rollup-plugin-inject-process-env.js');
 var tslib = require('tslib');
 var logger = require('@cantinc/logger');
 var chalk = require('chalk');

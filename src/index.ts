@@ -70,7 +70,6 @@ const innetEnv = Object.keys(process.env).reduce((result, key) => {
 export interface ReleaseOptions {
   node?: boolean
   index?: string
-  release?: string
   pub?: boolean
 }
 
@@ -242,9 +241,6 @@ export class InnetJS {
       outputOptions.format = 'cjs'
       inputOptions.external = Object.keys(pkg?.dependencies || {})
       inputOptions.plugins.push(
-        nodeResolve({
-          moduleDirectories: [path.resolve(this.buildFolder, 'node_modules')],
-        }),
         string({
           include: '**/*.*',
           exclude: stringExcludeNode,
@@ -355,9 +351,6 @@ export class InnetJS {
       options.output.format = 'cjs'
       options.external = Object.keys(pkg?.dependencies || {})
       options.plugins.push(
-        nodeResolve({
-          moduleDirectories: [path.resolve(this.srcFolder, 'node_modules')],
-        }),
         string({
           include: '**/*.*',
           exclude: stringExcludeNode,
@@ -485,42 +478,11 @@ export class InnetJS {
     })
   }
 
-  async release ({ node = false, index = 'index', release, pub }: ReleaseOptions = {}) {
+  async release ({ node = false, index = 'index', pub }: ReleaseOptions = {}) {
     const { releaseFolder, cssModules } = this
     await logger.start('Remove previous release', () => fs.remove(releaseFolder))
 
     const pkg = await this.getPackage()
-
-    await logger.start('Prepare package.json', async () => {
-      const version = pkg.version.split('.')
-
-      switch (release) {
-        case 'patch': {
-          version[2]++
-          break
-        }
-        case 'minor': {
-          version[1]++
-          version[2] = 0
-          break
-        }
-        case 'major': {
-          version[1] = 0
-          version[2] = 0
-          version[0]++
-          break
-        }
-        default: return
-      }
-
-      pkg.version = version.join('.')
-
-      await fs.writeFile(
-        path.resolve(this.projectFolder, 'package.json'),
-        JSON.stringify(pkg, undefined, 2),
-        'UTF-8',
-      )
-    })
 
     async function build (format: rollup.ModuleFormat) {
       const ext: string = format === 'es'
@@ -677,6 +639,41 @@ export class InnetJS {
         await execAsync(`npm publish ${this.releaseFolder}`)
       })
     }
+  }
+
+  async increaseVersion (release: string) {
+    const pkg = await this.getPackage()
+
+    await logger.start('Prepare package.json', async () => {
+      const version = pkg.version.split('.')
+
+      switch (release) {
+        case 'patch': {
+          version[2]++
+          break
+        }
+        case 'minor': {
+          version[1]++
+          version[2] = 0
+          break
+        }
+        case 'major': {
+          version[1] = 0
+          version[2] = 0
+          version[0]++
+          break
+        }
+        default: return
+      }
+
+      pkg.version = version.join('.')
+
+      await fs.writeFile(
+        path.resolve(this.projectFolder, 'package.json'),
+        JSON.stringify(pkg, undefined, 2),
+        'UTF-8',
+      )
+    })
   }
 
   async getPackage (): Promise<Record<string, any>> {
