@@ -2,7 +2,6 @@
 import { Option, program } from 'commander'
 
 import { InnetJS } from '..'
-import { version } from '../package.json'
 
 const dotenvConfigOutput = require('dotenv').config()
 require('dotenv-expand').expand(dotenvConfigOutput)
@@ -14,7 +13,7 @@ const releaseOption = new Option('-r, --release <release>', 'Select release type
   .choices(['patch', 'minor', 'major'])
 
 program
-  .version(version, '-v, --version')
+  .version(process.env.INNETJS_INNETJS_PACKAGE_VERSION, '-v, --version')
 
 program
   .command('init <app-name>')

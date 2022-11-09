@@ -420,6 +420,7 @@ class InnetJS {
                             eslint({
                                 include: lintInclude,
                             }),
+                            injectEnv(innetEnv),
                         ],
                     };
                     if (node) {
@@ -449,7 +450,6 @@ class InnetJS {
                                 modules: cssModules,
                                 minimize: true,
                             }),
-                            injectEnv(innetEnv),
                         ];
                     }
                     const bundle = yield rollup.rollup(options);
@@ -496,6 +496,7 @@ class InnetJS {
                                 }),
                                 externals(),
                                 jsx(),
+                                injectEnv(innetEnv),
                             ],
                         };
                         const bundle = yield rollup.rollup(options);

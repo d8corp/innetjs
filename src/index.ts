@@ -554,6 +554,7 @@ export class InnetJS {
           eslint({
             include: lintInclude,
           }),
+          injectEnv(innetEnv),
         ],
       }
 
@@ -583,7 +584,6 @@ export class InnetJS {
             modules: cssModules,
             minimize: true,
           }),
-          injectEnv(innetEnv),
         ]
       }
 
@@ -642,6 +642,7 @@ export class InnetJS {
               }),
               externals(),
               jsx(),
+              injectEnv(innetEnv),
             ],
           }
 

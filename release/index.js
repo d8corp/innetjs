@@ -454,6 +454,7 @@ class InnetJS {
                             eslint__default["default"]({
                                 include: constants.lintInclude,
                             }),
+                            injectEnv__default["default"](innetEnv),
                         ],
                     };
                     if (node) {
@@ -483,7 +484,6 @@ class InnetJS {
                                 modules: cssModules,
                                 minimize: true,
                             }),
-                            injectEnv__default["default"](innetEnv),
                         ];
                     }
                     const bundle = yield rollup__default["default"].rollup(options);
@@ -530,6 +530,7 @@ class InnetJS {
                                 }),
                                 externals__default["default"](),
                                 jsx__default["default"](),
+                                injectEnv__default["default"](innetEnv),
                             ],
                         };
                         const bundle = yield rollup__default["default"].rollup(options);

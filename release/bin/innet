@@ -557,6 +557,7 @@ class InnetJS {
                             eslint__default["default"]({
                                 include: lintInclude,
                             }),
+                            injectEnv__default["default"](innetEnv),
                         ],
                     };
                     if (node) {
@@ -586,7 +587,6 @@ class InnetJS {
                                 modules: cssModules,
                                 minimize: true,
                             }),
-                            injectEnv__default["default"](innetEnv),
                         ];
                     }
                     const bundle = yield rollup__default["default"].rollup(options);
@@ -633,6 +633,7 @@ class InnetJS {
                                 }),
                                 externals__default["default"](),
                                 jsx__default["default"](),
+                                injectEnv__default["default"](innetEnv),
                             ],
                         };
                         const bundle = yield rollup__default["default"].rollup(options);
@@ -744,8 +745,6 @@ class InnetJS {
     }
 }
 
-var version = "2.2.0";
-
 const dotenvConfigOutput = require('dotenv').config();
 require('dotenv-expand').expand(dotenvConfigOutput);
 const innetJS = new InnetJS();
@@ -753,7 +752,7 @@ const errorOption = new commander.Option('-e, --error', 'Show error details');
 const releaseOption = new commander.Option('-r, --release <release>', 'Select release type')
     .choices(['patch', 'minor', 'major']);
 commander.program
-    .version(version, '-v, --version');
+    .version('2.2.2', '-v, --version');
 commander.program
     .command('init <app-name>')
     .description('Create innet boilerplate')
