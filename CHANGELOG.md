@@ -2,6 +2,9 @@
 
 ## v2.2
 
+### v2.2.12 [![11.11.2022](https://img.shields.io/date/1668115484)](https://github.com/d8corp/innetjs/tree/v2.2.12)
+- fix env
+
 ### v2.2.11 [![11.11.2022](https://img.shields.io/date/1668114996)](https://github.com/d8corp/innetjs/tree/v2.2.11)
 - add `INNETJS_ENV_PREFIX`
 

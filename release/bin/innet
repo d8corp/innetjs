@@ -758,9 +758,9 @@ class InnetJS {
 }
 
 if (typeof process === 'undefined') {
-  process = { env: {"INNETJS_INNETJS_PACKAGE_VERSION":"2.2.11"} };
+  process = { env: {"__INNETJS__PACKAGE_VERSION":"2.2.12"} };
 } else {
-  Object.assign(process.env, {"INNETJS_INNETJS_PACKAGE_VERSION":"2.2.11"});
+  Object.assign(process.env, {"__INNETJS__PACKAGE_VERSION":"2.2.12"});
 }
 updateDotenv();
 const innetJS = new InnetJS();
@@ -768,7 +768,7 @@ const errorOption = new commander.Option('-e, --error', 'Show error details');
 const releaseOption = new commander.Option('-r, --release <release>', 'Select release type')
     .choices(['patch', 'minor', 'major']);
 commander.program
-    .version(process.env.INNETJS_INNETJS_PACKAGE_VERSION, '-v, --version');
+    .version(process.env.__INNETJS__PACKAGE_VERSION, '-v, --version');
 commander.program
     .command('init <app-name>')
     .description('Create innet boilerplate')

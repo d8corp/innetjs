@@ -13,7 +13,7 @@ const releaseOption = new Option('-r, --release <release>', 'Select release type
   .choices(['patch', 'minor', 'major'])
 
 program
-  .version(process.env.INNETJS_INNETJS_PACKAGE_VERSION, '-v, --version')
+  .version(process.env.__INNETJS__PACKAGE_VERSION, '-v, --version')
 
 program
   .command('init <app-name>')

@@ -71,9 +71,9 @@ var typescript__default = /*#__PURE__*/_interopDefaultLegacy(typescript);
 var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
 
 if (typeof process === 'undefined') {
-  process = { env: {"INNETJS_INNETJS_PACKAGE_VERSION":"2.2.11"} };
+  process = { env: {"__INNETJS__PACKAGE_VERSION":"2.2.12"} };
 } else {
-  Object.assign(process.env, {"INNETJS_INNETJS_PACKAGE_VERSION":"2.2.11"});
+  Object.assign(process.env, {"__INNETJS__PACKAGE_VERSION":"2.2.12"});
 }
 const livereload = require('rollup-plugin-livereload');
 const { string } = require('rollup-plugin-string');
