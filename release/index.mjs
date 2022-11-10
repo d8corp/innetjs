@@ -36,11 +36,16 @@ import { Extract } from './extract.mjs';
 import { reporter, convertIndexFile, getFile } from './helpers.mjs';
 import { updateDotenv } from './updateDotenv.mjs';
 
-if (typeof process === 'undefined') {
-  process = { env: {"__INNETJS__PACKAGE_VERSION":"2.2.12"} };
-} else {
-  Object.assign(process.env, {"__INNETJS__PACKAGE_VERSION":"2.2.12"});
-}
+(function () {
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.14"};
+  if (typeof process === 'undefined') {
+    process = { env };
+  } else if (process.env) {
+    Object.assign(process.env, env);
+  } else {
+    process.env = env;
+  }
+})();
 const livereload = require('rollup-plugin-livereload');
 const { string } = require('rollup-plugin-string');
 const { exec, spawn } = require('child_process');

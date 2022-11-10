@@ -757,11 +757,16 @@ class InnetJS {
     }
 }
 
-if (typeof process === 'undefined') {
-  process = { env: {"__INNETJS__PACKAGE_VERSION":"2.2.12"} };
-} else {
-  Object.assign(process.env, {"__INNETJS__PACKAGE_VERSION":"2.2.12"});
-}
+(function () {
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.14"};
+  if (typeof process === 'undefined') {
+    process = { env };
+  } else if (process.env) {
+    Object.assign(process.env, env);
+  } else {
+    process.env = env;
+  }
+})();
 updateDotenv();
 const innetJS = new InnetJS();
 const errorOption = new commander.Option('-e, --error', 'Show error details');
