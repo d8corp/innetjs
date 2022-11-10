@@ -2,7 +2,6 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-require('./_virtual/_rollup-plugin-inject-process-env.js');
 var tslib = require('tslib');
 var logger = require('@cantinc/logger');
 var commonjs = require('@rollup/plugin-commonjs');
@@ -71,6 +70,11 @@ var styles__default = /*#__PURE__*/_interopDefaultLegacy(styles);
 var typescript__default = /*#__PURE__*/_interopDefaultLegacy(typescript);
 var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
 
+if (typeof process === 'undefined') {
+  process = { env: {"INNETJS_INNETJS_PACKAGE_VERSION":"2.2.11"} };
+} else {
+  Object.assign(process.env, {"INNETJS_INNETJS_PACKAGE_VERSION":"2.2.11"});
+}
 const livereload = require('rollup-plugin-livereload');
 const { string } = require('rollup-plugin-string');
 const { exec, spawn } = require('child_process');
@@ -79,21 +83,10 @@ const execAsync = node_util.promisify(exec);
 const copyFiles = node_util.promisify(fs__default["default"].copy);
 updateDotenv.updateDotenv();
 const REG_CLEAR_TEXT = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
-function normalizeEnv(value) {
-    if (value) {
-        return value.replace(/\${([a-zA-Z0-9]+)}/g, (placeholder, placeholderId) => { var _a; return (_a = process.env[placeholderId]) !== null && _a !== void 0 ? _a : placeholder; });
-    }
-}
-const innetEnv = Object.keys(process.env).reduce((result, key) => {
-    if (key.startsWith('INNETJS_')) {
-        result[key] = normalizeEnv(process.env[key]);
-    }
-    return result;
-}, {});
 const scriptExtensions = ['ts', 'js', 'tsx', 'jsx'];
 const indexExt = scriptExtensions.join(',');
 class InnetJS {
-    constructor({ projectFolder = process.env.PROJECT_FOLDER || '', baseUrl = process.env.BASE_URL || '/', publicFolder = process.env.PUBLIC_FOLDER || 'public', releaseFolder = process.env.RELEASE_FOLDER || 'release', buildFolder = process.env.BUILD_FOLDER || 'build', srcFolder = process.env.SRC_FOLDER || 'src', sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === 'true' : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === 'true' : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === 'true' : true, sslKey = process.env.SSL_KEY || 'localhost.key', sslCrt = process.env.SSL_CRT || 'localhost.crt', proxy = process.env.PROXY || '', port = process.env.PORT ? +process.env.PORT : 3000, api = process.env.API || '/api/?*', } = {}) {
+    constructor({ envPrefix = process.env.INNETJS_ENV_PREFIX || 'INNETJS_', projectFolder = process.env.PROJECT_FOLDER || '', baseUrl = process.env.BASE_URL || '/', publicFolder = process.env.PUBLIC_FOLDER || 'public', releaseFolder = process.env.RELEASE_FOLDER || 'release', buildFolder = process.env.BUILD_FOLDER || 'build', srcFolder = process.env.SRC_FOLDER || 'src', sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === 'true' : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === 'true' : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === 'true' : true, sslKey = process.env.SSL_KEY || 'localhost.key', sslCrt = process.env.SSL_CRT || 'localhost.crt', proxy = process.env.PROXY || '', port = process.env.PORT ? +process.env.PORT : 3000, api = process.env.API || '/api/?*', } = {}) {
         this.projectFolder = path__default["default"].resolve(projectFolder);
         this.publicFolder = path__default["default"].resolve(publicFolder);
         this.releaseFolder = path__default["default"].resolve(releaseFolder);
@@ -118,6 +111,7 @@ class InnetJS {
         this.proxy = proxy;
         this.api = api;
         this.baseUrl = baseUrl;
+        this.envPrefix = envPrefix;
     }
     // Methods
     init(appName, { template, force = false } = {}) {
@@ -211,7 +205,7 @@ class InnetJS {
                 }), string({
                     include: '**/*.*',
                     exclude: constants.stringExcludeDom,
-                }), env__default["default"](innetEnv, { include: input }));
+                }));
                 outputOptions.format = 'es';
                 outputOptions.plugins = [
                     rollupPluginTerser.terser(),
@@ -220,6 +214,7 @@ class InnetJS {
                     }),
                 ];
             }
+            this.withEnv(inputOptions);
             yield logger__default["default"].start('Build production bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 const bundle = yield rollup__default["default"].rollup(inputOptions);
                 yield bundle.write(outputOptions);
@@ -309,8 +304,9 @@ class InnetJS {
                 }), string({
                     include: '**/*.*',
                     exclude: constants.stringExcludeDom,
-                }), this.createClient(key, cert, pkg, index), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))), env__default["default"](innetEnv, { include: input }));
+                }), this.createClient(key, cert, pkg, index), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
             }
+            this.withEnv(options);
             const watcher = rollup__default["default"].watch(options);
             watcher.on('event', (e) => tslib.__awaiter(this, void 0, void 0, function* () {
                 if (e.code === 'ERROR') {
@@ -426,7 +422,6 @@ class InnetJS {
                             },
                         }),
                         jsx__default["default"](),
-                        env__default["default"](innetEnv, { include: input }),
                     ],
                 };
                 this.withLint(options);
@@ -458,6 +453,7 @@ class InnetJS {
                         }),
                     ];
                 }
+                this.withEnv(options);
                 const bundle = yield rollup__default["default"].rollup(options);
                 yield bundle.write(options.output);
                 yield bundle.close();
@@ -501,10 +497,10 @@ class InnetJS {
                                 }),
                                 externals__default["default"](),
                                 jsx__default["default"](),
-                                env__default["default"](innetEnv, { include: input }),
                             ],
                         };
                         this.withLint(options);
+                        this.withEnv(options);
                         const bundle = yield rollup__default["default"].rollup(options);
                         yield bundle.write(options.output);
                         yield bundle.close();
@@ -543,6 +539,9 @@ class InnetJS {
                 include: constants.lintInclude,
             }));
         }
+    }
+    withEnv(options) {
+        options.plugins.push(env__default["default"](this.envPrefix, { include: options.input }));
     }
     increaseVersion(release) {
         return tslib.__awaiter(this, void 0, void 0, function* () {

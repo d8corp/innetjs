@@ -31,8 +31,10 @@ export declare class InnetJS {
     cssInJs: boolean;
     port: number;
     api: string;
+    envPrefix: string;
     private package;
-    constructor({ projectFolder, baseUrl, publicFolder, releaseFolder, buildFolder, srcFolder, sourcemap, cssModules, cssInJs, sslKey, sslCrt, proxy, port, api, }?: {
+    constructor({ envPrefix, projectFolder, baseUrl, publicFolder, releaseFolder, buildFolder, srcFolder, sourcemap, cssModules, cssInJs, sslKey, sslCrt, proxy, port, api, }?: {
+        envPrefix?: string;
         projectFolder?: string;
         baseUrl?: string;
         publicFolder?: string;
@@ -62,6 +64,7 @@ export declare class InnetJS {
     release({ node, index, pub }?: ReleaseOptions): Promise<void>;
     private _lintUsage;
     withLint(options: rollup.RollupOptions): void;
+    withEnv(options: rollup.RollupOptions): void;
     increaseVersion(release: string): Promise<void>;
     getPackage(): Promise<Record<string, any>>;
     createClient(key: any, cert: any, pkg: any, index: string): rollup.Plugin;

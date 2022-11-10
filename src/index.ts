@@ -51,22 +51,6 @@ updateDotenv()
 
 const REG_CLEAR_TEXT = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g
 
-function normalizeEnv (value?: string) {
-  if (value) {
-    return value.replace(
-      /\${([a-zA-Z0-9]+)}/g,
-      (placeholder, placeholderId) => process.env[placeholderId] ?? placeholder)
-  }
-}
-
-const innetEnv = Object.keys(process.env).reduce((result, key) => {
-  if (key.startsWith('INNETJS_')) {
-    result[key] = normalizeEnv(process.env[key])
-  }
-
-  return result
-}, {})
-
 export interface ReleaseOptions {
   node?: boolean
   index?: string
@@ -101,10 +85,12 @@ export class InnetJS {
   cssInJs: boolean
   port: number
   api: string
+  envPrefix: string
 
   private package: object
 
   constructor ({
+    envPrefix = process.env.INNETJS_ENV_PREFIX || 'INNETJS_',
     projectFolder = process.env.PROJECT_FOLDER || '',
     baseUrl = process.env.BASE_URL || '/',
     publicFolder = process.env.PUBLIC_FOLDER || 'public',
@@ -144,6 +130,7 @@ export class InnetJS {
     this.proxy = proxy
     this.api = api
     this.baseUrl = baseUrl
+    this.envPrefix = envPrefix
   }
 
   // Methods
@@ -264,7 +251,6 @@ export class InnetJS {
           include: '**/*.*',
           exclude: stringExcludeDom,
         }),
-        env(innetEnv, { include: input }),
       )
       outputOptions.format = 'es'
       outputOptions.plugins = [
@@ -274,6 +260,8 @@ export class InnetJS {
         }),
       ]
     }
+
+    this.withEnv(inputOptions)
 
     await logger.start('Build production bundle', async () => {
       const bundle = await rollup.rollup(inputOptions)
@@ -394,10 +382,10 @@ export class InnetJS {
           verbose: false,
           ...(key && cert ? { https: { key, cert } } : {}),
         }),
-        env(innetEnv, { include: input }),
       )
     }
 
+    this.withEnv(options)
     const watcher = rollup.watch(options)
 
     watcher.on('event', async e => {
@@ -517,7 +505,6 @@ export class InnetJS {
             },
           }),
           jsx(),
-          env(innetEnv, { include: input }),
         ],
       }
 
@@ -551,6 +538,7 @@ export class InnetJS {
         ]
       }
 
+      this.withEnv(options)
       const bundle = await rollup.rollup(options)
       await bundle.write(options.output as rollup.OutputOptions)
       await bundle.close()
@@ -606,11 +594,11 @@ export class InnetJS {
               }),
               externals(),
               jsx(),
-              env(innetEnv, { include: input }),
             ],
           }
 
           this.withLint(options)
+          this.withEnv(options)
 
           const bundle = await rollup.rollup(options)
           await bundle.write(options.output as rollup.OutputOptions)
@@ -658,6 +646,10 @@ export class InnetJS {
         include: lintInclude,
       }))
     }
+  }
+
+  withEnv (options: rollup.RollupOptions) {
+    options.plugins.push(env(this.envPrefix, { include: options.input as string[] }))
   }
 
   async increaseVersion (release: string) {
