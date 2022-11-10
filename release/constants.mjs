@@ -1,5 +1,3 @@
-import './_virtual/_rollup-plugin-inject-process-env.mjs';
-
 const lintInclude = [
     '**/*.ts',
     '**/*.tsx',

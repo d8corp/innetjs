@@ -1,4 +1,3 @@
-import './_virtual/_rollup-plugin-inject-process-env.mjs';
 import { __awaiter } from 'tslib';
 import logger from '@cantinc/logger';
 import chalk from 'chalk';

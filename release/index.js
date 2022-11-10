@@ -26,11 +26,11 @@ var path = require('node:path');
 var prompt = require('prompts');
 var rollup = require('rollup');
 var filesize = require('rollup-plugin-filesize');
-var injectEnv = require('rollup-plugin-inject-process-env');
 var jsx = require('rollup-plugin-innet-jsx');
 var externals = require('rollup-plugin-node-externals');
 var polyfill = require('rollup-plugin-polyfill-node');
 var rollupPluginPreserveShebangs = require('rollup-plugin-preserve-shebangs');
+var env = require('rollup-plugin-process-env');
 var styles = require('rollup-plugin-styles');
 var rollupPluginTerser = require('rollup-plugin-terser');
 var typescript = require('rollup-plugin-typescript2');
@@ -63,10 +63,10 @@ var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 var prompt__default = /*#__PURE__*/_interopDefaultLegacy(prompt);
 var rollup__default = /*#__PURE__*/_interopDefaultLegacy(rollup);
 var filesize__default = /*#__PURE__*/_interopDefaultLegacy(filesize);
-var injectEnv__default = /*#__PURE__*/_interopDefaultLegacy(injectEnv);
 var jsx__default = /*#__PURE__*/_interopDefaultLegacy(jsx);
 var externals__default = /*#__PURE__*/_interopDefaultLegacy(externals);
 var polyfill__default = /*#__PURE__*/_interopDefaultLegacy(polyfill);
+var env__default = /*#__PURE__*/_interopDefaultLegacy(env);
 var styles__default = /*#__PURE__*/_interopDefaultLegacy(styles);
 var typescript__default = /*#__PURE__*/_interopDefaultLegacy(typescript);
 var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
@@ -183,11 +183,9 @@ class InnetJS {
                     json__default["default"](),
                     typescript__default["default"](),
                     jsx__default["default"](),
-                    eslint__default["default"]({
-                        include: constants.lintInclude,
-                    }),
                 ],
             };
+            this.withLint(inputOptions);
             const outputOptions = {
                 dir: this.buildFolder,
                 sourcemap: this.sourcemap,
@@ -213,7 +211,7 @@ class InnetJS {
                 }), string({
                     include: '**/*.*',
                     exclude: constants.stringExcludeDom,
-                }), injectEnv__default["default"](innetEnv));
+                }), env__default["default"](innetEnv, { include: input }));
                 outputOptions.format = 'es';
                 outputOptions.plugins = [
                     rollupPluginTerser.terser(),
@@ -275,11 +273,9 @@ class InnetJS {
                         },
                     }),
                     jsx__default["default"](),
-                    eslint__default["default"]({
-                        include: constants.lintInclude,
-                    }),
                 ],
             };
+            this.withLint(options);
             if (node) {
                 // @ts-expect-error
                 options.output.format = 'cjs';
@@ -313,7 +309,7 @@ class InnetJS {
                 }), string({
                     include: '**/*.*',
                     exclude: constants.stringExcludeDom,
-                }), this.createClient(key, cert, pkg, index), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))), injectEnv__default["default"](innetEnv));
+                }), this.createClient(key, cert, pkg, index), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))), env__default["default"](innetEnv, { include: input }));
             }
             const watcher = rollup__default["default"].watch(options);
             watcher.on('event', (e) => tslib.__awaiter(this, void 0, void 0, function* () {
@@ -397,74 +393,75 @@ class InnetJS {
             const { releaseFolder, cssModules } = this;
             yield logger__default["default"].start('Remove previous release', () => fs__default["default"].remove(releaseFolder));
             const pkg = yield this.getPackage();
-            function build(format) {
+            const build = (format) => tslib.__awaiter(this, void 0, void 0, function* () {
                 var _a, _b;
-                return tslib.__awaiter(this, void 0, void 0, function* () {
-                    const ext = format === 'es'
-                        ? ((_a = (pkg.module || pkg.esnext || pkg['jsnext:main'])) === null || _a === void 0 ? void 0 : _a.replace('index', '')) || '.mjs'
-                        : ((_b = pkg.main) === null || _b === void 0 ? void 0 : _b.replace('index', '')) || '.js';
-                    const input = glob__default["default"].sync(`src/${index}.{${indexExt}}`);
-                    if (!input.length) {
-                        throw Error('index file is not detected');
-                    }
-                    const options = {
-                        input,
-                        preserveEntrySignatures: 'strict',
-                        output: {
-                            dir: releaseFolder,
-                            entryFileNames: `[name]${ext}`,
-                            format,
-                            preserveModules: true,
-                        },
-                        plugins: [
-                            json__default["default"](),
-                            typescript__default["default"]({
-                                rollupCommonJSResolveHack: false,
-                                clean: true,
-                            }),
-                            jsx__default["default"](),
-                            eslint__default["default"]({
-                                include: constants.lintInclude,
-                            }),
-                            injectEnv__default["default"](innetEnv, {
-                                include: input,
-                            }),
-                        ],
-                    };
-                    if (node) {
-                        options.external = [...Object.keys(pkg.dependencies), 'tslib'];
-                        options.plugins = [
-                            ...options.plugins,
-                            externals__default["default"](),
-                            string({
-                                include: '**/*.*',
-                                exclude: constants.stringExcludeNode,
-                            }),
-                        ];
-                    }
-                    else {
-                        options.plugins = [
-                            ...options.plugins,
-                            string({
-                                include: '**/*.*',
-                                exclude: constants.stringExcludeDom,
-                            }),
-                            polyfill__default["default"](),
-                            image__default["default"](),
-                            styles__default["default"]({
-                                mode: 'inject',
-                                url: true,
-                                plugins: [autoprefixer__default["default"]()],
-                                modules: cssModules,
-                                minimize: true,
-                            }),
-                        ];
-                    }
-                    const bundle = yield rollup__default["default"].rollup(options);
-                    yield bundle.write(options.output);
-                    yield bundle.close();
-                });
-            }
+                const ext = format === 'es'
+                    ? ((_a = (pkg.module || pkg.esnext || pkg['jsnext:main'])) === null || _a === void 0 ? void 0 : _a.replace('index', '')) || '.mjs'
+                    : ((_b = pkg.main) === null || _b === void 0 ? void 0 : _b.replace('index', '')) || '.js';
+                const input = glob__default["default"].sync(`src/${index}.{${indexExt}}`);
+                if (!input.length) {
+                    throw Error('index file is not detected');
+                }
+                const options = {
+                    input,
+                    external: [...Object.keys(pkg.dependencies), 'tslib'],
+                    preserveEntrySignatures: 'strict',
+                    output: {
+                        dir: releaseFolder,
+                        entryFileNames: `[name]${ext}`,
+                        format,
+                        preserveModules: true,
+                        exports: 'auto',
+                    },
+                    plugins: [
+                        json__default["default"](),
+                        typescript__default["default"]({
+                            clean: true,
+                            useTsconfigDeclarationDir: true,
+                            tsconfigOverride: {
+                                compilerOptions: {
+                                    declarationDir: releaseFolder,
+                                    sourceMap: false,
+                                },
+                            },
+                        }),
+                        jsx__default["default"](),
+                        env__default["default"](innetEnv, { include: input }),
+                    ],
+                };
+                this.withLint(options);
+                if (node) {
+                    options.plugins = [
+                        ...options.plugins,
+                        externals__default["default"](),
+                        string({
+                            include: '**/*.*',
+                            exclude: constants.stringExcludeNode,
+                        }),
+                    ];
+                }
+                else {
+                    options.plugins = [
+                        ...options.plugins,
+                        string({
+                            include: '**/*.*',
+                            exclude: constants.stringExcludeDom,
+                        }),
+                        polyfill__default["default"](),
+                        image__default["default"](),
+                        styles__default["default"]({
+                            mode: 'inject',
+                            url: true,
+                            plugins: [autoprefixer__default["default"]()],
+                            modules: cssModules,
+                            minimize: true,
+                        }),
+                    ];
+                }
+                const bundle = yield rollup__default["default"].rollup(options);
+                yield bundle.write(options.output);
+                yield bundle.close();
+            });
             yield logger__default["default"].start('Build cjs bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 yield build('cjs');
             }));
@@ -482,7 +479,7 @@ class InnetJS {
                     const { bin } = pkg;
                     for (const name in bin) {
                         const value = bin[name];
-                        const input = glob__default["default"].sync(`src/${value}.{${scriptExtensions.join(',')}}`);
+                        const input = glob__default["default"].sync(`src/${value}.{${indexExt}}`);
                         const file = path__default["default"].join(this.releaseFolder, value);
                         const options = {
                             input,
@@ -504,11 +501,10 @@ class InnetJS {
                                 }),
                                 externals__default["default"](),
                                 jsx__default["default"](),
-                                injectEnv__default["default"](innetEnv, {
-                                    include: input,
-                                }),
+                                env__default["default"](innetEnv, { include: input }),
                             ],
                         };
+                        this.withLint(options);
                         const bundle = yield rollup__default["default"].rollup(options);
                         yield bundle.write(options.output);
                         yield bundle.close();
@@ -537,6 +533,16 @@ class InnetJS {
                 }));
             }
         });
+    }
+    withLint(options) {
+        if (this._lintUsage === undefined) {
+            this._lintUsage = fs__default["default"].existsSync(path__default["default"].join(this.projectFolder, '.eslintrc'));
+        }
+        if (this._lintUsage) {
+            options.plugins.push(eslint__default["default"]({
+                include: constants.lintInclude,
+            }));
+        }
     }
     increaseVersion(release) {
         return tslib.__awaiter(this, void 0, void 0, function* () {

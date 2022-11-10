@@ -1,4 +1,3 @@
-import './_virtual/_rollup-plugin-inject-process-env.mjs';
 import { Parse } from 'unzipper';
 
 const Writer = require('fstream').Writer;

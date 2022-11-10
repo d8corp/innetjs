@@ -2,8 +2,6 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-require('./_virtual/_rollup-plugin-inject-process-env.js');
-
 function updateDotenv() {
     const { INNETJS_INNETJS_PACKAGE_VERSION } = process.env;
     delete process.env.INNETJS_INNETJS_PACKAGE_VERSION;

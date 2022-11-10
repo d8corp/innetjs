@@ -22,17 +22,17 @@ import path from 'node:path';
 import prompt from 'prompts';
 import rollup from 'rollup';
 import filesize from 'rollup-plugin-filesize';
-import injectEnv from 'rollup-plugin-inject-process-env';
 import jsx from 'rollup-plugin-innet-jsx';
 import externals from 'rollup-plugin-node-externals';
 import polyfill from 'rollup-plugin-polyfill-node';
 import { preserveShebangs } from 'rollup-plugin-preserve-shebangs';
+import env from 'rollup-plugin-process-env';
 import styles from 'rollup-plugin-styles';
 import { terser } from 'rollup-plugin-terser';
 import typescript from 'rollup-plugin-typescript2';
 import tmp from 'tmp';
 import { promisify } from 'node:util';
-import { lintInclude, stringExcludeNode, stringExcludeDom } from './constants.mjs';
+import { stringExcludeNode, stringExcludeDom, lintInclude } from './constants.mjs';
 import { Extract } from './extract.mjs';
 import { reporter, convertIndexFile, getFile } from './helpers.mjs';
 import { updateDotenv } from './updateDotenv.mjs';
@@ -149,11 +149,9 @@ class InnetJS {
                     json(),
                     typescript(),
                     jsx(),
-                    eslint({
-                        include: lintInclude,
-                    }),
                 ],
             };
+            this.withLint(inputOptions);
             const outputOptions = {
                 dir: this.buildFolder,
                 sourcemap: this.sourcemap,
@@ -179,7 +177,7 @@ class InnetJS {
                 }), string({
                     include: '**/*.*',
                     exclude: stringExcludeDom,
-                }), injectEnv(innetEnv));
+                }), env(innetEnv, { include: input }));
                 outputOptions.format = 'es';
                 outputOptions.plugins = [
                     terser(),
@@ -241,11 +239,9 @@ class InnetJS {
                         },
                     }),
                     jsx(),
-                    eslint({
-                        include: lintInclude,
-                    }),
                 ],
             };
+            this.withLint(options);
             if (node) {
                 // @ts-expect-error
                 options.output.format = 'cjs';
@@ -279,7 +275,7 @@ class InnetJS {
                 }), string({
                     include: '**/*.*',
                     exclude: stringExcludeDom,
-                }), this.createClient(key, cert, pkg, index), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))), injectEnv(innetEnv));
+                }), this.createClient(key, cert, pkg, index), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))), env(innetEnv, { include: input }));
             }
             const watcher = rollup.watch(options);
             watcher.on('event', (e) => __awaiter(this, void 0, void 0, function* () {
@@ -363,74 +359,75 @@ class InnetJS {
             const { releaseFolder, cssModules } = this;
             yield logger.start('Remove previous release', () => fs.remove(releaseFolder));
             const pkg = yield this.getPackage();
-            function build(format) {
+            const build = (format) => __awaiter(this, void 0, void 0, function* () {
                 var _a, _b;
-                return __awaiter(this, void 0, void 0, function* () {
-                    const ext = format === 'es'
-                        ? ((_a = (pkg.module || pkg.esnext || pkg['jsnext:main'])) === null || _a === void 0 ? void 0 : _a.replace('index', '')) || '.mjs'
-                        : ((_b = pkg.main) === null || _b === void 0 ? void 0 : _b.replace('index', '')) || '.js';
-                    const input = glob.sync(`src/${index}.{${indexExt}}`);
-                    if (!input.length) {
-                        throw Error('index file is not detected');
-                    }
-                    const options = {
-                        input,
-                        preserveEntrySignatures: 'strict',
-                        output: {
-                            dir: releaseFolder,
-                            entryFileNames: `[name]${ext}`,
-                            format,
-                            preserveModules: true,
-                        },
-                        plugins: [
-                            json(),
-                            typescript({
-                                rollupCommonJSResolveHack: false,
-                                clean: true,
-                            }),
-                            jsx(),
-                            eslint({
-                                include: lintInclude,
-                            }),
-                            injectEnv(innetEnv, {
-                                include: input,
-                            }),
-                        ],
-                    };
-                    if (node) {
-                        options.external = [...Object.keys(pkg.dependencies), 'tslib'];
-                        options.plugins = [
-                            ...options.plugins,
-                            externals(),
-                            string({
-                                include: '**/*.*',
-                                exclude: stringExcludeNode,
-                            }),
-                        ];
-                    }
-                    else {
-                        options.plugins = [
-                            ...options.plugins,
-                            string({
-                                include: '**/*.*',
-                                exclude: stringExcludeDom,
-                            }),
-                            polyfill(),
-                            image(),
-                            styles({
-                                mode: 'inject',
-                                url: true,
-                                plugins: [autoprefixer()],
-                                modules: cssModules,
-                                minimize: true,
-                            }),
-                        ];
-                    }
-                    const bundle = yield rollup.rollup(options);
-                    yield bundle.write(options.output);
-                    yield bundle.close();
-                });
-            }
+                const ext = format === 'es'
+                    ? ((_a = (pkg.module || pkg.esnext || pkg['jsnext:main'])) === null || _a === void 0 ? void 0 : _a.replace('index', '')) || '.mjs'
+                    : ((_b = pkg.main) === null || _b === void 0 ? void 0 : _b.replace('index', '')) || '.js';
+                const input = glob.sync(`src/${index}.{${indexExt}}`);
+                if (!input.length) {
+                    throw Error('index file is not detected');
+                }
+                const options = {
+                    input,
+                    external: [...Object.keys(pkg.dependencies), 'tslib'],
+                    preserveEntrySignatures: 'strict',
+                    output: {
+                        dir: releaseFolder,
+                        entryFileNames: `[name]${ext}`,
+                        format,
+                        preserveModules: true,
+                        exports: 'auto',
+                    },
+                    plugins: [
+                        json(),
+                        typescript({
+                            clean: true,
+                            useTsconfigDeclarationDir: true,
+                            tsconfigOverride: {
+                                compilerOptions: {
+                                    declarationDir: releaseFolder,
+                                    sourceMap: false,
+                                },
+                            },
+                        }),
+                        jsx(),
+                        env(innetEnv, { include: input }),
+                    ],
+                };
+                this.withLint(options);
+                if (node) {
+                    options.plugins = [
+                        ...options.plugins,
+                        externals(),
+                        string({
+                            include: '**/*.*',
+                            exclude: stringExcludeNode,
+                        }),
+                    ];
+                }
+                else {
+                    options.plugins = [
+                        ...options.plugins,
+                        string({
+                            include: '**/*.*',
+                            exclude: stringExcludeDom,
+                        }),
+                        polyfill(),
+                        image(),
+                        styles({
+                            mode: 'inject',
+                            url: true,
+                            plugins: [autoprefixer()],
+                            modules: cssModules,
+                            minimize: true,
+                        }),
+                    ];
+                }
+                const bundle = yield rollup.rollup(options);
+                yield bundle.write(options.output);
+                yield bundle.close();
+            });
             yield logger.start('Build cjs bundle', () => __awaiter(this, void 0, void 0, function* () {
                 yield build('cjs');
             }));
@@ -448,7 +445,7 @@ class InnetJS {
                     const { bin } = pkg;
                     for (const name in bin) {
                         const value = bin[name];
-                        const input = glob.sync(`src/${value}.{${scriptExtensions.join(',')}}`);
+                        const input = glob.sync(`src/${value}.{${indexExt}}`);
                         const file = path.join(this.releaseFolder, value);
                         const options = {
                             input,
@@ -470,11 +467,10 @@ class InnetJS {
                                 }),
                                 externals(),
                                 jsx(),
-                                injectEnv(innetEnv, {
-                                    include: input,
-                                }),
+                                env(innetEnv, { include: input }),
                             ],
                         };
+                        this.withLint(options);
                         const bundle = yield rollup.rollup(options);
                         yield bundle.write(options.output);
                         yield bundle.close();
@@ -503,6 +499,16 @@ class InnetJS {
                 }));
             }
         });
+    }
+    withLint(options) {
+        if (this._lintUsage === undefined) {
+            this._lintUsage = fs.existsSync(path.join(this.projectFolder, '.eslintrc'));
+        }
+        if (this._lintUsage) {
+            options.plugins.push(eslint({
+                include: lintInclude,
+            }));
+        }
     }
     increaseVersion(release) {
         return __awaiter(this, void 0, void 0, function* () {

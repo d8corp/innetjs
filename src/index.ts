@@ -20,11 +20,11 @@ import path from 'path'
 import prompt from 'prompts'
 import rollup from 'rollup'
 import filesize from 'rollup-plugin-filesize'
-import injectEnv from 'rollup-plugin-inject-process-env'
 import jsx from 'rollup-plugin-innet-jsx'
 import externals from 'rollup-plugin-node-externals'
 import polyfill from 'rollup-plugin-polyfill-node'
 import { preserveShebangs } from 'rollup-plugin-preserve-shebangs'
+import env from 'rollup-plugin-process-env'
 import styles from 'rollup-plugin-styles'
 import { terser } from 'rollup-plugin-terser'
 import typescript from 'rollup-plugin-typescript2'
@@ -226,11 +226,10 @@ export class InnetJS {
         json(),
         typescript(),
         jsx(),
-        eslint({
-          include: lintInclude,
-        }),
       ],
     } as Record<string, any>
+
+    this.withLint(inputOptions)
 
     const outputOptions = {
       dir: this.buildFolder,
@@ -265,7 +264,7 @@ export class InnetJS {
           include: '**/*.*',
           exclude: stringExcludeDom,
         }),
-        injectEnv(innetEnv),
+        env(innetEnv, { include: input }),
       )
       outputOptions.format = 'es'
       outputOptions.plugins = [
@@ -340,11 +339,10 @@ export class InnetJS {
           },
         }),
         jsx(),
-        eslint({
-          include: lintInclude,
-        }),
       ],
     }
+
+    this.withLint(options)
 
     if (node) {
       // @ts-expect-error
@@ -396,7 +394,7 @@ export class InnetJS {
           verbose: false,
           ...(key && cert ? { https: { key, cert } } : {}),
         }),
-        injectEnv(innetEnv),
+        env(innetEnv, { include: input }),
       )
     }
 
@@ -484,7 +482,7 @@ export class InnetJS {
 
     const pkg = await this.getPackage()
 
-    async function build (format: rollup.ModuleFormat) {
+    const build = async (format: rollup.ModuleFormat) => {
       const ext: string = format === 'es'
         ? (pkg.module || pkg.esnext || pkg['jsnext:main'])?.replace('index', '') || '.mjs'
         : pkg.main?.replace('index', '') || '.js'
@@ -497,31 +495,35 @@ export class InnetJS {
 
       const options: rollup.RollupOptions = {
         input,
+        external: [...Object.keys(pkg.dependencies), 'tslib'],
         preserveEntrySignatures: 'strict',
         output: {
           dir: releaseFolder,
           entryFileNames: `[name]${ext}`,
           format,
           preserveModules: true,
+          exports: 'auto',
         },
         plugins: [
           json(),
           typescript({
-            rollupCommonJSResolveHack: false,
             clean: true,
+            useTsconfigDeclarationDir: true,
+            tsconfigOverride: {
+              compilerOptions: {
+                declarationDir: releaseFolder,
+                sourceMap: false,
+              },
+            },
           }),
           jsx(),
-          eslint({
-            include: lintInclude,
-          }),
-          injectEnv(innetEnv, {
-            include: input,
-          }),
+          env(innetEnv, { include: input }),
         ],
       }
 
+      this.withLint(options)
+
       if (node) {
-        options.external = [...Object.keys(pkg.dependencies), 'tslib']
         options.plugins = [
           ...options.plugins,
           externals(),
@@ -581,7 +583,7 @@ export class InnetJS {
 
         for (const name in bin) {
           const value = bin[name]
-          const input = glob.sync(`src/${value}.{${scriptExtensions.join(',')}}`)
+          const input = glob.sync(`src/${value}.{${indexExt}}`)
           const file = path.join(this.releaseFolder, value)
 
           const options: rollup.RollupOptions = {
@@ -604,11 +606,11 @@ export class InnetJS {
               }),
               externals(),
               jsx(),
-              injectEnv(innetEnv, {
-                include: input,
-              }),
+              env(innetEnv, { include: input }),
             ],
           }
+
+          this.withLint(options)
 
           const bundle = await rollup.rollup(options)
           await bundle.write(options.output as rollup.OutputOptions)
@@ -640,6 +642,21 @@ export class InnetJS {
       await logger.start(`publishing v${pkg.version} ${date}`, async () => {
         await execAsync(`npm publish ${this.releaseFolder}`)
       })
+    }
+  }
+
+  // Helpers
+
+  private _lintUsage: boolean
+  withLint (options: rollup.RollupOptions) {
+    if (this._lintUsage === undefined) {
+      this._lintUsage = fs.existsSync(path.join(this.projectFolder, '.eslintrc'))
+    }
+
+    if (this._lintUsage) {
+      options.plugins.push(eslint({
+        include: lintInclude,
+      }))
     }
   }
 

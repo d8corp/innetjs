@@ -1,5 +1,3 @@
-import './_virtual/_rollup-plugin-inject-process-env.mjs';
-
 function updateDotenv() {
     const { INNETJS_INNETJS_PACKAGE_VERSION } = process.env;
     delete process.env.INNETJS_INNETJS_PACKAGE_VERSION;
