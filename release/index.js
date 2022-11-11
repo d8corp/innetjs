@@ -71,9 +71,9 @@ var typescript__default = /*#__PURE__*/_interopDefaultLegacy(typescript);
 var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.15"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.16"};
   if (typeof process === 'undefined') {
-    process = { env };
+    globalThis.process = { env: env };
   } else if (process.env) {
     Object.assign(process.env, env);
   } else {
