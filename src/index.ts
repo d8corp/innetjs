@@ -205,18 +205,24 @@ export class InnetJS {
     await logger.start('Remove build', () => fs.remove(this.buildFolder))
 
     const pkg = node && await this.getPackage()
-    const inputOptions = {
+    const options: rollup.RollupOptions = {
       input,
       preserveEntrySignatures: 'strict',
       plugins: [
         commonjs(),
         json(),
-        typescript(),
+        typescript({
+          tsconfigOverride: {
+            compilerOptions: {
+              declaration: false,
+            },
+          },
+        }),
         jsx(),
       ],
-    } as Record<string, any>
+    }
 
-    this.withLint(inputOptions)
+    this.withLint(options)
 
     const outputOptions = {
       dir: this.buildFolder,
@@ -225,15 +231,15 @@ export class InnetJS {
 
     if (node) {
       outputOptions.format = 'cjs'
-      inputOptions.external = Object.keys(pkg?.dependencies || {})
-      inputOptions.plugins.push(
+      options.external = Object.keys(pkg?.dependencies || {})
+      options.plugins.push(
         string({
           include: '**/*.*',
           exclude: stringExcludeNode,
         }),
       )
     } else {
-      inputOptions.plugins.push(
+      options.plugins.push(
         nodeResolve({
           browser: true,
         }),
@@ -261,10 +267,10 @@ export class InnetJS {
       ]
     }
 
-    this.withEnv(inputOptions)
+    this.withEnv(options)
 
     await logger.start('Build production bundle', async () => {
-      const bundle = await rollup.rollup(inputOptions)
+      const bundle = await rollup.rollup(options)
       await bundle.write(outputOptions)
       await bundle.close()
       if (!node) {
@@ -322,6 +328,7 @@ export class InnetJS {
         typescript({
           tsconfigOverride: {
             compilerOptions: {
+              declaration: false,
               sourceMap: true,
             },
           },

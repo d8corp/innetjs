@@ -37,7 +37,7 @@ import { reporter, convertIndexFile, getFile } from './helpers.mjs';
 import { updateDotenv } from './updateDotenv.mjs';
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.14"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.15"};
   if (typeof process === 'undefined') {
     process = { env };
   } else if (process.env) {
@@ -140,31 +140,37 @@ class InnetJS {
             }
             yield logger.start('Remove build', () => fs.remove(this.buildFolder));
             const pkg = node && (yield this.getPackage());
-            const inputOptions = {
+            const options = {
                 input,
                 preserveEntrySignatures: 'strict',
                 plugins: [
                     commonjs(),
                     json(),
-                    typescript(),
+                    typescript({
+                        tsconfigOverride: {
+                            compilerOptions: {
+                                declaration: false,
+                            },
+                        },
+                    }),
                     jsx(),
                 ],
             };
-            this.withLint(inputOptions);
+            this.withLint(options);
             const outputOptions = {
                 dir: this.buildFolder,
                 sourcemap: this.sourcemap,
             };
             if (node) {
                 outputOptions.format = 'cjs';
-                inputOptions.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
-                inputOptions.plugins.push(string({
+                options.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
+                options.plugins.push(string({
                     include: '**/*.*',
                     exclude: stringExcludeNode,
                 }));
             }
             else {
-                inputOptions.plugins.push(nodeResolve({
+                options.plugins.push(nodeResolve({
                     browser: true,
                 }), polyfill(), image(), styles({
                     mode: this.cssInJs ? 'inject' : 'extract',
@@ -185,9 +191,9 @@ class InnetJS {
                     }),
                 ];
             }
-            this.withEnv(inputOptions);
+            this.withEnv(options);
             yield logger.start('Build production bundle', () => __awaiter(this, void 0, void 0, function* () {
-                const bundle = yield rollup.rollup(inputOptions);
+                const bundle = yield rollup.rollup(options);
                 yield bundle.write(outputOptions);
                 yield bundle.close();
                 if (!node) {
@@ -234,6 +240,7 @@ class InnetJS {
                     typescript({
                         tsconfigOverride: {
                             compilerOptions: {
+                                declaration: false,
                                 sourceMap: true,
                             },
                         },

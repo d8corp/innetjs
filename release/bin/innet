@@ -275,31 +275,37 @@ class InnetJS {
             }
             yield logger__default["default"].start('Remove build', () => fs__default["default"].remove(this.buildFolder));
             const pkg = node && (yield this.getPackage());
-            const inputOptions = {
+            const options = {
                 input,
                 preserveEntrySignatures: 'strict',
                 plugins: [
                     commonjs__default["default"](),
                     json__default["default"](),
-                    typescript__default["default"](),
+                    typescript__default["default"]({
+                        tsconfigOverride: {
+                            compilerOptions: {
+                                declaration: false,
+                            },
+                        },
+                    }),
                     jsx__default["default"](),
                 ],
             };
-            this.withLint(inputOptions);
+            this.withLint(options);
             const outputOptions = {
                 dir: this.buildFolder,
                 sourcemap: this.sourcemap,
             };
             if (node) {
                 outputOptions.format = 'cjs';
-                inputOptions.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
-                inputOptions.plugins.push(string({
+                options.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
+                options.plugins.push(string({
                     include: '**/*.*',
                     exclude: stringExcludeNode,
                 }));
             }
             else {
-                inputOptions.plugins.push(pluginNodeResolve.nodeResolve({
+                options.plugins.push(pluginNodeResolve.nodeResolve({
                     browser: true,
                 }), polyfill__default["default"](), image__default["default"](), styles__default["default"]({
                     mode: this.cssInJs ? 'inject' : 'extract',
@@ -320,9 +326,9 @@ class InnetJS {
                     }),
                 ];
             }
-            this.withEnv(inputOptions);
+            this.withEnv(options);
             yield logger__default["default"].start('Build production bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                const bundle = yield rollup__default["default"].rollup(inputOptions);
+                const bundle = yield rollup__default["default"].rollup(options);
                 yield bundle.write(outputOptions);
                 yield bundle.close();
                 if (!node) {
@@ -369,6 +375,7 @@ class InnetJS {
                     typescript__default["default"]({
                         tsconfigOverride: {
                             compilerOptions: {
+                                declaration: false,
                                 sourceMap: true,
                             },
                         },
@@ -758,7 +765,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.14"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.15"};
   if (typeof process === 'undefined') {
     process = { env };
   } else if (process.env) {

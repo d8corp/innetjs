@@ -2,6 +2,9 @@
 
 ## v2.2
 
+### v2.2.15 [![11.11.2022](https://img.shields.io/date/1668167799)](https://github.com/d8corp/innetjs/tree/v2.2.15)
+- remove `.d.ts` files for `build` and `start`
+
 ### v2.2.14 [![11.11.2022](https://img.shields.io/date/1668118382)](https://github.com/d8corp/innetjs/tree/v2.2.14)
 - update dependencies
 
