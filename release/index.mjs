@@ -20,6 +20,7 @@ import { LinesAndColumns } from 'lines-and-columns';
 import path from 'node:path';
 import prompt from 'prompts';
 import rollup from 'rollup';
+import external from 'rollup-plugin-external-node-modules';
 import filesize from 'rollup-plugin-filesize';
 import jsx from 'rollup-plugin-innet-jsx';
 import externals from 'rollup-plugin-node-externals';
@@ -37,7 +38,7 @@ import { reporter, convertIndexFile, getFile } from './helpers.mjs';
 import { updateDotenv } from './updateDotenv.mjs';
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.16"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.17"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {
@@ -362,7 +363,7 @@ class InnetJS {
             }));
         });
     }
-    release({ node = false, index = 'index', pub } = {}) {
+    release({ index = 'index', pub } = {}) {
         return __awaiter(this, void 0, void 0, function* () {
             const { releaseFolder, cssModules } = this;
             yield logger.start('Remove previous release', () => fs.remove(releaseFolder));
@@ -378,59 +379,45 @@ class InnetJS {
                 }
                 const options = {
                     input,
-                    external: [...Object.keys(pkg.dependencies), 'tslib'],
-                    preserveEntrySignatures: 'strict',
+                    external: ['tslib'],
+                    treeshake: false,
                     output: {
                         dir: releaseFolder,
                         entryFileNames: `[name]${ext}`,
                         format,
                         preserveModules: true,
-                        exports: 'auto',
+                        exports: 'named',
                     },
                     plugins: [
                         json(),
                         typescript({
                             clean: true,
-                            useTsconfigDeclarationDir: true,
                             tsconfigOverride: {
                                 compilerOptions: {
-                                    declarationDir: releaseFolder,
                                     sourceMap: false,
                                 },
                             },
                         }),
                         jsx(),
-                    ],
-                };
-                this.withLint(options);
-                if (node) {
-                    options.plugins = [
-                        ...options.plugins,
+                        external(),
                         externals(),
-                        string({
-                            include: '**/*.*',
-                            exclude: stringExcludeNode,
-                        }),
-                    ];
-                }
-                else {
-                    options.plugins = [
-                        ...options.plugins,
                         string({
                             include: '**/*.*',
                             exclude: stringExcludeDom,
                         }),
-                        polyfill(),
                         image(),
                         styles({
-                            mode: 'inject',
-                            url: true,
+                            mode: this.cssInJs ? 'inject' : 'extract',
                             plugins: [autoprefixer()],
                             modules: cssModules,
                             minimize: true,
+                            autoModules: true,
+                            dts: true,
                         }),
-                    ];
-                }
+                        nodeResolve(),
+                    ],
+                };
+                this.withLint(options);
                 this.withEnv(options);
                 const bundle = yield rollup.rollup(options);
                 yield bundle.write(options.output);

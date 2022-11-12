@@ -19,6 +19,7 @@ import { LinesAndColumns } from 'lines-and-columns'
 import path from 'path'
 import prompt from 'prompts'
 import rollup from 'rollup'
+import external from 'rollup-plugin-external-node-modules'
 import filesize from 'rollup-plugin-filesize'
 import jsx from 'rollup-plugin-innet-jsx'
 import externals from 'rollup-plugin-node-externals'
@@ -471,7 +472,7 @@ export class InnetJS {
     })
   }
 
-  async release ({ node = false, index = 'index', pub }: ReleaseOptions = {}) {
+  async release ({ index = 'index', pub }: ReleaseOptions = {}) {
     const { releaseFolder, cssModules } = this
     await logger.start('Remove previous release', () => fs.remove(releaseFolder))
 
@@ -490,62 +491,48 @@ export class InnetJS {
 
       const options: rollup.RollupOptions = {
         input,
-        external: [...Object.keys(pkg.dependencies), 'tslib'],
-        preserveEntrySignatures: 'strict',
+        external: ['tslib'],
+        treeshake: false,
         output: {
           dir: releaseFolder,
           entryFileNames: `[name]${ext}`,
           format,
           preserveModules: true,
-          exports: 'auto',
+          exports: 'named',
         },
         plugins: [
           json(),
           typescript({
             clean: true,
-            useTsconfigDeclarationDir: true,
             tsconfigOverride: {
               compilerOptions: {
-                declarationDir: releaseFolder,
                 sourceMap: false,
               },
             },
           }),
           jsx(),
-        ],
-      }
-
-      this.withLint(options)
-
-      if (node) {
-        options.plugins = [
-          ...options.plugins,
+          external(),
           externals(),
-          string({
-            include: '**/*.*',
-            exclude: stringExcludeNode,
-          }),
-        ]
-      } else {
-        options.plugins = [
-          ...options.plugins,
           string({
             include: '**/*.*',
             exclude: stringExcludeDom,
           }),
-          polyfill(),
           image(),
           styles({
-            mode: 'inject',
-            url: true,
+            mode: this.cssInJs ? 'inject' : 'extract',
             plugins: [autoprefixer()],
             modules: cssModules,
             minimize: true,
+            autoModules: true,
+            dts: true,
           }),
-        ]
+          nodeResolve(),
+        ],
       }
 
+      this.withLint(options)
       this.withEnv(options)
+
       const bundle = await rollup.rollup(options)
       await bundle.write(options.output as rollup.OutputOptions)
       await bundle.close()

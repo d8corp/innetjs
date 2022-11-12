@@ -75,13 +75,12 @@ program
 program
   .command('release')
   .description('Release new version of your library')
-  .option('-n, --node', 'Release for node.js')
   .option('-i, --index <index>', 'Root index file name', 'index')
   .option('-p, --public', 'Public the package')
   .addOption(releaseOption)
   .addOption(errorOption)
-  .action(({ error, node, index, public: pub }) => {
-    innetJS.release({ node, index, pub }).catch(e => {
+  .action(({ error, index, public: pub }) => {
+    innetJS.release({ index, pub }).catch(e => {
       if (error) {
         console.error(e)
         process.exit(1)

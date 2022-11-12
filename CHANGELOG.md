@@ -2,6 +2,10 @@
 
 ## v2.2
 
+### v2.2.17 [![12.11.2022](https://img.shields.io/date/1668251474)](https://github.com/d8corp/innetjs/tree/v2.2.17)
+- remove node flag
+- fix build bugs
+
 ### v2.2.16 [![11.11.2022](https://img.shields.io/date/1668169948)](https://github.com/d8corp/innetjs/tree/v2.2.16)
 - update depends
 

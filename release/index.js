@@ -24,6 +24,7 @@ var linesAndColumns = require('lines-and-columns');
 var path = require('node:path');
 var prompt = require('prompts');
 var rollup = require('rollup');
+var external = require('rollup-plugin-external-node-modules');
 var filesize = require('rollup-plugin-filesize');
 var jsx = require('rollup-plugin-innet-jsx');
 var externals = require('rollup-plugin-node-externals');
@@ -61,6 +62,7 @@ var https__default = /*#__PURE__*/_interopDefaultLegacy(https);
 var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 var prompt__default = /*#__PURE__*/_interopDefaultLegacy(prompt);
 var rollup__default = /*#__PURE__*/_interopDefaultLegacy(rollup);
+var external__default = /*#__PURE__*/_interopDefaultLegacy(external);
 var filesize__default = /*#__PURE__*/_interopDefaultLegacy(filesize);
 var jsx__default = /*#__PURE__*/_interopDefaultLegacy(jsx);
 var externals__default = /*#__PURE__*/_interopDefaultLegacy(externals);
@@ -71,7 +73,7 @@ var typescript__default = /*#__PURE__*/_interopDefaultLegacy(typescript);
 var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.16"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.17"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {
@@ -396,7 +398,7 @@ class InnetJS {
             }));
         });
     }
-    release({ node = false, index = 'index', pub } = {}) {
+    release({ index = 'index', pub } = {}) {
         return tslib.__awaiter(this, void 0, void 0, function* () {
             const { releaseFolder, cssModules } = this;
             yield logger__default["default"].start('Remove previous release', () => fs__default["default"].remove(releaseFolder));
@@ -412,59 +414,45 @@ class InnetJS {
                 }
                 const options = {
                     input,
-                    external: [...Object.keys(pkg.dependencies), 'tslib'],
-                    preserveEntrySignatures: 'strict',
+                    external: ['tslib'],
+                    treeshake: false,
                     output: {
                         dir: releaseFolder,
                         entryFileNames: `[name]${ext}`,
                         format,
                         preserveModules: true,
-                        exports: 'auto',
+                        exports: 'named',
                     },
                     plugins: [
                         json__default["default"](),
                         typescript__default["default"]({
                             clean: true,
-                            useTsconfigDeclarationDir: true,
                             tsconfigOverride: {
                                 compilerOptions: {
-                                    declarationDir: releaseFolder,
                                     sourceMap: false,
                                 },
                             },
                         }),
                         jsx__default["default"](),
-                    ],
-                };
-                this.withLint(options);
-                if (node) {
-                    options.plugins = [
-                        ...options.plugins,
+                        external__default["default"](),
                         externals__default["default"](),
-                        string({
-                            include: '**/*.*',
-                            exclude: constants.stringExcludeNode,
-                        }),
-                    ];
-                }
-                else {
-                    options.plugins = [
-                        ...options.plugins,
                         string({
                             include: '**/*.*',
                             exclude: constants.stringExcludeDom,
                         }),
-                        polyfill__default["default"](),
                         image__default["default"](),
                         styles__default["default"]({
-                            mode: 'inject',
-                            url: true,
+                            mode: this.cssInJs ? 'inject' : 'extract',
                             plugins: [autoprefixer__default["default"]()],
                             modules: cssModules,
                             minimize: true,
+                            autoModules: true,
+                            dts: true,
                         }),
-                    ];
-                }
+                        pluginNodeResolve.nodeResolve(),
+                    ],
+                };
+                this.withLint(options);
                 this.withEnv(options);
                 const bundle = yield rollup__default["default"].rollup(options);
                 yield bundle.write(options.output);
