@@ -51,6 +51,8 @@ const copyFiles = promisify(fs.copy)
 updateDotenv()
 
 const REG_CLEAR_TEXT = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g
+const REG_TJSX = /\.[tj]sx?$/
+const REG_EXT = /\.([^.]+)$/
 
 export interface ReleaseOptions {
   node?: boolean
@@ -495,7 +497,15 @@ export class InnetJS {
         treeshake: false,
         output: {
           dir: releaseFolder,
-          entryFileNames: `[name]${ext}`,
+          entryFileNames: ({ name, facadeModuleId }) => {
+            if (REG_TJSX.test(facadeModuleId)) {
+              return `${name}${ext}`
+            }
+
+            const match = facadeModuleId.match(REG_EXT)
+
+            return match ? `${name}${match[0]}${ext}` : `${name}${ext}`
+          },
           format,
           preserveModules: true,
           exports: 'named',
@@ -524,7 +534,6 @@ export class InnetJS {
             modules: cssModules,
             minimize: true,
             autoModules: true,
-            dts: true,
           }),
           nodeResolve(),
         ],

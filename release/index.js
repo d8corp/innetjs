@@ -73,7 +73,7 @@ var typescript__default = /*#__PURE__*/_interopDefaultLegacy(typescript);
 var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.17"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.18"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {
@@ -90,6 +90,8 @@ const execAsync = node_util.promisify(exec);
 const copyFiles = node_util.promisify(fs__default["default"].copy);
 updateDotenv.updateDotenv();
 const REG_CLEAR_TEXT = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+const REG_TJSX = /\.[tj]sx?$/;
+const REG_EXT = /\.([^.]+)$/;
 const scriptExtensions = ['ts', 'js', 'tsx', 'jsx'];
 const indexExt = scriptExtensions.join(',');
 class InnetJS {
@@ -418,7 +420,13 @@ class InnetJS {
                     treeshake: false,
                     output: {
                         dir: releaseFolder,
-                        entryFileNames: `[name]${ext}`,
+                        entryFileNames: ({ name, facadeModuleId }) => {
+                            if (REG_TJSX.test(facadeModuleId)) {
+                                return `${name}${ext}`;
+                            }
+                            const match = facadeModuleId.match(REG_EXT);
+                            return match ? `${name}${match[0]}${ext}` : `${name}${ext}`;
+                        },
                         format,
                         preserveModules: true,
                         exports: 'named',
@@ -447,7 +455,6 @@ class InnetJS {
                             modules: cssModules,
                             minimize: true,
                             autoModules: true,
-                            dts: true,
                         }),
                         pluginNodeResolve.nodeResolve(),
                     ],
