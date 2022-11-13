@@ -2,6 +2,9 @@
 
 ## v2.2
 
+### v2.2.19 [![13.11.2022](https://img.shields.io/date/1668336865)](https://github.com/d8corp/innetjs/tree/v2.2.19)
+- fix rebuilding bug
+
 ### v2.2.18 [![12.11.2022](https://img.shields.io/date/1668267233)](https://github.com/d8corp/innetjs/tree/v2.2.18)
 - improve build file names
 

@@ -73,7 +73,7 @@ var typescript__default = /*#__PURE__*/_interopDefaultLegacy(typescript);
 var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.18"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.19"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {
