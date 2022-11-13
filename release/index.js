@@ -73,7 +73,7 @@ var typescript__default = /*#__PURE__*/_interopDefaultLegacy(typescript);
 var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.19"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.22"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {
@@ -229,7 +229,7 @@ class InnetJS {
                     }),
                 ];
             }
-            this.withEnv(options);
+            this.withEnv(options, true);
             yield logger__default["default"].start('Build production bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 const bundle = yield rollup__default["default"].rollup(options);
                 yield bundle.write(outputOptions);
@@ -322,7 +322,7 @@ class InnetJS {
                     exclude: constants.stringExcludeDom,
                 }), this.createClient(key, cert, pkg, index), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
             }
-            this.withEnv(options);
+            this.withEnv(options, true);
             const watcher = rollup__default["default"].watch(options);
             watcher.on('event', (e) => tslib.__awaiter(this, void 0, void 0, function* () {
                 if (e.code === 'ERROR') {
@@ -547,8 +547,11 @@ class InnetJS {
             }));
         }
     }
-    withEnv(options) {
-        options.plugins.push(env__default["default"](this.envPrefix, { include: options.input }));
+    withEnv(options, virtual) {
+        options.plugins.push(env__default["default"](this.envPrefix, {
+            include: options.input,
+            virtual,
+        }));
     }
     increaseVersion(release) {
         return tslib.__awaiter(this, void 0, void 0, function* () {

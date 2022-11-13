@@ -1,6 +1,6 @@
 {
   "name": "innetjs",
-  "version": "2.2.19",
+  "version": "2.2.22",
   "description": "CLI for innet boilerplate",
   "homepage": "https://github.com/d8corp/innetjs",
   "author": "Mikhail Lysikov <d8corp@mail.ru>",
@@ -79,7 +79,7 @@
     "rollup-plugin-node-externals": "^5.0.2",
     "rollup-plugin-polyfill-node": "^0.11.0",
     "rollup-plugin-preserve-shebangs": "^0.2.0",
-    "rollup-plugin-process-env": "^1.0.4",
+    "rollup-plugin-process-env": "^1.0.5",
     "rollup-plugin-string": "^3.0.0",
     "rollup-plugin-styles": "^4.0.0",
     "rollup-plugin-terser": "^7.0.2",

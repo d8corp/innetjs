@@ -270,7 +270,7 @@ export class InnetJS {
       ]
     }
 
-    this.withEnv(options)
+    this.withEnv(options, true)
 
     await logger.start('Build production bundle', async () => {
       const bundle = await rollup.rollup(options)
@@ -395,7 +395,7 @@ export class InnetJS {
       )
     }
 
-    this.withEnv(options)
+    this.withEnv(options, true)
     const watcher = rollup.watch(options)
 
     watcher.on('event', async e => {
@@ -651,8 +651,11 @@ export class InnetJS {
     }
   }
 
-  withEnv (options: rollup.RollupOptions) {
-    options.plugins.push(env(this.envPrefix, { include: options.input as string[] }))
+  withEnv (options: rollup.RollupOptions, virtual?: boolean) {
+    options.plugins.push(env(this.envPrefix, {
+      include: options.input as string[],
+      virtual,
+    }))
   }
 
   async increaseVersion (release: string) {

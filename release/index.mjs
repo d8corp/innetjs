@@ -38,7 +38,7 @@ import { reporter, convertIndexFile, getFile } from './helpers.mjs';
 import { updateDotenv } from './updateDotenv.mjs';
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.19"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.22"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {
@@ -194,7 +194,7 @@ class InnetJS {
                     }),
                 ];
             }
-            this.withEnv(options);
+            this.withEnv(options, true);
             yield logger.start('Build production bundle', () => __awaiter(this, void 0, void 0, function* () {
                 const bundle = yield rollup.rollup(options);
                 yield bundle.write(outputOptions);
@@ -287,7 +287,7 @@ class InnetJS {
                     exclude: stringExcludeDom,
                 }), this.createClient(key, cert, pkg, index), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
             }
-            this.withEnv(options);
+            this.withEnv(options, true);
             const watcher = rollup.watch(options);
             watcher.on('event', (e) => __awaiter(this, void 0, void 0, function* () {
                 if (e.code === 'ERROR') {
@@ -512,8 +512,11 @@ class InnetJS {
             }));
         }
     }
-    withEnv(options) {
-        options.plugins.push(env(this.envPrefix, { include: options.input }));
+    withEnv(options, virtual) {
+        options.plugins.push(env(this.envPrefix, {
+            include: options.input,
+            virtual,
+        }));
     }
     increaseVersion(release) {
         return __awaiter(this, void 0, void 0, function* () {

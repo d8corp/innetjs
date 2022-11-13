@@ -64,7 +64,7 @@ export declare class InnetJS {
     release({ index, pub }?: ReleaseOptions): Promise<void>;
     private _lintUsage;
     withLint(options: rollup.RollupOptions): void;
-    withEnv(options: rollup.RollupOptions): void;
+    withEnv(options: rollup.RollupOptions, virtual?: boolean): void;
     increaseVersion(release: string): Promise<void>;
     getPackage(): Promise<Record<string, any>>;
     createClient(key: any, cert: any, pkg: any, index: string): rollup.Plugin;
