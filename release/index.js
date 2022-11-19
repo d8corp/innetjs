@@ -73,7 +73,7 @@ var typescript__default = /*#__PURE__*/_interopDefaultLegacy(typescript);
 var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.23"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.24"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {
@@ -439,10 +439,10 @@ class InnetJS {
                                 compilerOptions: {
                                     sourceMap: false,
                                 },
+                                include: [...input, 'src/declaration.d.ts'],
                             },
                         }),
                         jsx__default["default"](),
-                        external__default["default"](),
                         externals__default["default"](),
                         string({
                             include: '**/*.*',
@@ -457,6 +457,7 @@ class InnetJS {
                             autoModules: true,
                         }),
                         pluginNodeResolve.nodeResolve(),
+                        external__default["default"](),
                     ],
                 };
                 this.withLint(options);

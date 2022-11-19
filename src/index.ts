@@ -518,10 +518,10 @@ export class InnetJS {
               compilerOptions: {
                 sourceMap: false,
               },
+              include: [...input, 'src/declaration.d.ts'],
             },
           }),
           jsx(),
-          external(),
           externals(),
           string({
             include: '**/*.*',
@@ -536,6 +536,7 @@ export class InnetJS {
             autoModules: true,
           }),
           nodeResolve(),
+          external(),
         ],
       }
 

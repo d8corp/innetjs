@@ -38,7 +38,7 @@ import { reporter, convertIndexFile, getFile } from './helpers.mjs';
 import { updateDotenv } from './updateDotenv.mjs';
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.23"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.24"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {
@@ -404,10 +404,10 @@ class InnetJS {
                                 compilerOptions: {
                                     sourceMap: false,
                                 },
+                                include: [...input, 'src/declaration.d.ts'],
                             },
                         }),
                         jsx(),
-                        external(),
                         externals(),
                         string({
                             include: '**/*.*',
@@ -422,6 +422,7 @@ class InnetJS {
                             autoModules: true,
                         }),
                         nodeResolve(),
+                        external(),
                     ],
                 };
                 this.withLint(options);

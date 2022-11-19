@@ -2,6 +2,9 @@
 
 ## v2.2
 
+### v2.2.24 [![19.11.2022](https://img.shields.io/date/1668870840)](https://github.com/d8corp/innetjs/tree/v2.2.24)
+- fix build bugs
+
 ### v2.2.23 [![13.11.2022](https://img.shields.io/date/1668340263)](https://github.com/d8corp/innetjs/tree/v2.2.23)
 - fix env bugs
 
