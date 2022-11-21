@@ -2,7 +2,7 @@
 
 ## v2.2
 
-### v2.3.0 [![19.11.2022](https://img.shields.io/date/1669032575)](https://github.com/d8corp/innetjs/tree/v2.3.0)
+### v2.3.0 [![21.11.2022](https://img.shields.io/date/1669032575)](https://github.com/d8corp/innetjs/tree/v2.3.0)
 - fix `cli` help information
 
 ### v2.2.24 [![19.11.2022](https://img.shields.io/date/1668870840)](https://github.com/d8corp/innetjs/tree/v2.2.24)
