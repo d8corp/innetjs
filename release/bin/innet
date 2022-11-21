@@ -764,7 +764,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.2.24"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.3.0"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {
@@ -776,8 +776,6 @@ class InnetJS {
 updateDotenv();
 const innetJS = new InnetJS();
 const errorOption = new commander.Option('-e, --error', 'Show error details');
-const releaseOption = new commander.Option('-r, --release <release>', 'Select release type')
-    .choices(['patch', 'minor', 'major']);
 commander.program
     .version(process.env.__INNETJS__PACKAGE_VERSION, '-v, --version');
 commander.program
@@ -838,7 +836,6 @@ commander.program
     .description('Release new version of your library')
     .option('-i, --index <index>', 'Root index file name', 'index')
     .option('-p, --public', 'Public the package')
-    .addOption(releaseOption)
     .addOption(errorOption)
     .action(({ error, index, public: pub }) => {
     innetJS.release({ index, pub }).catch(e => {

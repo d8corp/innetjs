@@ -9,8 +9,6 @@ updateDotenv()
 const innetJS = new InnetJS()
 
 const errorOption = new Option('-e, --error', 'Show error details')
-const releaseOption = new Option('-r, --release <release>', 'Select release type')
-  .choices(['patch', 'minor', 'major'])
 
 program
   .version(process.env.__INNETJS__PACKAGE_VERSION, '-v, --version')
@@ -77,7 +75,6 @@ program
   .description('Release new version of your library')
   .option('-i, --index <index>', 'Root index file name', 'index')
   .option('-p, --public', 'Public the package')
-  .addOption(releaseOption)
   .addOption(errorOption)
   .action(({ error, index, public: pub }) => {
     innetJS.release({ index, pub }).catch(e => {
