@@ -51,6 +51,7 @@ const copyFiles = promisify(fs.copy)
 updateDotenv()
 
 const REG_CLEAR_TEXT = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g
+const REG_RPT_ERROR_FILE = /(src[^:]+):(\d+):(\d+)/
 const REG_TJSX = /\.[tj]sx?$/
 const REG_EXT = /\.([^.]+)$/
 
@@ -410,10 +411,14 @@ export class InnetJS {
         } else if (e.error.code === 'PLUGIN_ERROR' && ['rpt2', 'commonjs'].includes(e.error.plugin)) {
           const [, file, line, column] = e.error.message
             .replace(REG_CLEAR_TEXT, '')
-            .match(/^(src[^:]+):(\d+):(\d+)/) || []
+            .match(REG_RPT_ERROR_FILE) || []
           logger.end('Bundling', e.error.message)
+
           if (file) {
             console.log(`ERROR in ${file}:${line}:${column}`)
+          } else if (e.error.loc) {
+            console.log(`ERROR in ${e.error.loc.file}:${e.error.loc.line}:${e.error.loc.column}`)
+            console.log(e.error.frame)
           }
         } else {
           logger.end('Bundling', error ? e.error.stack : e.error.message)

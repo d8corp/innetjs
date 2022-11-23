@@ -1,6 +1,6 @@
 {
   "name": "innetjs",
-  "version": "2.3.0",
+  "version": "2.3.2",
   "description": "CLI for innet boilerplate",
   "homepage": "https://github.com/d8corp/innetjs",
   "author": "Mikhail Lysikov <d8corp@mail.ru>",
@@ -14,14 +14,14 @@
     "innetjs": "bin/innet"
   },
   "scripts": {
-    "build": "innetjs release -n",
+    "build": "innetjs release",
     "test": "jest",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "start": "npm run build && cd release && npm link",
     "stop": "npm unlink innetjs -g",
     "restart": "npm run stop && npm start",
-    "release": "innetjs release -n -p",
+    "release": "innetjs release -p",
     "patch": "innetjs patch",
     "minor": "innetjs minor",
     "major": "innetjs major"

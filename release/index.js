@@ -72,8 +72,8 @@ var styles__default = /*#__PURE__*/_interopDefaultLegacy(styles);
 var typescript__default = /*#__PURE__*/_interopDefaultLegacy(typescript);
 var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
 
-(function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.3.0"};
+;(function () {
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.3.2"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {
@@ -90,6 +90,7 @@ const execAsync = node_util.promisify(exec);
 const copyFiles = node_util.promisify(fs__default["default"].copy);
 updateDotenv.updateDotenv();
 const REG_CLEAR_TEXT = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+const REG_RPT_ERROR_FILE = /(src[^:]+):(\d+):(\d+)/;
 const REG_TJSX = /\.[tj]sx?$/;
 const REG_EXT = /\.([^.]+)$/;
 const scriptExtensions = ['ts', 'js', 'tsx', 'jsx'];
@@ -337,10 +338,14 @@ class InnetJS {
                     else if (e.error.code === 'PLUGIN_ERROR' && ['rpt2', 'commonjs'].includes(e.error.plugin)) {
                         const [, file, line, column] = e.error.message
                             .replace(REG_CLEAR_TEXT, '')
-                            .match(/^(src[^:]+):(\d+):(\d+)/) || [];
+                            .match(REG_RPT_ERROR_FILE) || [];
                         logger__default["default"].end('Bundling', e.error.message);
                         if (file) {
                             console.log(`ERROR in ${file}:${line}:${column}`);
+                        }
+                        else if (e.error.loc) {
+                            console.log(`ERROR in ${e.error.loc.file}:${e.error.loc.line}:${e.error.loc.column}`);
+                            console.log(e.error.frame);
                         }
                     }
                     else {
