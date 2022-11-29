@@ -226,7 +226,7 @@ export class InnetJS {
       ],
     }
 
-    this.withLint(options)
+    this.withLint(options, true)
 
     const outputOptions = {
       dir: this.buildFolder,
@@ -546,7 +546,7 @@ export class InnetJS {
       }
 
       this.withLint(options)
-      this.withEnv(options)
+      this.withEnv(options, true)
 
       const bundle = await rollup.rollup(options)
       await bundle.write(options.output as rollup.OutputOptions)
@@ -645,7 +645,7 @@ export class InnetJS {
   // Helpers
 
   private _lintUsage: boolean
-  withLint (options: rollup.RollupOptions) {
+  withLint (options: rollup.RollupOptions, prod = false) {
     if (this._lintUsage === undefined) {
       this._lintUsage = fs.existsSync(path.join(this.projectFolder, '.eslintrc'))
     }
@@ -653,6 +653,7 @@ export class InnetJS {
     if (this._lintUsage) {
       options.plugins.push(eslint({
         include: lintInclude,
+        throwOnError: prod,
       }))
     }
   }

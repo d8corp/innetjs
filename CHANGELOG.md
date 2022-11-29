@@ -1,12 +1,17 @@
 # Changelog
 
-## v2.2
+## v2.3
+
+### v2.3.3 [![29.11.2022](https://img.shields.io/date/1669727821)](https://github.com/d8corp/innetjs/tree/v2.3.3)
+- throw eslint error on `build` and `release`
 
 ### v2.3.2 [![24.11.2022](https://img.shields.io/date/1669239835)](https://github.com/d8corp/innetjs/tree/v2.3.2)
 - fix error message
 
 ### v2.3.0 [![21.11.2022](https://img.shields.io/date/1669032575)](https://github.com/d8corp/innetjs/tree/v2.3.0)
 - fix `cli` help information
+
+## v2.2
 
 ### v2.2.24 [![19.11.2022](https://img.shields.io/date/1668870840)](https://github.com/d8corp/innetjs/tree/v2.2.24)
 - fix build bugs

@@ -38,7 +38,7 @@ import { reporter, convertIndexFile, getFile } from './helpers.mjs';
 import { updateDotenv } from './updateDotenv.mjs';
 
 ;(function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.3.2"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.3.3"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {
@@ -160,7 +160,7 @@ class InnetJS {
                     jsx(),
                 ],
             };
-            this.withLint(options);
+            this.withLint(options, true);
             const outputOptions = {
                 dir: this.buildFolder,
                 sourcemap: this.sourcemap,
@@ -431,7 +431,7 @@ class InnetJS {
                     ],
                 };
                 this.withLint(options);
-                this.withEnv(options);
+                this.withEnv(options, true);
                 const bundle = yield rollup.rollup(options);
                 yield bundle.write(options.output);
                 yield bundle.close();
@@ -508,13 +508,14 @@ class InnetJS {
             }
         });
     }
-    withLint(options) {
+    withLint(options, prod = false) {
         if (this._lintUsage === undefined) {
             this._lintUsage = fs.existsSync(path.join(this.projectFolder, '.eslintrc'));
         }
         if (this._lintUsage) {
             options.plugins.push(eslint({
                 include: lintInclude,
+                throwOnError: prod,
             }));
         }
     }

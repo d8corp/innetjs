@@ -63,7 +63,7 @@ export declare class InnetJS {
     run(file: any): Promise<void>;
     release({ index, pub }?: ReleaseOptions): Promise<void>;
     private _lintUsage;
-    withLint(options: rollup.RollupOptions): void;
+    withLint(options: rollup.RollupOptions, prod?: boolean): void;
     withEnv(options: rollup.RollupOptions, virtual?: boolean): void;
     increaseVersion(release: string): Promise<void>;
     getPackage(): Promise<Record<string, any>>;
