@@ -316,7 +316,7 @@ class InnetJS {
                     mode: this.cssInJs ? 'inject' : 'extract',
                     url: true,
                     plugins: [autoprefixer__default["default"]()],
-                    modules: this.cssModules,
+                    autoModules: this.cssModules ? (id) => !id.includes('.global.') : true,
                     sourceMap: this.sourcemap,
                     minimize: true,
                 }), string({
@@ -417,7 +417,7 @@ class InnetJS {
                     mode: this.cssInJs ? 'inject' : 'extract',
                     url: true,
                     plugins: [autoprefixer__default["default"]()],
-                    modules: this.cssModules,
+                    autoModules: this.cssModules ? (id) => !id.includes('.global.') : true,
                     sourceMap: true,
                 }), string({
                     include: '**/*.*',
@@ -558,9 +558,8 @@ class InnetJS {
                         styles__default["default"]({
                             mode: this.cssInJs ? 'inject' : 'extract',
                             plugins: [autoprefixer__default["default"]()],
-                            modules: cssModules,
+                            autoModules: cssModules ? (id) => !id.includes('.global.') : true,
                             minimize: true,
-                            autoModules: true,
                         }),
                         pluginNodeResolve.nodeResolve(),
                         external__default["default"](),
@@ -770,7 +769,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.3.3"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.3.5"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {

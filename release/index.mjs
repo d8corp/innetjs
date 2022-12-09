@@ -1,3 +1,4 @@
+import './_virtual/_rollup-plugin-process-env.mjs';
 import { __awaiter } from 'tslib';
 import logger from '@cantinc/logger';
 import commonjs from '@rollup/plugin-commonjs';
@@ -37,16 +38,6 @@ import { Extract } from './extract.mjs';
 import { reporter, convertIndexFile, getFile } from './helpers.mjs';
 import { updateDotenv } from './updateDotenv.mjs';
 
-;(function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.3.3"};
-  if (typeof process === 'undefined') {
-    globalThis.process = { env: env };
-  } else if (process.env) {
-    Object.assign(process.env, env);
-  } else {
-    process.env = env;
-  }
-})();
 const livereload = require('rollup-plugin-livereload');
 const { string } = require('rollup-plugin-string');
 const { exec, spawn } = require('child_process');
@@ -180,7 +171,7 @@ class InnetJS {
                     mode: this.cssInJs ? 'inject' : 'extract',
                     url: true,
                     plugins: [autoprefixer()],
-                    modules: this.cssModules,
+                    autoModules: this.cssModules ? (id) => !id.includes('.global.') : true,
                     sourceMap: this.sourcemap,
                     minimize: true,
                 }), string({
@@ -281,7 +272,7 @@ class InnetJS {
                     mode: this.cssInJs ? 'inject' : 'extract',
                     url: true,
                     plugins: [autoprefixer()],
-                    modules: this.cssModules,
+                    autoModules: this.cssModules ? (id) => !id.includes('.global.') : true,
                     sourceMap: true,
                 }), string({
                     include: '**/*.*',
@@ -422,9 +413,8 @@ class InnetJS {
                         styles({
                             mode: this.cssInJs ? 'inject' : 'extract',
                             plugins: [autoprefixer()],
-                            modules: cssModules,
+                            autoModules: cssModules ? (id) => !id.includes('.global.') : true,
                             minimize: true,
-                            autoModules: true,
                         }),
                         nodeResolve(),
                         external(),

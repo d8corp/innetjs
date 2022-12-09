@@ -253,7 +253,7 @@ export class InnetJS {
           mode: this.cssInJs ? 'inject' : 'extract',
           url: true,
           plugins: [autoprefixer()],
-          modules: this.cssModules,
+          autoModules: this.cssModules ? (id: string) => !id.includes('.global.') : true,
           sourceMap: this.sourcemap,
           minimize: true,
         }),
@@ -379,7 +379,7 @@ export class InnetJS {
           mode: this.cssInJs ? 'inject' : 'extract',
           url: true,
           plugins: [autoprefixer()],
-          modules: this.cssModules,
+          autoModules: this.cssModules ? (id: string) => !id.includes('.global.') : true,
           sourceMap: true,
         }),
         string({
@@ -536,9 +536,8 @@ export class InnetJS {
           styles({
             mode: this.cssInJs ? 'inject' : 'extract',
             plugins: [autoprefixer()],
-            modules: cssModules,
+            autoModules: cssModules ? (id: string) => !id.includes('.global.') : true,
             minimize: true,
-            autoModules: true,
           }),
           nodeResolve(),
           external(),

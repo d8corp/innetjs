@@ -2,6 +2,9 @@
 
 ## v2.3
 
+### v2.3.5 [![09.12.2022](https://img.shields.io/date/1670603179)](https://github.com/d8corp/innetjs/tree/v2.3.5)
+- improve css import
+
 ### v2.3.3 [![29.11.2022](https://img.shields.io/date/1669727821)](https://github.com/d8corp/innetjs/tree/v2.3.3)
 - throw eslint error on `build` and `release`
 
