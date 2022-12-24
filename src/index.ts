@@ -96,7 +96,7 @@ export class InnetJS {
   constructor ({
     envPrefix = process.env.INNETJS_ENV_PREFIX || 'INNETJS_',
     projectFolder = process.env.PROJECT_FOLDER || '',
-    baseUrl = process.env.BASE_URL || '/',
+    baseUrl = process.env.BASE_URL || '',
     publicFolder = process.env.PUBLIC_FOLDER || 'public',
     releaseFolder = process.env.RELEASE_FOLDER || 'release',
     buildFolder = process.env.BUILD_FOLDER || 'build',
@@ -133,7 +133,7 @@ export class InnetJS {
     this.port = port
     this.proxy = proxy
     this.api = api
-    this.baseUrl = baseUrl
+    this.baseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
     this.envPrefix = envPrefix
   }
 

@@ -2,6 +2,10 @@
 
 ## v2.3
 
+### v2.3.7 [![24.12.2022](https://img.shields.io/date/1671877589)](https://github.com/d8corp/innetjs/tree/v2.3.7)
+
+- improve `BASE_URL`
+
 ### v2.3.6 [![24.12.2022](https://img.shields.io/date/1671875650)](https://github.com/d8corp/innetjs/tree/v2.3.6)
 
 - add `index.html` file replacement with environment variables.
