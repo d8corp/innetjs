@@ -2,6 +2,20 @@
 
 ## v2.3
 
+### v2.3.6 [![24.12.2022](https://img.shields.io/date/1671875650)](https://github.com/d8corp/innetjs/tree/v2.3.6)
+
+- add `index.html` file replacement with environment variables.
+  ```html
+  <html>
+    <head>
+    ...
+    <link rel="shortcut icon" href="%PUBLIC_URL%/logo/favicon.ico">
+    ...
+    </head>
+    ...
+  </html>
+  ```
+
 ### v2.3.5 [![09.12.2022](https://img.shields.io/date/1670603179)](https://github.com/d8corp/innetjs/tree/v2.3.5)
 - improve css import
 

@@ -34,11 +34,17 @@ export function getFile (file) {
 }
 
 export async function convertIndexFile (data: Buffer, version: string, baseUrl: string, index: string) {
+  const { env } = process
+
   return data
     .toString()
     .replace(
       '</head>',
       `<script type="module" defer src="${baseUrl}${index}.js${version ? `?v=${version}` : ''}"></script></head>`,
+    )
+    .replace(
+      /%([A-Z0-9_]+)%/g,
+      (placeholder, placeholderId) => env[placeholderId] ?? placeholder,
     )
 }
 

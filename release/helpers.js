@@ -39,9 +39,11 @@ function getFile(file) {
 }
 function convertIndexFile(data, version, baseUrl, index) {
     return tslib.__awaiter(this, void 0, void 0, function* () {
+        const { env } = process;
         return data
             .toString()
-            .replace('</head>', `<script type="module" defer src="${baseUrl}${index}.js${version ? `?v=${version}` : ''}"></script></head>`);
+            .replace('</head>', `<script type="module" defer src="${baseUrl}${index}.js${version ? `?v=${version}` : ''}"></script></head>`)
+            .replace(/%([A-Z0-9_]+)%/g, (placeholder, placeholderId) => { var _a; return (_a = env[placeholderId]) !== null && _a !== void 0 ? _a : placeholder; });
     });
 }
 const reporter = (options, outputOptions, info) => {
