@@ -744,6 +744,7 @@ export class InnetJS {
           if (this.proxy?.startsWith('http')) {
             app.use(this.api, proxy(this.proxy, {
               https: httpsUsing,
+              limit: '1000mb',
               proxyReqPathResolver: req => req.originalUrl,
             }))
           }

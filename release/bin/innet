@@ -724,6 +724,7 @@ class InnetJS {
                     if ((_a = this.proxy) === null || _a === void 0 ? void 0 : _a.startsWith('http')) {
                         app.use(this.api, proxy__default["default"](this.proxy, {
                             https: httpsUsing,
+                            limit: '1000mb',
                             proxyReqPathResolver: req => req.originalUrl,
                         }));
                     }
@@ -771,7 +772,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.3.8"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.3.9"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {

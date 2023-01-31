@@ -2,6 +2,10 @@
 
 ## v2.3
 
+### v2.3.9 [![31.01.2023](https://img.shields.io/date/1675187121)](https://github.com/d8corp/innetjs/tree/v2.3.9)
+
+- fix proxy file size limit
+
 ### v2.3.8 [![31.01.2023](https://img.shields.io/date/1675160611)](https://github.com/d8corp/innetjs/tree/v2.3.8)
 
 - fix node `start` and `build`

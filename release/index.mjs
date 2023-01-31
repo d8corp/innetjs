@@ -577,6 +577,7 @@ class InnetJS {
                     if ((_a = this.proxy) === null || _a === void 0 ? void 0 : _a.startsWith('http')) {
                         app.use(this.api, proxy(this.proxy, {
                             https: httpsUsing,
+                            limit: '1000mb',
                             proxyReqPathResolver: req => req.originalUrl,
                         }));
                     }
