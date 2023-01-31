@@ -194,7 +194,7 @@ class InnetJS {
             if (node) {
                 outputOptions.format = 'cjs';
                 options.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
-                options.plugins.push(string({
+                options.plugins.push(pluginNodeResolve.nodeResolve(), string({
                     include: '**/*.*',
                     exclude: constants.stringExcludeNode,
                 }));
@@ -283,7 +283,7 @@ class InnetJS {
                 // @ts-expect-error
                 options.output.format = 'cjs';
                 options.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
-                options.plugins.push(string({
+                options.plugins.push(pluginNodeResolve.nodeResolve(), string({
                     include: '**/*.*',
                     exclude: constants.stringExcludeNode,
                 }), this.createServer());

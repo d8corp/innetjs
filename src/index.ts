@@ -237,6 +237,7 @@ export class InnetJS {
       outputOptions.format = 'cjs'
       options.external = Object.keys(pkg?.dependencies || {})
       options.plugins.push(
+        nodeResolve(),
         string({
           include: '**/*.*',
           exclude: stringExcludeNode,
@@ -348,6 +349,7 @@ export class InnetJS {
       options.output.format = 'cjs'
       options.external = Object.keys(pkg?.dependencies || {})
       options.plugins.push(
+        nodeResolve(),
         string({
           include: '**/*.*',
           exclude: stringExcludeNode,

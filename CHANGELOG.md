@@ -2,6 +2,10 @@
 
 ## v2.3
 
+### v2.3.8 [![31.01.2023](https://img.shields.io/date/1675160611)](https://github.com/d8corp/innetjs/tree/v2.3.8)
+
+- fix node `start` and `build`
+
 ### v2.3.7 [![24.12.2022](https://img.shields.io/date/1671877589)](https://github.com/d8corp/innetjs/tree/v2.3.7)
 
 - improve `BASE_URL`
