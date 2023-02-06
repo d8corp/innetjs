@@ -2,6 +2,10 @@
 
 ## v2.3
 
+### v2.3.10 [![06.02.2023](https://img.shields.io/date/1675677317)](https://github.com/d8corp/innetjs/tree/v2.3.10)
+
+- add `IP` simulation feature
+
 ### v2.3.9 [![31.01.2023](https://img.shields.io/date/1675187121)](https://github.com/d8corp/innetjs/tree/v2.3.9)
 
 - fix proxy file size limit

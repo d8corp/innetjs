@@ -32,8 +32,9 @@ export declare class InnetJS {
     port: number;
     api: string;
     envPrefix: string;
+    simulateIP: string;
     private package;
-    constructor({ envPrefix, projectFolder, baseUrl, publicFolder, releaseFolder, buildFolder, srcFolder, sourcemap, cssModules, cssInJs, sslKey, sslCrt, proxy, port, api, }?: {
+    constructor({ envPrefix, projectFolder, baseUrl, publicFolder, releaseFolder, buildFolder, srcFolder, sourcemap, cssModules, cssInJs, sslKey, sslCrt, proxy, simulateIP, port, api, }?: {
         envPrefix?: string;
         projectFolder?: string;
         baseUrl?: string;
@@ -47,6 +48,7 @@ export declare class InnetJS {
         sslKey?: string;
         sslCrt?: string;
         proxy?: string;
+        simulateIP?: string;
         port?: number;
         api?: string;
     });

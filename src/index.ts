@@ -90,6 +90,7 @@ export class InnetJS {
   port: number
   api: string
   envPrefix: string
+  simulateIP: string
 
   private package: object
 
@@ -107,6 +108,7 @@ export class InnetJS {
     sslKey = process.env.SSL_KEY || 'localhost.key',
     sslCrt = process.env.SSL_CRT || 'localhost.crt',
     proxy = process.env.PROXY || '',
+    simulateIP = process.env.IP,
     port = process.env.PORT ? +process.env.PORT : 3000,
     api = process.env.API || '/api/?*',
   } = {}) {
@@ -135,6 +137,7 @@ export class InnetJS {
     this.api = api
     this.baseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
     this.envPrefix = envPrefix
+    this.simulateIP = simulateIP
   }
 
   // Methods
@@ -742,6 +745,13 @@ export class InnetJS {
           app.use(express.static(this.publicFolder))
 
           if (this.proxy?.startsWith('http')) {
+            if (this.simulateIP) {
+              app.use((req, res, next) => {
+                req.headers['X-Real-IP'] = this.simulateIP
+                next()
+              })
+            }
+
             app.use(this.api, proxy(this.proxy, {
               https: httpsUsing,
               limit: '1000mb',
