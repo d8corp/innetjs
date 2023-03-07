@@ -1,7 +1,6 @@
 import logger from '@cantinc/logger'
 import commonjs from '@rollup/plugin-commonjs'
 import eslint from '@rollup/plugin-eslint'
-import image from '@rollup/plugin-image'
 import json from '@rollup/plugin-json'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 import address from 'address'
@@ -45,6 +44,7 @@ const livereload = require('rollup-plugin-livereload')
 const { string } = require('rollup-plugin-string')
 const { exec, spawn } = require('child_process')
 const readline = require('readline')
+const image = require('rollup-plugin-image-files')
 const execAsync = promisify(exec)
 const copyFiles = promisify(fs.copy)
 
