@@ -4,27 +4,25 @@ const lintInclude = [
     '**/*.js',
     '**/*.jsx',
 ];
-const stringExcludeDom = [
-    '**/*.ts',
-    '**/*.tsx',
-    '**/*.js',
-    '**/*.jsx',
-    '**/*.json',
-    '**/*.css',
-    '**/*.scss',
-    '**/*.webp',
+const imageInclude = [
     '**/*.gif',
     '**/*.png',
     '**/*.jpeg',
     '**/*.jpg',
     '**/*.svg',
+    '**/*.webp',
+];
+const stringExcludeDom = [
+    ...lintInclude,
+    '**/*.json',
+    '**/*.css',
+    '**/*.scss',
+    '**/*.webp',
+    ...imageInclude,
 ];
 const stringExcludeNode = [
-    '**/*.ts',
-    '**/*.tsx',
-    '**/*.js',
-    '**/*.jsx',
+    ...lintInclude,
     '**/*.json',
 ];
 
-export { lintInclude, stringExcludeDom, stringExcludeNode };
+export { imageInclude, lintInclude, stringExcludeDom, stringExcludeNode };

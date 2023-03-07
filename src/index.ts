@@ -1,6 +1,7 @@
 import logger from '@cantinc/logger'
 import commonjs from '@rollup/plugin-commonjs'
 import eslint from '@rollup/plugin-eslint'
+import image from '@rollup/plugin-image'
 import json from '@rollup/plugin-json'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 import address from 'address'
@@ -32,6 +33,7 @@ import tmp from 'tmp'
 import { promisify } from 'util'
 
 import {
+  imageInclude,
   lintInclude,
   stringExcludeDom,
   stringExcludeNode,
@@ -44,7 +46,7 @@ const livereload = require('rollup-plugin-livereload')
 const { string } = require('rollup-plugin-string')
 const { exec, spawn } = require('child_process')
 const readline = require('readline')
-const image = require('rollup-plugin-image-files')
+const importAssets = require('rollup-plugin-import-assets')
 const execAsync = promisify(exec)
 const copyFiles = promisify(fs.copy)
 
@@ -252,7 +254,9 @@ export class InnetJS {
           browser: true,
         }),
         polyfill(),
-        image(),
+        importAssets({
+          include: imageInclude.map(img => `src/${img}`),
+        }),
         styles({
           mode: this.cssInJs ? 'inject' : 'extract',
           url: true,
@@ -379,7 +383,9 @@ export class InnetJS {
           browser: true,
         }),
         polyfill(),
-        image(),
+        importAssets({
+          include: imageInclude.map(img => `src/${img}`),
+        }),
         styles({
           mode: this.cssInJs ? 'inject' : 'extract',
           url: true,

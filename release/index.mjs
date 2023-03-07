@@ -33,7 +33,7 @@ import { terser } from 'rollup-plugin-terser';
 import typescript from 'rollup-plugin-typescript2';
 import tmp from 'tmp';
 import { promisify } from 'node:util';
-import { stringExcludeNode, stringExcludeDom, lintInclude } from './constants.mjs';
+import { stringExcludeNode, imageInclude, stringExcludeDom, lintInclude } from './constants.mjs';
 import { Extract } from './extract.mjs';
 import { reporter, convertIndexFile, getFile } from './helpers.mjs';
 import { updateDotenv } from './updateDotenv.mjs';
@@ -42,6 +42,7 @@ const livereload = require('rollup-plugin-livereload');
 const { string } = require('rollup-plugin-string');
 const { exec, spawn } = require('child_process');
 const readline = require('readline');
+const importAssets = require('rollup-plugin-import-assets');
 const execAsync = promisify(exec);
 const copyFiles = promisify(fs.copy);
 updateDotenv();
@@ -168,7 +169,9 @@ class InnetJS {
             else {
                 options.plugins.push(nodeResolve({
                     browser: true,
-                }), polyfill(), image(), styles({
+                }), polyfill(), importAssets({
+                    include: imageInclude.map(img => `src/${img}`),
+                }), styles({
                     mode: this.cssInJs ? 'inject' : 'extract',
                     url: true,
                     plugins: [autoprefixer()],
@@ -269,7 +272,9 @@ class InnetJS {
                 options.output.format = 'es';
                 options.plugins.push(nodeResolve({
                     browser: true,
-                }), polyfill(), image(), styles({
+                }), polyfill(), importAssets({
+                    include: imageInclude.map(img => `src/${img}`),
+                }), styles({
                     mode: this.cssInJs ? 'inject' : 'extract',
                     url: true,
                     plugins: [autoprefixer()],

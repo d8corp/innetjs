@@ -77,6 +77,7 @@ const livereload = require('rollup-plugin-livereload');
 const { string } = require('rollup-plugin-string');
 const { exec, spawn } = require('child_process');
 const readline = require('readline');
+const importAssets = require('rollup-plugin-import-assets');
 const execAsync = node_util.promisify(exec);
 const copyFiles = node_util.promisify(fs__default["default"].copy);
 updateDotenv.updateDotenv();
@@ -203,7 +204,9 @@ class InnetJS {
             else {
                 options.plugins.push(pluginNodeResolve.nodeResolve({
                     browser: true,
-                }), polyfill__default["default"](), image__default["default"](), styles__default["default"]({
+                }), polyfill__default["default"](), importAssets({
+                    include: constants.imageInclude.map(img => `src/${img}`),
+                }), styles__default["default"]({
                     mode: this.cssInJs ? 'inject' : 'extract',
                     url: true,
                     plugins: [autoprefixer__default["default"]()],
@@ -304,7 +307,9 @@ class InnetJS {
                 options.output.format = 'es';
                 options.plugins.push(pluginNodeResolve.nodeResolve({
                     browser: true,
-                }), polyfill__default["default"](), image__default["default"](), styles__default["default"]({
+                }), polyfill__default["default"](), importAssets({
+                    include: constants.imageInclude.map(img => `src/${img}`),
+                }), styles__default["default"]({
                     mode: this.cssInJs ? 'inject' : 'extract',
                     url: true,
                     plugins: [autoprefixer__default["default"]()],

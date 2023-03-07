@@ -75,26 +75,24 @@ const lintInclude = [
     '**/*.js',
     '**/*.jsx',
 ];
-const stringExcludeDom = [
-    '**/*.ts',
-    '**/*.tsx',
-    '**/*.js',
-    '**/*.jsx',
-    '**/*.json',
-    '**/*.css',
-    '**/*.scss',
-    '**/*.webp',
+const imageInclude = [
     '**/*.gif',
     '**/*.png',
     '**/*.jpeg',
     '**/*.jpg',
     '**/*.svg',
+    '**/*.webp',
+];
+const stringExcludeDom = [
+    ...lintInclude,
+    '**/*.json',
+    '**/*.css',
+    '**/*.scss',
+    '**/*.webp',
+    ...imageInclude,
 ];
 const stringExcludeNode = [
-    '**/*.ts',
-    '**/*.tsx',
-    '**/*.js',
-    '**/*.jsx',
+    ...lintInclude,
     '**/*.json',
 ];
 
@@ -189,6 +187,7 @@ const livereload = require('rollup-plugin-livereload');
 const { string } = require('rollup-plugin-string');
 const { exec, spawn } = require('child_process');
 const readline = require('readline');
+const importAssets = require('rollup-plugin-import-assets');
 const execAsync = node_util.promisify(exec);
 const copyFiles = node_util.promisify(fs__default["default"].copy);
 updateDotenv();
@@ -315,7 +314,9 @@ class InnetJS {
             else {
                 options.plugins.push(pluginNodeResolve.nodeResolve({
                     browser: true,
-                }), polyfill__default["default"](), image__default["default"](), styles__default["default"]({
+                }), polyfill__default["default"](), importAssets({
+                    include: imageInclude.map(img => `src/${img}`),
+                }), styles__default["default"]({
                     mode: this.cssInJs ? 'inject' : 'extract',
                     url: true,
                     plugins: [autoprefixer__default["default"]()],
@@ -416,7 +417,9 @@ class InnetJS {
                 options.output.format = 'es';
                 options.plugins.push(pluginNodeResolve.nodeResolve({
                     browser: true,
-                }), polyfill__default["default"](), image__default["default"](), styles__default["default"]({
+                }), polyfill__default["default"](), importAssets({
+                    include: imageInclude.map(img => `src/${img}`),
+                }), styles__default["default"]({
                     mode: this.cssInJs ? 'inject' : 'extract',
                     url: true,
                     plugins: [autoprefixer__default["default"]()],
@@ -779,7 +782,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.3.10"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.4.0-beta.0"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {

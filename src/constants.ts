@@ -4,25 +4,23 @@ export const lintInclude = [
   '**/*.js',
   '**/*.jsx',
 ]
-export const stringExcludeDom = [
-  '**/*.ts',
-  '**/*.tsx',
-  '**/*.js',
-  '**/*.jsx',
-  '**/*.json',
-  '**/*.css',
-  '**/*.scss',
-  '**/*.webp',
+export const imageInclude = [
   '**/*.gif',
   '**/*.png',
   '**/*.jpeg',
   '**/*.jpg',
   '**/*.svg',
+  '**/*.webp',
+]
+export const stringExcludeDom = [
+  ...lintInclude,
+  '**/*.json',
+  '**/*.css',
+  '**/*.scss',
+  '**/*.webp',
+  ...imageInclude,
 ]
 export const stringExcludeNode = [
-  '**/*.ts',
-  '**/*.tsx',
-  '**/*.js',
-  '**/*.jsx',
+  ...lintInclude,
   '**/*.json',
 ]
