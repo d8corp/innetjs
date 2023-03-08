@@ -174,7 +174,10 @@ class InnetJS {
                     publicPath: this.baseUrl,
                 }), styles({
                     mode: this.cssInJs ? 'inject' : 'extract',
-                    url: true,
+                    url: {
+                        inline: false,
+                        publicPath: `${this.baseUrl}assets`,
+                    },
                     plugins: [autoprefixer()],
                     autoModules: this.cssModules ? (id) => !id.includes('.global.') : true,
                     sourceMap: this.sourcemap,
@@ -278,7 +281,10 @@ class InnetJS {
                     publicPath: this.baseUrl,
                 }), styles({
                     mode: this.cssInJs ? 'inject' : 'extract',
-                    url: true,
+                    url: {
+                        inline: false,
+                        publicPath: `${this.baseUrl}assets`,
+                    },
                     plugins: [autoprefixer()],
                     autoModules: this.cssModules ? (id) => !id.includes('.global.') : true,
                     sourceMap: true,

@@ -319,7 +319,10 @@ class InnetJS {
                     publicPath: this.baseUrl,
                 }), styles__default["default"]({
                     mode: this.cssInJs ? 'inject' : 'extract',
-                    url: true,
+                    url: {
+                        inline: false,
+                        publicPath: `${this.baseUrl}assets`,
+                    },
                     plugins: [autoprefixer__default["default"]()],
                     autoModules: this.cssModules ? (id) => !id.includes('.global.') : true,
                     sourceMap: this.sourcemap,
@@ -423,7 +426,10 @@ class InnetJS {
                     publicPath: this.baseUrl,
                 }), styles__default["default"]({
                     mode: this.cssInJs ? 'inject' : 'extract',
-                    url: true,
+                    url: {
+                        inline: false,
+                        publicPath: `${this.baseUrl}assets`,
+                    },
                     plugins: [autoprefixer__default["default"]()],
                     autoModules: this.cssModules ? (id) => !id.includes('.global.') : true,
                     sourceMap: true,
@@ -785,7 +791,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.4.1"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.4.2"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {

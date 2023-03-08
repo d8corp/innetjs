@@ -209,7 +209,10 @@ class InnetJS {
                     publicPath: this.baseUrl,
                 }), styles__default["default"]({
                     mode: this.cssInJs ? 'inject' : 'extract',
-                    url: true,
+                    url: {
+                        inline: false,
+                        publicPath: `${this.baseUrl}assets`,
+                    },
                     plugins: [autoprefixer__default["default"]()],
                     autoModules: this.cssModules ? (id) => !id.includes('.global.') : true,
                     sourceMap: this.sourcemap,
@@ -313,7 +316,10 @@ class InnetJS {
                     publicPath: this.baseUrl,
                 }), styles__default["default"]({
                     mode: this.cssInJs ? 'inject' : 'extract',
-                    url: true,
+                    url: {
+                        inline: false,
+                        publicPath: `${this.baseUrl}assets`,
+                    },
                     plugins: [autoprefixer__default["default"]()],
                     autoModules: this.cssModules ? (id) => !id.includes('.global.') : true,
                     sourceMap: true,
