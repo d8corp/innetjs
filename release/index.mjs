@@ -171,6 +171,7 @@ class InnetJS {
                     browser: true,
                 }), polyfill(), importAssets({
                     include: imageInclude.map(img => `src/${img}`),
+                    publicPath: this.baseUrl,
                 }), styles({
                     mode: this.cssInJs ? 'inject' : 'extract',
                     url: true,
@@ -274,6 +275,7 @@ class InnetJS {
                     browser: true,
                 }), polyfill(), importAssets({
                     include: imageInclude.map(img => `src/${img}`),
+                    publicPath: this.baseUrl,
                 }), styles({
                     mode: this.cssInJs ? 'inject' : 'extract',
                     url: true,

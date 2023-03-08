@@ -206,6 +206,7 @@ class InnetJS {
                     browser: true,
                 }), polyfill__default["default"](), importAssets({
                     include: constants.imageInclude.map(img => `src/${img}`),
+                    publicPath: this.baseUrl,
                 }), styles__default["default"]({
                     mode: this.cssInJs ? 'inject' : 'extract',
                     url: true,
@@ -309,6 +310,7 @@ class InnetJS {
                     browser: true,
                 }), polyfill__default["default"](), importAssets({
                     include: constants.imageInclude.map(img => `src/${img}`),
+                    publicPath: this.baseUrl,
                 }), styles__default["default"]({
                     mode: this.cssInJs ? 'inject' : 'extract',
                     url: true,

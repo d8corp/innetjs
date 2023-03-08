@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.4
+
+### v2.4.0 [![08.03.2023](https://img.shields.io/date/1678263972)](https://github.com/d8corp/innetjs/tree/v2.4.0)
+
+- build assets as files instead of url injection
+
 ## v2.3
 
 ### v2.3.10 [![06.02.2023](https://img.shields.io/date/1675677317)](https://github.com/d8corp/innetjs/tree/v2.3.10)
