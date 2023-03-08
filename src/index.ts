@@ -749,8 +749,8 @@ export class InnetJS {
 
           const httpsUsing = !!(cert && key)
 
-          app.use(express.static(this.devBuildFolder))
-          app.use(express.static(this.publicFolder))
+          app.use(this.baseUrl, express.static(this.devBuildFolder))
+          app.use(this.baseUrl, express.static(this.publicFolder))
 
           if (this.proxy?.startsWith('http')) {
             if (this.simulateIP) {
@@ -774,7 +774,8 @@ export class InnetJS {
           const server = httpsUsing ? https.createServer({ key, cert }, app) : http.createServer(app)
           let port = this.port
           const listener = () => {
-            console.log(`${chalk.green('➤')} Started on http${httpsUsing ? 's' : ''}://localhost:${port} and http${httpsUsing ? 's' : ''}://${address.ip()}:${port}`)
+            const baseUrl = this.baseUrl === '/' ? '' : this.baseUrl
+            console.log(`${chalk.green('➤')} Started on http${httpsUsing ? 's' : ''}://localhost:${port}${baseUrl} and http${httpsUsing ? 's' : ''}://${address.ip()}:${port}${baseUrl}`)
           }
 
           server.listen(port, listener)

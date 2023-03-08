@@ -580,8 +580,8 @@ class InnetJS {
                     fs.watch(this.publicIndexFile, update);
                     yield update();
                     const httpsUsing = !!(cert && key);
-                    app.use(express.static(this.devBuildFolder));
-                    app.use(express.static(this.publicFolder));
+                    app.use(this.baseUrl, express.static(this.devBuildFolder));
+                    app.use(this.baseUrl, express.static(this.publicFolder));
                     if ((_a = this.proxy) === null || _a === void 0 ? void 0 : _a.startsWith('http')) {
                         if (this.simulateIP) {
                             app.use((req, res, next) => {
@@ -601,7 +601,8 @@ class InnetJS {
                     const server = httpsUsing ? https.createServer({ key, cert }, app) : http.createServer(app);
                     let port = this.port;
                     const listener = () => {
-                        console.log(`${chalk.green('➤')} Started on http${httpsUsing ? 's' : ''}://localhost:${port} and http${httpsUsing ? 's' : ''}://${address.ip()}:${port}`);
+                        const baseUrl = this.baseUrl === '/' ? '' : this.baseUrl;
+                        console.log(`${chalk.green('➤')} Started on http${httpsUsing ? 's' : ''}://localhost:${port}${baseUrl} and http${httpsUsing ? 's' : ''}://${address.ip()}:${port}${baseUrl}`);
                     };
                     server.listen(port, listener);
                     server.on('error', (e) => __awaiter(this, void 0, void 0, function* () {
