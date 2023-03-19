@@ -187,6 +187,11 @@ class InnetJS {
                     }),
                     jsx__default["default"](),
                 ],
+                onwarn(warning, warn) {
+                    if (warning.code === 'THIS_IS_UNDEFINED' || warning.code === 'SOURCEMAP_ERROR')
+                        return;
+                    warn(warning);
+                },
             };
             this.withLint(options, true);
             const outputOptions = {
@@ -238,7 +243,7 @@ class InnetJS {
                     yield copyFiles(this.publicFolder, this.buildFolder);
                     const data = yield fs.promises.readFile(this.publicIndexFile);
                     const pkg = yield this.getPackage();
-                    yield fs.promises.writeFile(this.buildIndexFile, yield helpers.convertIndexFile(data, pkg.version, this.baseUrl, index));
+                    yield fs.promises.writeFile(this.buildIndexFile, yield helpers.convertIndexFile(data, pkg.version, this.baseUrl, path__default["default"].parse(input[0]).name));
                 }
             }));
             if (pkg) {
@@ -285,6 +290,11 @@ class InnetJS {
                     }),
                     jsx__default["default"](),
                 ],
+                onwarn(warning, warn) {
+                    if (warning.code === 'THIS_IS_UNDEFINED' || warning.code === 'SOURCEMAP_ERROR')
+                        return;
+                    warn(warning);
+                },
             };
             this.withLint(options);
             if (node) {
@@ -326,7 +336,7 @@ class InnetJS {
                 }), string({
                     include: '**/*.*',
                     exclude: constants.stringExcludeDom,
-                }), this.createClient(key, cert, pkg, index), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
+                }), this.createClient(key, cert, pkg, path__default["default"].parse(input[0]).name), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
             }
             this.withEnv(options, true);
             const watcher = rollup__default["default"].watch(options);

@@ -152,6 +152,11 @@ class InnetJS {
                     }),
                     jsx(),
                 ],
+                onwarn(warning, warn) {
+                    if (warning.code === 'THIS_IS_UNDEFINED' || warning.code === 'SOURCEMAP_ERROR')
+                        return;
+                    warn(warning);
+                },
             };
             this.withLint(options, true);
             const outputOptions = {
@@ -203,7 +208,7 @@ class InnetJS {
                     yield copyFiles(this.publicFolder, this.buildFolder);
                     const data = yield promises.readFile(this.publicIndexFile);
                     const pkg = yield this.getPackage();
-                    yield promises.writeFile(this.buildIndexFile, yield convertIndexFile(data, pkg.version, this.baseUrl, index));
+                    yield promises.writeFile(this.buildIndexFile, yield convertIndexFile(data, pkg.version, this.baseUrl, path.parse(input[0]).name));
                 }
             }));
             if (pkg) {
@@ -250,6 +255,11 @@ class InnetJS {
                     }),
                     jsx(),
                 ],
+                onwarn(warning, warn) {
+                    if (warning.code === 'THIS_IS_UNDEFINED' || warning.code === 'SOURCEMAP_ERROR')
+                        return;
+                    warn(warning);
+                },
             };
             this.withLint(options);
             if (node) {
@@ -291,7 +301,7 @@ class InnetJS {
                 }), string({
                     include: '**/*.*',
                     exclude: stringExcludeDom,
-                }), this.createClient(key, cert, pkg, index), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
+                }), this.createClient(key, cert, pkg, path.parse(input[0]).name), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
             }
             this.withEnv(options, true);
             const watcher = rollup.watch(options);

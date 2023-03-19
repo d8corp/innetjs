@@ -2,6 +2,10 @@
 
 ## v2.4
 
+### v2.4.3 [![19.03.2023](https://img.shields.io/date/1679236171)](https://github.com/d8corp/innetjs/tree/v2.4.3)
+
+- add a possible to use a several index files
+
 ### v2.4.2 [![08.03.2023](https://img.shields.io/date/1678277776)](https://github.com/d8corp/innetjs/tree/v2.4.2)
 
 - build assets as files instead of url injection for css

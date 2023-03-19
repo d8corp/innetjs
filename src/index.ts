@@ -229,6 +229,10 @@ export class InnetJS {
         }),
         jsx(),
       ],
+      onwarn (warning, warn) {
+        if (warning.code === 'THIS_IS_UNDEFINED' || warning.code === 'SOURCEMAP_ERROR') return
+        warn(warning)
+      },
     }
 
     this.withLint(options, true)
@@ -295,7 +299,7 @@ export class InnetJS {
         const pkg = await this.getPackage()
         await fsx.writeFile(
           this.buildIndexFile,
-          await convertIndexFile(data, pkg.version, this.baseUrl, index),
+          await convertIndexFile(data, pkg.version, this.baseUrl, path.parse(input[0]).name),
         )
       }
     })
@@ -351,6 +355,10 @@ export class InnetJS {
         }),
         jsx(),
       ],
+      onwarn (warning, warn) {
+        if (warning.code === 'THIS_IS_UNDEFINED' || warning.code === 'SOURCEMAP_ERROR') return
+        warn(warning)
+      },
     }
 
     this.withLint(options)
@@ -405,7 +413,7 @@ export class InnetJS {
           include: '**/*.*',
           exclude: stringExcludeDom,
         }),
-        this.createClient(key, cert, pkg, index),
+        this.createClient(key, cert, pkg, path.parse(input[0]).name),
         livereload({
           exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'],
           watch: [this.devBuildFolder, this.publicFolder],
