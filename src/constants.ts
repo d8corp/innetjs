@@ -3,6 +3,7 @@ export const lintInclude = [
   '**/*.tsx',
   '**/*.js',
   '**/*.jsx',
+  '**/*.mjs',
 ]
 export const imageInclude = [
   '**/*.gif',

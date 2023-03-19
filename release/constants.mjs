@@ -3,6 +3,7 @@ const lintInclude = [
     '**/*.tsx',
     '**/*.js',
     '**/*.jsx',
+    '**/*.mjs',
 ];
 const imageInclude = [
     '**/*.gif',

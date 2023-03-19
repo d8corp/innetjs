@@ -2,6 +2,10 @@
 
 ## v2.4
 
+### v2.4.4 [![19.03.2023](https://img.shields.io/date/1679246795)](https://github.com/d8corp/innetjs/tree/v2.4.4)
+
+- fix `mjs` import bug
+
 ### v2.4.3 [![19.03.2023](https://img.shields.io/date/1679236171)](https://github.com/d8corp/innetjs/tree/v2.4.3)
 
 - add a possible to use a several index files
