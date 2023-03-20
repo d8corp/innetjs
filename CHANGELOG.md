@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.5
+
+### v2.5.0 [![20.03.2023](https://img.shields.io/date/1679321924)](https://github.com/d8corp/innetjs/tree/v2.5.0)
+
+- change TypeScript plugin
+
 ## v2.4
 
 ### v2.4.4 [![19.03.2023](https://img.shields.io/date/1679246795)](https://github.com/d8corp/innetjs/tree/v2.4.4)

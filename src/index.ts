@@ -4,6 +4,7 @@ import eslint from '@rollup/plugin-eslint'
 import image from '@rollup/plugin-image'
 import json from '@rollup/plugin-json'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
+import typescript from '@rollup/plugin-typescript'
 import address from 'address'
 import autoprefixer from 'autoprefixer'
 import axios from 'axios'
@@ -28,7 +29,7 @@ import { preserveShebangs } from 'rollup-plugin-preserve-shebangs'
 import env from 'rollup-plugin-process-env'
 import styles from 'rollup-plugin-styles'
 import { terser } from 'rollup-plugin-terser'
-import typescript from 'rollup-plugin-typescript2'
+import typescript2 from 'rollup-plugin-typescript2'
 import tmp from 'tmp'
 import { promisify } from 'util'
 
@@ -220,7 +221,7 @@ export class InnetJS {
       plugins: [
         commonjs(),
         json(),
-        typescript({
+        typescript2({
           tsconfigOverride: {
             compilerOptions: {
               declaration: false,
@@ -346,11 +347,9 @@ export class InnetJS {
         commonjs(),
         json(),
         typescript({
-          tsconfigOverride: {
-            compilerOptions: {
-              declaration: false,
-              sourceMap: true,
-            },
+          compilerOptions: {
+            declaration: false,
+            sourceMap: true,
           },
         }),
         jsx(),
@@ -480,7 +479,7 @@ export class InnetJS {
           commonjs(),
           nodeResolve(),
           json(),
-          typescript({
+          typescript2({
             tsconfigOverride: {
               compilerOptions: {
                 sourceMap: true,
@@ -544,7 +543,7 @@ export class InnetJS {
         },
         plugins: [
           json(),
-          typescript({
+          typescript2({
             clean: true,
             tsconfigOverride: {
               compilerOptions: {
@@ -619,7 +618,7 @@ export class InnetJS {
             plugins: [
               preserveShebangs(),
               json(),
-              typescript({
+              typescript2({
                 clean: true,
                 tsconfigOverride: {
                   compilerOptions: {
