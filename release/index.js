@@ -180,11 +180,10 @@ class InnetJS {
                 plugins: [
                     commonjs__default["default"](),
                     json__default["default"](),
-                    typescript2__default["default"]({
-                        tsconfigOverride: {
-                            compilerOptions: {
-                                declaration: false,
-                            },
+                    typescript__default["default"]({
+                        noEmitOnError: true,
+                        compilerOptions: {
+                            declaration: false,
                         },
                     }),
                     jsx__default["default"](),
@@ -283,6 +282,7 @@ class InnetJS {
                     commonjs__default["default"](),
                     json__default["default"](),
                     typescript__default["default"]({
+                        noEmitOnError: true,
                         compilerOptions: {
                             declaration: false,
                             sourceMap: true,
@@ -350,7 +350,7 @@ class InnetJS {
                         logger__default["default"].end('Bundling', e.error.message);
                         console.log(`ERROR in ${file}:${line + 1}:${column + 1}`);
                     }
-                    else if (e.error.code === 'PLUGIN_ERROR' && ['rpt2', 'commonjs'].includes(e.error.plugin)) {
+                    else if (e.error.code === 'PLUGIN_ERROR' && ['rpt2', 'commonjs', 'typescript'].includes(e.error.plugin)) {
                         const [, file, line, column] = e.error.message
                             .replace(REG_CLEAR_TEXT, '')
                             .match(REG_RPT_ERROR_FILE) || [];

@@ -221,11 +221,10 @@ export class InnetJS {
       plugins: [
         commonjs(),
         json(),
-        typescript2({
-          tsconfigOverride: {
-            compilerOptions: {
-              declaration: false,
-            },
+        typescript({
+          noEmitOnError: true,
+          compilerOptions: {
+            declaration: false,
           },
         }),
         jsx(),
@@ -347,6 +346,7 @@ export class InnetJS {
         commonjs(),
         json(),
         typescript({
+          noEmitOnError: true,
           compilerOptions: {
             declaration: false,
             sourceMap: true,
@@ -434,7 +434,7 @@ export class InnetJS {
           const { line, column } = lines.locationForIndex(text.indexOf(importer))
           logger.end('Bundling', e.error.message)
           console.log(`ERROR in ${file}:${line + 1}:${column + 1}`)
-        } else if (e.error.code === 'PLUGIN_ERROR' && ['rpt2', 'commonjs'].includes(e.error.plugin)) {
+        } else if (e.error.code === 'PLUGIN_ERROR' && ['rpt2', 'commonjs', 'typescript'].includes(e.error.plugin)) {
           const [, file, line, column] = e.error.message
             .replace(REG_CLEAR_TEXT, '')
             .match(REG_RPT_ERROR_FILE) || []
