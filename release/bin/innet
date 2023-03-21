@@ -393,7 +393,6 @@ class InnetJS {
                     commonjs__default["default"](),
                     json__default["default"](),
                     typescript__default["default"]({
-                        noEmitOnError: true,
                         compilerOptions: {
                             declaration: false,
                             sourceMap: true,
@@ -404,6 +403,13 @@ class InnetJS {
                 onwarn(warning, warn) {
                     if (warning.code === 'THIS_IS_UNDEFINED' || warning.code === 'SOURCEMAP_ERROR')
                         return;
+                    if (warning.plugin === 'typescript') {
+                        const { loc: { line, column, file }, frame, message } = warning;
+                        console.log(`ERROR in ${file}:${line}:${column}`);
+                        console.log(message);
+                        console.log(frame);
+                        return;
+                    }
                     warn(warning);
                 },
             };
@@ -802,7 +808,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.5.1"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.5.2"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {

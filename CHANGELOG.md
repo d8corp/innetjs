@@ -2,6 +2,10 @@
 
 ## v2.5
 
+### v2.5.2 [![21.03.2023](https://img.shields.io/date/1679394876)](https://github.com/d8corp/innetjs/tree/v2.5.2)
+
+- fix errors handling
+
 ### v2.5.1 [![20.03.2023](https://img.shields.io/date/1679324482)](https://github.com/d8corp/innetjs/tree/v2.5.1)
 
 - change TypeScript plugin for build

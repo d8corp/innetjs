@@ -246,7 +246,6 @@ class InnetJS {
                     commonjs(),
                     json(),
                     typescript({
-                        noEmitOnError: true,
                         compilerOptions: {
                             declaration: false,
                             sourceMap: true,
@@ -257,6 +256,13 @@ class InnetJS {
                 onwarn(warning, warn) {
                     if (warning.code === 'THIS_IS_UNDEFINED' || warning.code === 'SOURCEMAP_ERROR')
                         return;
+                    if (warning.plugin === 'typescript') {
+                        const { loc: { line, column, file }, frame, message } = warning;
+                        console.log(`ERROR in ${file}:${line}:${column}`);
+                        console.log(message);
+                        console.log(frame);
+                        return;
+                    }
                     warn(warning);
                 },
             };
