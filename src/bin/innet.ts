@@ -44,10 +44,11 @@ program
   .command('start')
   .description('Start development with innet boilerplate')
   .option('-n, --node', 'Start development for Node.js')
+  .option('-in, --inject', 'Injects script element into index.html')
   .option('-i, --index <index>', 'Root index file name', 'index')
   .addOption(errorOption)
-  .action(({ error, node, index }) => {
-    innetJS.start({ node, error, index }).catch(e => {
+  .action(({ error, node, index, inject }) => {
+    innetJS.start({ node, error, index, inject }).catch(e => {
       if (error) {
         console.error(e)
         process.exit(1)
@@ -60,9 +61,10 @@ program
   .description('Build production bundle')
   .addOption(errorOption)
   .option('-n, --node', 'Build for node.js')
+  .option('-in, --inject', 'Injects script element into index.html')
   .option('-i, --index <index>', 'Root index file name', 'index')
-  .action(({ error, node, index }) => {
-    innetJS.build({ node, index }).catch(e => {
+  .action(({ error, node, index, inject }) => {
+    innetJS.build({ node, index, inject }).catch(e => {
       if (error) {
         console.error(e)
         process.exit(1)

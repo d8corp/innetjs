@@ -205,7 +205,7 @@ export class InnetJS {
     await logger.start('Install packages', () => execAsync(`cd ${appPath} && npm i`))
   }
 
-  async build ({ node = false, index = 'index' } = {}) {
+  async build ({ node = false, inject = false, index = 'index' } = {}) {
     const input = glob.sync(`src/${index}.{${indexExt}}`)
 
     if (!input.length) {
@@ -299,7 +299,7 @@ export class InnetJS {
         const pkg = await this.getPackage()
         await fsx.writeFile(
           this.buildIndexFile,
-          await convertIndexFile(data, pkg.version, this.baseUrl, path.parse(input[0]).name),
+          await convertIndexFile(data, pkg.version, this.baseUrl, path.parse(input[0]).name, inject),
         )
       }
     })
@@ -325,7 +325,7 @@ export class InnetJS {
     }
   }
 
-  async start ({ node = false, error = false, index = 'index' } = {}) {
+  async start ({ node = false, inject = false, error = false, index = 'index' } = {}) {
     const pkg = await this.getPackage()
     const input = glob.sync(`src/${index}.{${indexExt}}`)
 
@@ -420,7 +420,7 @@ export class InnetJS {
           include: '**/*.*',
           exclude: stringExcludeDom,
         }),
-        this.createClient(key, cert, pkg, path.parse(input[0]).name),
+        this.createClient(key, cert, pkg, path.parse(input[0]).name, inject),
         livereload({
           exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'],
           watch: [this.devBuildFolder, this.publicFolder],
@@ -749,7 +749,7 @@ export class InnetJS {
     return this.package
   }
 
-  createClient (key, cert, pkg, index: string): rollup.Plugin {
+  createClient (key, cert, pkg, index: string, inject: boolean): rollup.Plugin {
     let app
 
     return {
@@ -761,7 +761,7 @@ export class InnetJS {
             const data = await fsx.readFile(this.publicIndexFile)
             await fsx.writeFile(
               this.devBuildIndexFile,
-              await convertIndexFile(data, pkg.version, this.baseUrl, index),
+              await convertIndexFile(data, pkg.version, this.baseUrl, index, inject),
             )
           }
 

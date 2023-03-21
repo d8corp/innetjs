@@ -166,7 +166,7 @@ class InnetJS {
             yield logger__default["default"].start('Install packages', () => execAsync(`cd ${appPath} && npm i`));
         });
     }
-    build({ node = false, index = 'index' } = {}) {
+    build({ node = false, inject = false, index = 'index' } = {}) {
         return tslib.__awaiter(this, void 0, void 0, function* () {
             const input = glob__default["default"].sync(`src/${index}.{${indexExt}}`);
             if (!input.length) {
@@ -244,7 +244,7 @@ class InnetJS {
                     yield copyFiles(this.publicFolder, this.buildFolder);
                     const data = yield fs.promises.readFile(this.publicIndexFile);
                     const pkg = yield this.getPackage();
-                    yield fs.promises.writeFile(this.buildIndexFile, yield helpers.convertIndexFile(data, pkg.version, this.baseUrl, path__default["default"].parse(input[0]).name));
+                    yield fs.promises.writeFile(this.buildIndexFile, yield helpers.convertIndexFile(data, pkg.version, this.baseUrl, path__default["default"].parse(input[0]).name, inject));
                 }
             }));
             if (pkg) {
@@ -263,7 +263,7 @@ class InnetJS {
             }
         });
     }
-    start({ node = false, error = false, index = 'index' } = {}) {
+    start({ node = false, inject = false, error = false, index = 'index' } = {}) {
         return tslib.__awaiter(this, void 0, void 0, function* () {
             const pkg = yield this.getPackage();
             const input = glob__default["default"].sync(`src/${index}.{${indexExt}}`);
@@ -342,7 +342,7 @@ class InnetJS {
                 }), string({
                     include: '**/*.*',
                     exclude: constants.stringExcludeDom,
-                }), this.createClient(key, cert, pkg, path__default["default"].parse(input[0]).name), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
+                }), this.createClient(key, cert, pkg, path__default["default"].parse(input[0]).name, inject), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
             }
             this.withEnv(options, true);
             const watcher = rollup__default["default"].watch(options);
@@ -622,7 +622,7 @@ class InnetJS {
             return this.package;
         });
     }
-    createClient(key, cert, pkg, index) {
+    createClient(key, cert, pkg, index, inject) {
         let app;
         return {
             name: 'client',
@@ -632,7 +632,7 @@ class InnetJS {
                     app = express__default["default"]();
                     const update = () => tslib.__awaiter(this, void 0, void 0, function* () {
                         const data = yield fs.promises.readFile(this.publicIndexFile);
-                        yield fs.promises.writeFile(this.devBuildIndexFile, yield helpers.convertIndexFile(data, pkg.version, this.baseUrl, index));
+                        yield fs.promises.writeFile(this.devBuildIndexFile, yield helpers.convertIndexFile(data, pkg.version, this.baseUrl, index, inject));
                     });
                     fs__default["default"].watch(this.publicIndexFile, update);
                     yield update();

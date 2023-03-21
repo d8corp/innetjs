@@ -33,19 +33,23 @@ export function getFile (file) {
   return file
 }
 
-export async function convertIndexFile (data: Buffer, version: string, baseUrl: string, index: string) {
+export async function convertIndexFile (data: Buffer, version: string, baseUrl: string, index: string, inject: boolean) {
   const { env } = process
 
-  return data
+  const indexString = data
     .toString()
-    .replace(
-      '</head>',
-      `<script type="module" defer src="${baseUrl}${index}.js${version ? `?v=${version}` : ''}"></script></head>`,
-    )
     .replace(
       /%([A-Z0-9_]+)%/g,
       (placeholder, placeholderId) => env[placeholderId] ?? placeholder,
     )
+
+  return inject
+    ? indexString
+      .replace(
+        '</head>',
+      `<script type="module" defer src="${baseUrl}${index}.js${version ? `?v=${version}` : ''}"></script></head>`,
+      )
+    : indexString
 }
 
 export const reporter: FileSizeRender<string | Promise<string>> = (options, outputOptions, info) => {

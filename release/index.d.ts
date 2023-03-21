@@ -53,12 +53,14 @@ export declare class InnetJS {
         api?: string;
     });
     init(appName: string, { template, force }?: any): Promise<void>;
-    build({ node, index }?: {
+    build({ node, inject, index }?: {
         node?: boolean;
+        inject?: boolean;
         index?: string;
     }): Promise<void>;
-    start({ node, error, index }?: {
+    start({ node, inject, error, index }?: {
         node?: boolean;
+        inject?: boolean;
         error?: boolean;
         index?: string;
     }): Promise<void>;
@@ -69,6 +71,6 @@ export declare class InnetJS {
     withEnv(options: rollup.RollupOptions, virtual?: boolean): void;
     increaseVersion(release: string): Promise<void>;
     getPackage(): Promise<Record<string, any>>;
-    createClient(key: any, cert: any, pkg: any, index: string): rollup.Plugin;
+    createClient(key: any, cert: any, pkg: any, index: string, inject: boolean): rollup.Plugin;
     createServer(): rollup.Plugin;
 }

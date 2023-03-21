@@ -2,6 +2,10 @@
 
 ## v2.5
 
+### v2.5.3 [![21.03.2023](https://img.shields.io/date/1679405382)](https://github.com/d8corp/innetjs/tree/v2.5.3)
+
+- make script injection optional, use `-in` flag to have the injection like before.
+
 ### v2.5.2 [![21.03.2023](https://img.shields.io/date/1679394876)](https://github.com/d8corp/innetjs/tree/v2.5.2)
 
 - fix errors handling

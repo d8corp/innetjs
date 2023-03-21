@@ -1,5 +1,5 @@
 ;(function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"2.5.2"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"2.5.3"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {
