@@ -10,7 +10,7 @@ var eslint = require('@rollup/plugin-eslint');
 var image = require('@rollup/plugin-image');
 var json = require('@rollup/plugin-json');
 var pluginNodeResolve = require('@rollup/plugin-node-resolve');
-var typescript = require('@rollup/plugin-typescript');
+var ts = require('@rollup/plugin-typescript');
 var address = require('address');
 var autoprefixer = require('autoprefixer');
 var axios = require('axios');
@@ -35,7 +35,6 @@ var rollupPluginPreserveShebangs = require('rollup-plugin-preserve-shebangs');
 var env = require('rollup-plugin-process-env');
 var styles = require('rollup-plugin-styles');
 var rollupPluginTerser = require('rollup-plugin-terser');
-var typescript2 = require('rollup-plugin-typescript2');
 var tmp = require('tmp');
 var node_util = require('node:util');
 var constants = require('./constants.js');
@@ -50,7 +49,7 @@ var commonjs__default = /*#__PURE__*/_interopDefaultLegacy(commonjs);
 var eslint__default = /*#__PURE__*/_interopDefaultLegacy(eslint);
 var image__default = /*#__PURE__*/_interopDefaultLegacy(image);
 var json__default = /*#__PURE__*/_interopDefaultLegacy(json);
-var typescript__default = /*#__PURE__*/_interopDefaultLegacy(typescript);
+var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
 var address__default = /*#__PURE__*/_interopDefaultLegacy(address);
 var autoprefixer__default = /*#__PURE__*/_interopDefaultLegacy(autoprefixer);
 var axios__default = /*#__PURE__*/_interopDefaultLegacy(axios);
@@ -72,7 +71,6 @@ var externals__default = /*#__PURE__*/_interopDefaultLegacy(externals);
 var polyfill__default = /*#__PURE__*/_interopDefaultLegacy(polyfill);
 var env__default = /*#__PURE__*/_interopDefaultLegacy(env);
 var styles__default = /*#__PURE__*/_interopDefaultLegacy(styles);
-var typescript2__default = /*#__PURE__*/_interopDefaultLegacy(typescript2);
 var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
 
 const livereload = require('rollup-plugin-livereload');
@@ -180,7 +178,7 @@ class InnetJS {
                 plugins: [
                     commonjs__default["default"](),
                     json__default["default"](),
-                    typescript__default["default"]({
+                    ts__default["default"]({
                         noEmitOnError: true,
                         compilerOptions: {
                             declaration: false,
@@ -281,7 +279,7 @@ class InnetJS {
                 plugins: [
                     commonjs__default["default"](),
                     json__default["default"](),
-                    typescript__default["default"]({
+                    ts__default["default"]({
                         compilerOptions: {
                             declaration: false,
                             sourceMap: true,
@@ -403,11 +401,9 @@ class InnetJS {
                         commonjs__default["default"](),
                         pluginNodeResolve.nodeResolve(),
                         json__default["default"](),
-                        typescript2__default["default"]({
-                            tsconfigOverride: {
-                                compilerOptions: {
-                                    sourceMap: true,
-                                },
+                        ts__default["default"]({
+                            compilerOptions: {
+                                sourceMap: true,
                             },
                         }),
                     ],
@@ -459,13 +455,10 @@ class InnetJS {
                     },
                     plugins: [
                         json__default["default"](),
-                        typescript2__default["default"]({
-                            clean: true,
-                            tsconfigOverride: {
-                                compilerOptions: {
-                                    sourceMap: false,
-                                },
-                                include: [...input, 'src/declaration.d.ts'],
+                        ts__default["default"]({
+                            compilerOptions: {
+                                sourceMap: false,
+                                outDir: releaseFolder,
                             },
                         }),
                         jsx__default["default"](),
@@ -520,12 +513,9 @@ class InnetJS {
                             plugins: [
                                 rollupPluginPreserveShebangs.preserveShebangs(),
                                 json__default["default"](),
-                                typescript2__default["default"]({
-                                    clean: true,
-                                    tsconfigOverride: {
-                                        compilerOptions: {
-                                            declaration: false,
-                                        },
+                                ts__default["default"]({
+                                    compilerOptions: {
+                                        declaration: false,
                                     },
                                 }),
                                 externals__default["default"](),

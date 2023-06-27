@@ -4,7 +4,7 @@ import eslint from '@rollup/plugin-eslint'
 import image from '@rollup/plugin-image'
 import json from '@rollup/plugin-json'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
-import typescript from '@rollup/plugin-typescript'
+import ts from '@rollup/plugin-typescript'
 import address from 'address'
 import autoprefixer from 'autoprefixer'
 import axios from 'axios'
@@ -29,7 +29,6 @@ import { preserveShebangs } from 'rollup-plugin-preserve-shebangs'
 import env from 'rollup-plugin-process-env'
 import styles from 'rollup-plugin-styles'
 import { terser } from 'rollup-plugin-terser'
-import typescript2 from 'rollup-plugin-typescript2'
 import tmp from 'tmp'
 import { promisify } from 'util'
 
@@ -221,7 +220,7 @@ export class InnetJS {
       plugins: [
         commonjs(),
         json(),
-        typescript({
+        ts({
           noEmitOnError: true,
           compilerOptions: {
             declaration: false,
@@ -345,7 +344,7 @@ export class InnetJS {
       plugins: [
         commonjs(),
         json(),
-        typescript({
+        ts({
           compilerOptions: {
             declaration: false,
             sourceMap: true,
@@ -487,11 +486,9 @@ export class InnetJS {
           commonjs(),
           nodeResolve(),
           json(),
-          typescript2({
-            tsconfigOverride: {
-              compilerOptions: {
-                sourceMap: true,
-              },
+          ts({
+            compilerOptions: {
+              sourceMap: true,
             },
           }),
         ],
@@ -551,13 +548,10 @@ export class InnetJS {
         },
         plugins: [
           json(),
-          typescript2({
-            clean: true,
-            tsconfigOverride: {
-              compilerOptions: {
-                sourceMap: false,
-              },
-              include: [...input, 'src/declaration.d.ts'],
+          ts({
+            compilerOptions: {
+              sourceMap: false,
+              outDir: releaseFolder,
             },
           }),
           jsx(),
@@ -626,12 +620,9 @@ export class InnetJS {
             plugins: [
               preserveShebangs(),
               json(),
-              typescript2({
-                clean: true,
-                tsconfigOverride: {
-                  compilerOptions: {
-                    declaration: false,
-                  },
+              ts({
+                compilerOptions: {
+                  declaration: false,
                 },
               }),
               externals(),
