@@ -72,5 +72,5 @@ export declare class InnetJS {
     increaseVersion(release: string): Promise<void>;
     getPackage(): Promise<Record<string, any>>;
     createClient(key: any, cert: any, pkg: any, index: string, inject: boolean): rollup.Plugin;
-    createServer(): rollup.Plugin;
+    createServer(input: string[]): rollup.Plugin;
 }

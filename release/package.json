@@ -1,6 +1,6 @@
 {
   "name": "innetjs",
-  "version": "2.6.0-alpha.5",
+  "version": "2.6.0-alpha.6",
   "description": "CLI for innet boilerplate",
   "homepage": "https://github.com/d8corp/innetjs",
   "author": "Mikhail Lysikov <d8corp@mail.ru>",
@@ -14,7 +14,7 @@
     "innetjs": "bin/innet"
   },
   "scripts": {
-    "build": "innetjs release",
+    "build": "innetjs release -e",
     "test": "jest",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",

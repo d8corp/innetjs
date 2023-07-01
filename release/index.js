@@ -308,7 +308,7 @@ class InnetJS {
                 options.plugins.push(pluginNodeResolve.nodeResolve(), string({
                     include: '**/*.*',
                     exclude: constants.stringExcludeNode,
-                }), this.createServer());
+                }), this.createServer(input));
             }
             else {
                 const key = path__default["default"].basename(this.sslKey) !== this.sslKey
@@ -673,14 +673,18 @@ class InnetJS {
             }),
         };
     }
-    createServer() {
-        let app;
+    createServer(input) {
+        const apps = {};
         return {
             name: 'server',
             writeBundle: () => tslib.__awaiter(this, void 0, void 0, function* () {
-                app === null || app === void 0 ? void 0 : app.kill();
-                const filePath = path__default["default"].resolve(this.devBuildFolder, 'index.js');
-                app = spawn('node', ['-r', 'source-map-support/register', filePath], { stdio: 'inherit' });
+                var _a;
+                for (const file of input) {
+                    const { name } = path__default["default"].parse(file);
+                    (_a = apps[name]) === null || _a === void 0 ? void 0 : _a.kill();
+                    const filePath = path__default["default"].resolve(this.devBuildFolder, `${name}.js`);
+                    apps[name] = spawn('node', ['-r', 'source-map-support/register', filePath], { stdio: 'inherit' });
+                }
             }),
         };
     }

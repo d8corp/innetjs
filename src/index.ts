@@ -379,7 +379,7 @@ export class InnetJS {
           include: '**/*.*',
           exclude: stringExcludeNode,
         }),
-        this.createServer(),
+        this.createServer(input),
       )
     } else {
       const key = path.basename(this.sslKey) !== this.sslKey
@@ -814,15 +814,18 @@ export class InnetJS {
     }
   }
 
-  createServer (): rollup.Plugin {
-    let app
+  createServer (input: string[]): rollup.Plugin {
+    const apps: Record<string, any> = {}
+
     return {
       name: 'server',
       writeBundle: async () => {
-        app?.kill()
-        const filePath = path.resolve(this.devBuildFolder, 'index.js')
-
-        app = spawn('node', ['-r', 'source-map-support/register', filePath], { stdio: 'inherit' })
+        for (const file of input) {
+          const { name } = path.parse(file)
+          apps[name]?.kill()
+          const filePath = path.resolve(this.devBuildFolder, `${name}.js`)
+          apps[name] = spawn('node', ['-r', 'source-map-support/register', filePath], { stdio: 'inherit' })
+        }
       },
     }
   }

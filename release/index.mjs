@@ -273,7 +273,7 @@ class InnetJS {
                 options.plugins.push(nodeResolve(), string({
                     include: '**/*.*',
                     exclude: stringExcludeNode,
-                }), this.createServer());
+                }), this.createServer(input));
             }
             else {
                 const key = path.basename(this.sslKey) !== this.sslKey
@@ -638,14 +638,18 @@ class InnetJS {
             }),
         };
     }
-    createServer() {
-        let app;
+    createServer(input) {
+        const apps = {};
         return {
             name: 'server',
             writeBundle: () => __awaiter(this, void 0, void 0, function* () {
-                app === null || app === void 0 ? void 0 : app.kill();
-                const filePath = path.resolve(this.devBuildFolder, 'index.js');
-                app = spawn('node', ['-r', 'source-map-support/register', filePath], { stdio: 'inherit' });
+                var _a;
+                for (const file of input) {
+                    const { name } = path.parse(file);
+                    (_a = apps[name]) === null || _a === void 0 ? void 0 : _a.kill();
+                    const filePath = path.resolve(this.devBuildFolder, `${name}.js`);
+                    apps[name] = spawn('node', ['-r', 'source-map-support/register', filePath], { stdio: 'inherit' });
+                }
             }),
         };
     }
