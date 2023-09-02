@@ -12,6 +12,7 @@ var json = require('@rollup/plugin-json');
 var pluginNodeResolve = require('@rollup/plugin-node-resolve');
 var ts = require('@rollup/plugin-typescript');
 var address = require('address');
+var Zip = require('adm-zip');
 var autoprefixer = require('autoprefixer');
 var axios = require('axios');
 var chalk = require('chalk');
@@ -23,6 +24,7 @@ var glob = require('glob');
 var http = require('node:http');
 var https = require('node:https');
 var linesAndColumns = require('lines-and-columns');
+var node_os = require('node:os');
 var path = require('node:path');
 var prompt = require('prompts');
 var rollup = require('rollup');
@@ -35,10 +37,10 @@ var rollupPluginPreserveShebangs = require('rollup-plugin-preserve-shebangs');
 var env = require('rollup-plugin-process-env');
 var styles = require('rollup-plugin-styles');
 var rollupPluginTerser = require('rollup-plugin-terser');
+var stream = require('node:stream');
 var tmp = require('tmp');
 var node_util = require('node:util');
 var constants = require('./constants.js');
-var extract = require('./extract.js');
 var helpers = require('./helpers.js');
 var updateDotenv = require('./updateDotenv.js');
 
@@ -51,6 +53,7 @@ var image__default = /*#__PURE__*/_interopDefaultLegacy(image);
 var json__default = /*#__PURE__*/_interopDefaultLegacy(json);
 var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
 var address__default = /*#__PURE__*/_interopDefaultLegacy(address);
+var Zip__default = /*#__PURE__*/_interopDefaultLegacy(Zip);
 var autoprefixer__default = /*#__PURE__*/_interopDefaultLegacy(autoprefixer);
 var axios__default = /*#__PURE__*/_interopDefaultLegacy(axios);
 var chalk__default = /*#__PURE__*/_interopDefaultLegacy(chalk);
@@ -71,6 +74,7 @@ var externals__default = /*#__PURE__*/_interopDefaultLegacy(externals);
 var polyfill__default = /*#__PURE__*/_interopDefaultLegacy(polyfill);
 var env__default = /*#__PURE__*/_interopDefaultLegacy(env);
 var styles__default = /*#__PURE__*/_interopDefaultLegacy(styles);
+var stream__default = /*#__PURE__*/_interopDefaultLegacy(stream);
 var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
 
 const livereload = require('rollup-plugin-livereload');
@@ -80,6 +84,7 @@ const readline = require('readline');
 const importAssets = require('rollup-plugin-import-assets');
 const execAsync = node_util.promisify(exec);
 const copyFiles = node_util.promisify(fs__default["default"].copy);
+const pipeline = node_util.promisify(stream__default["default"].pipeline);
 updateDotenv.updateDotenv();
 const REG_CLEAR_TEXT = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
 const REG_RPT_ERROR_FILE = /(src[^:]+):(\d+):(\d+)/;
@@ -152,14 +157,26 @@ class InnetJS {
                 }));
             }
             yield logger__default["default"].start('Download template', () => tslib.__awaiter(this, void 0, void 0, function* () {
+                const tmpPath = node_os.tmpdir();
+                const zipPath = path__default["default"].join(tmpPath, 'template.zip');
+                const unzipPath = path__default["default"].join(tmpPath, `innetjs-templates-${template}`);
                 const { data } = yield axios__default["default"].get(`https://github.com/d8corp/innetjs-templates/archive/refs/heads/${template}.zip`, {
                     responseType: 'stream',
                 });
+                yield pipeline(data, fs__default["default"].createWriteStream(zipPath));
+                const zip = new Zip__default["default"](zipPath);
                 yield new Promise((resolve, reject) => {
-                    data.pipe(extract.Extract({
-                        path: appPath,
-                    }, template)).on('finish', resolve).on('error', reject);
+                    zip.extractAllToAsync(tmpPath, false, false, (error) => {
+                        if (error) {
+                            reject(error);
+                        }
+                        else {
+                            resolve(undefined);
+                        }
+                    });
                 });
+                yield fs__default["default"].remove(zipPath);
+                yield fs__default["default"].move(unzipPath, appPath, { overwrite: true });
             }));
             yield logger__default["default"].start('Install packages', () => execAsync(`cd ${appPath} && npm i`));
         });

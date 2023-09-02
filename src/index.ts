@@ -6,6 +6,7 @@ import json from '@rollup/plugin-json'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 import ts from '@rollup/plugin-typescript'
 import address from 'address'
+import Zip from 'adm-zip'
 import autoprefixer from 'autoprefixer'
 import axios from 'axios'
 import chalk from 'chalk'
@@ -17,6 +18,7 @@ import glob from 'glob'
 import http from 'http'
 import https from 'https'
 import { LinesAndColumns } from 'lines-and-columns'
+import { tmpdir } from 'os'
 import path from 'path'
 import prompt from 'prompts'
 import rollup from 'rollup'
@@ -29,6 +31,7 @@ import { preserveShebangs } from 'rollup-plugin-preserve-shebangs'
 import env from 'rollup-plugin-process-env'
 import styles from 'rollup-plugin-styles'
 import { terser } from 'rollup-plugin-terser'
+import stream from 'stream'
 import tmp from 'tmp'
 import { promisify } from 'util'
 
@@ -38,7 +41,6 @@ import {
   stringExcludeDom,
   stringExcludeNode,
 } from './constants'
-import { Extract } from './extract'
 import { convertIndexFile, getFile, reporter } from './helpers'
 import { updateDotenv } from './updateDotenv'
 
@@ -49,6 +51,7 @@ const readline = require('readline')
 const importAssets = require('rollup-plugin-import-assets')
 const execAsync = promisify(exec)
 const copyFiles = promisify(fs.copy)
+const pipeline = promisify(stream.pipeline)
 
 updateDotenv()
 
@@ -190,15 +193,30 @@ export class InnetJS {
     }
 
     await logger.start('Download template', async () => {
+      const tmpPath = tmpdir()
+      const zipPath = path.join(tmpPath, 'template.zip')
+      const unzipPath = path.join(tmpPath, `innetjs-templates-${template}`)
       const { data } = await axios.get(`https://github.com/d8corp/innetjs-templates/archive/refs/heads/${template}.zip`, {
         responseType: 'stream',
       })
 
+      await pipeline(data, fs.createWriteStream(zipPath))
+
+      const zip = new Zip(zipPath)
+
       await new Promise((resolve, reject) => {
-        data.pipe(Extract({
-          path: appPath,
-        }, template)).on('finish', resolve).on('error', reject)
+        zip.extractAllToAsync(tmpPath, false, false, (error) => {
+          if (error) {
+            reject(error)
+          } else {
+            resolve(undefined)
+          }
+        })
       })
+
+      await fs.remove(zipPath)
+
+      await fs.move(unzipPath, appPath, { overwrite: true })
     })
 
     await logger.start('Install packages', () => execAsync(`cd ${appPath} && npm i`))

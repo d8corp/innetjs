@@ -8,6 +8,7 @@ import json from '@rollup/plugin-json';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import ts from '@rollup/plugin-typescript';
 import address from 'address';
+import Zip from 'adm-zip';
 import autoprefixer from 'autoprefixer';
 import axios from 'axios';
 import chalk from 'chalk';
@@ -19,6 +20,7 @@ import glob from 'glob';
 import http from 'node:http';
 import https from 'node:https';
 import { LinesAndColumns } from 'lines-and-columns';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import prompt from 'prompts';
 import rollup from 'rollup';
@@ -31,10 +33,10 @@ import { preserveShebangs } from 'rollup-plugin-preserve-shebangs';
 import env from 'rollup-plugin-process-env';
 import styles from 'rollup-plugin-styles';
 import { terser } from 'rollup-plugin-terser';
+import stream from 'node:stream';
 import tmp from 'tmp';
 import { promisify } from 'node:util';
 import { stringExcludeNode, imageInclude, stringExcludeDom, lintInclude } from './constants.mjs';
-import { Extract } from './extract.mjs';
 import { reporter, convertIndexFile, getFile } from './helpers.mjs';
 import { updateDotenv } from './updateDotenv.mjs';
 
@@ -45,6 +47,7 @@ const readline = require('readline');
 const importAssets = require('rollup-plugin-import-assets');
 const execAsync = promisify(exec);
 const copyFiles = promisify(fs.copy);
+const pipeline = promisify(stream.pipeline);
 updateDotenv();
 const REG_CLEAR_TEXT = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
 const REG_RPT_ERROR_FILE = /(src[^:]+):(\d+):(\d+)/;
@@ -117,14 +120,26 @@ class InnetJS {
                 }));
             }
             yield logger.start('Download template', () => __awaiter(this, void 0, void 0, function* () {
+                const tmpPath = tmpdir();
+                const zipPath = path.join(tmpPath, 'template.zip');
+                const unzipPath = path.join(tmpPath, `innetjs-templates-${template}`);
                 const { data } = yield axios.get(`https://github.com/d8corp/innetjs-templates/archive/refs/heads/${template}.zip`, {
                     responseType: 'stream',
                 });
+                yield pipeline(data, fs.createWriteStream(zipPath));
+                const zip = new Zip(zipPath);
                 yield new Promise((resolve, reject) => {
-                    data.pipe(Extract({
-                        path: appPath,
-                    }, template)).on('finish', resolve).on('error', reject);
+                    zip.extractAllToAsync(tmpPath, false, false, (error) => {
+                        if (error) {
+                            reject(error);
+                        }
+                        else {
+                            resolve(undefined);
+                        }
+                    });
                 });
+                yield fs.remove(zipPath);
+                yield fs.move(unzipPath, appPath, { overwrite: true });
             }));
             yield logger.start('Install packages', () => execAsync(`cd ${appPath} && npm i`));
         });
