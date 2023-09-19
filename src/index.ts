@@ -28,7 +28,7 @@ import jsx from 'rollup-plugin-innet-jsx'
 import externals from 'rollup-plugin-node-externals'
 import polyfill from 'rollup-plugin-polyfill-node'
 import { preserveShebangs } from 'rollup-plugin-preserve-shebangs'
-import env from 'rollup-plugin-process-env'
+import env, { EnvValues } from 'rollup-plugin-process-env'
 import styles from 'rollup-plugin-styles'
 import { terser } from 'rollup-plugin-terser'
 import stream from 'stream'
@@ -342,7 +342,12 @@ export class InnetJS {
     }
   }
 
-  async start ({ node = false, inject = false, error = false, index = 'index' } = {}) {
+  async start ({
+    node = false,
+    inject = false,
+    error = false,
+    index = 'index',
+  } = {}) {
     const pkg = await this.getPackage()
     const input = glob.sync(`src/${index}.{${indexExt}}`)
 
@@ -384,10 +389,12 @@ export class InnetJS {
         warn(warning)
       },
     }
+    let preset: EnvValues
 
     this.withLint(options)
 
     if (node) {
+      preset = { NODE_ENV: 'dev' }
       // @ts-expect-error
       options.output.format = 'cjs'
       options.external = Object.keys(pkg?.dependencies || {})
@@ -447,7 +454,7 @@ export class InnetJS {
       )
     }
 
-    this.withEnv(options, true)
+    this.withEnv(options, true, preset)
     const watcher = rollup.watch(options)
 
     watcher.on('event', async e => {
@@ -700,10 +707,11 @@ export class InnetJS {
     }
   }
 
-  withEnv (options: rollup.RollupOptions, virtual?: boolean) {
+  withEnv (options: rollup.RollupOptions, virtual?: boolean, preset?: EnvValues) {
     options.plugins.push(env(this.envPrefix, {
       include: options.input as string[],
       virtual,
+      preset,
     }))
   }
 

@@ -278,7 +278,7 @@ class InnetJS {
             }
         });
     }
-    start({ node = false, inject = false, error = false, index = 'index' } = {}) {
+    start({ node = false, inject = false, error = false, index = 'index', } = {}) {
         return tslib.__awaiter(this, void 0, void 0, function* () {
             const pkg = yield this.getPackage();
             const input = glob__default["default"].sync(`src/${index}.{${indexExt}}`);
@@ -317,8 +317,10 @@ class InnetJS {
                     warn(warning);
                 },
             };
+            let preset;
             this.withLint(options);
             if (node) {
+                preset = { NODE_ENV: 'dev' };
                 // @ts-expect-error
                 options.output.format = 'cjs';
                 options.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
@@ -359,7 +361,7 @@ class InnetJS {
                     exclude: constants.stringExcludeDom,
                 }), this.createClient(key, cert, pkg, path__default["default"].parse(input[0]).name, inject), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [this.devBuildFolder, this.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
             }
-            this.withEnv(options, true);
+            this.withEnv(options, true, preset);
             const watcher = rollup__default["default"].watch(options);
             watcher.on('event', (e) => tslib.__awaiter(this, void 0, void 0, function* () {
                 if (e.code === 'ERROR') {
@@ -581,10 +583,11 @@ class InnetJS {
             }));
         }
     }
-    withEnv(options, virtual) {
+    withEnv(options, virtual, preset) {
         options.plugins.push(env__default["default"](this.envPrefix, {
             include: options.input,
             virtual,
+            preset,
         }));
     }
     increaseVersion(release) {

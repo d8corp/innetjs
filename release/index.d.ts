@@ -1,4 +1,5 @@
 import rollup from 'rollup';
+import { EnvValues } from 'rollup-plugin-process-env';
 export interface ReleaseOptions {
     node?: boolean;
     index?: string;
@@ -58,7 +59,7 @@ export declare class InnetJS {
         inject?: boolean;
         index?: string;
     }): Promise<void>;
-    start({ node, inject, error, index }?: {
+    start({ node, inject, error, index, }?: {
         node?: boolean;
         inject?: boolean;
         error?: boolean;
@@ -68,7 +69,7 @@ export declare class InnetJS {
     release({ index, pub }?: ReleaseOptions): Promise<void>;
     private _lintUsage;
     withLint(options: rollup.RollupOptions, prod?: boolean): void;
-    withEnv(options: rollup.RollupOptions, virtual?: boolean): void;
+    withEnv(options: rollup.RollupOptions, virtual?: boolean, preset?: EnvValues): void;
     increaseVersion(release: string): Promise<void>;
     getPackage(): Promise<Record<string, any>>;
     createClient(key: any, cert: any, pkg: any, index: string, inject: boolean): rollup.Plugin;
