@@ -438,6 +438,7 @@ class InnetJS {
                     plugins: [
                         json(),
                         ts({
+                            include: [...input, '**/declaration.d.ts'],
                             compilerOptions: {
                                 sourceMap: false,
                                 outDir: releaseFolder,
