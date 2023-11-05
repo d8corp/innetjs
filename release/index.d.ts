@@ -34,8 +34,9 @@ export declare class InnetJS {
     api: string;
     envPrefix: string;
     simulateIP: string;
+    tsconfig: string;
     private package;
-    constructor({ envPrefix, projectFolder, baseUrl, publicFolder, releaseFolder, buildFolder, srcFolder, sourcemap, cssModules, cssInJs, sslKey, sslCrt, proxy, simulateIP, port, api, }?: {
+    constructor({ envPrefix, projectFolder, baseUrl, publicFolder, releaseFolder, buildFolder, srcFolder, sourcemap, cssModules, cssInJs, sslKey, sslCrt, proxy, simulateIP, port, api, tsconfig, }?: {
         envPrefix?: string;
         projectFolder?: string;
         baseUrl?: string;
@@ -52,6 +53,7 @@ export declare class InnetJS {
         simulateIP?: string;
         port?: number;
         api?: string;
+        tsconfig?: string;
     });
     init(appName: string, { template, force }?: any): Promise<void>;
     build({ node, inject, index }?: {

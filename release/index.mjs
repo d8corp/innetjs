@@ -56,7 +56,7 @@ const REG_EXT = /\.([^.]+)$/;
 const scriptExtensions = ['ts', 'js', 'tsx', 'jsx'];
 const indexExt = scriptExtensions.join(',');
 class InnetJS {
-    constructor({ envPrefix = process.env.INNETJS_ENV_PREFIX || 'INNETJS_', projectFolder = process.env.PROJECT_FOLDER || '', baseUrl = process.env.BASE_URL || '', publicFolder = process.env.PUBLIC_FOLDER || 'public', releaseFolder = process.env.RELEASE_FOLDER || 'release', buildFolder = process.env.BUILD_FOLDER || 'build', srcFolder = process.env.SRC_FOLDER || 'src', sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === 'true' : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === 'true' : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === 'true' : true, sslKey = process.env.SSL_KEY || 'localhost.key', sslCrt = process.env.SSL_CRT || 'localhost.crt', proxy = process.env.PROXY || '', simulateIP = process.env.IP, port = process.env.PORT ? +process.env.PORT : 3000, api = process.env.API || '/api/?*', } = {}) {
+    constructor({ envPrefix = process.env.INNETJS_ENV_PREFIX || 'INNETJS_', projectFolder = process.env.PROJECT_FOLDER || '', baseUrl = process.env.BASE_URL || '', publicFolder = process.env.PUBLIC_FOLDER || 'public', releaseFolder = process.env.RELEASE_FOLDER || 'release', buildFolder = process.env.BUILD_FOLDER || 'build', srcFolder = process.env.SRC_FOLDER || 'src', sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === 'true' : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === 'true' : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === 'true' : true, sslKey = process.env.SSL_KEY || 'localhost.key', sslCrt = process.env.SSL_CRT || 'localhost.crt', proxy = process.env.PROXY || '', simulateIP = process.env.IP, port = process.env.PORT ? +process.env.PORT : 3000, api = process.env.API || '/api/?*', tsconfig = process.env.TSCONFIG, } = {}) {
         this.projectFolder = path.resolve(projectFolder);
         this.publicFolder = path.resolve(publicFolder);
         this.releaseFolder = path.resolve(releaseFolder);
@@ -83,6 +83,7 @@ class InnetJS {
         this.baseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
         this.envPrefix = envPrefix;
         this.simulateIP = simulateIP;
+        this.tsconfig = tsconfig;
     }
     // Methods
     init(appName, { template, force = false } = {}) {
@@ -438,7 +439,7 @@ class InnetJS {
                     plugins: [
                         json(),
                         ts({
-                            include: [...input, '**/declaration.d.ts'],
+                            tsconfig: this.tsconfig,
                             compilerOptions: {
                                 sourceMap: false,
                                 outDir: releaseFolder,

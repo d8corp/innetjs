@@ -96,6 +96,7 @@ export class InnetJS {
   api: string
   envPrefix: string
   simulateIP: string
+  tsconfig: string
 
   private package: object
 
@@ -116,6 +117,7 @@ export class InnetJS {
     simulateIP = process.env.IP,
     port = process.env.PORT ? +process.env.PORT : 3000,
     api = process.env.API || '/api/?*',
+    tsconfig = process.env.TSCONFIG,
   } = {}) {
     this.projectFolder = path.resolve(projectFolder)
     this.publicFolder = path.resolve(publicFolder)
@@ -143,6 +145,7 @@ export class InnetJS {
     this.baseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
     this.envPrefix = envPrefix
     this.simulateIP = simulateIP
+    this.tsconfig = tsconfig
   }
 
   // Methods
@@ -574,7 +577,7 @@ export class InnetJS {
         plugins: [
           json(),
           ts({
-            include: [...input, '**/declaration.d.ts'],
+            tsconfig: this.tsconfig,
             compilerOptions: {
               sourceMap: false,
               outDir: releaseFolder,
