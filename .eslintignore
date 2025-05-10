@@ -1,4 +1,3 @@
 node_modules
 release
 jest.config.js
-rollup.config.js

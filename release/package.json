@@ -1,6 +1,6 @@
 {
   "name": "innetjs",
-  "version": "2.6.0-alpha.16",
+  "version": "3.0.0",
   "description": "CLI for innet boilerplate",
   "homepage": "https://github.com/d8corp/innetjs",
   "author": "Mikhail Lysikov <d8corp@mail.ru>",
@@ -76,7 +76,7 @@
     "rollup-plugin-external-node-modules": "^1.0.1",
     "rollup-plugin-filesize": "^9.1.2",
     "rollup-plugin-import-assets": "^1.1.1",
-    "rollup-plugin-innet-jsx": "^1.3.2",
+    "rollup-plugin-innet-jsx": "^2.0.0",
     "rollup-plugin-livereload": "^2.0.5",
     "rollup-plugin-node-externals": "^5.0.2",
     "rollup-plugin-polyfill-node": "^0.11.0",
