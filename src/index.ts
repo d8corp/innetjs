@@ -283,6 +283,9 @@ export class InnetJS {
           publicPath: this.baseUrl,
         }),
         styles({
+          sass: {
+            outputStyle: 'compressed',
+          },
           mode: this.cssInJs ? 'inject' : 'extract',
           url: {
             inline: false,
@@ -438,6 +441,9 @@ export class InnetJS {
           url: {
             inline: false,
             publicPath: `${this.baseUrl}assets`,
+          },
+          sass: {
+            silenceDeprecations: ['legacy-js-api'],
           },
           plugins: [autoprefixer()],
           autoModules: this.cssModules ? (id: string) => !id.includes('.global.') : true,

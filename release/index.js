@@ -230,6 +230,9 @@ class InnetJS {
                     include: constants.imageInclude.map(img => `src/${img}`),
                     publicPath: this.baseUrl,
                 }), styles__default["default"]({
+                    sass: {
+                        outputStyle: 'compressed',
+                    },
                     mode: this.cssInJs ? 'inject' : 'extract',
                     url: {
                         inline: false,
@@ -353,6 +356,9 @@ class InnetJS {
                     url: {
                         inline: false,
                         publicPath: `${this.baseUrl}assets`,
+                    },
+                    sass: {
+                        silenceDeprecations: ['legacy-js-api'],
                     },
                     plugins: [autoprefixer__default["default"]()],
                     autoModules: this.cssModules ? (id) => !id.includes('.global.') : true,

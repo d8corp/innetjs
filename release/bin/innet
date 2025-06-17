@@ -302,6 +302,9 @@ class InnetJS {
                     include: imageInclude.map(img => `src/${img}`),
                     publicPath: this.baseUrl,
                 }), styles__default["default"]({
+                    sass: {
+                        outputStyle: 'compressed',
+                    },
                     mode: this.cssInJs ? 'inject' : 'extract',
                     url: {
                         inline: false,
@@ -425,6 +428,9 @@ class InnetJS {
                     url: {
                         inline: false,
                         publicPath: `${this.baseUrl}assets`,
+                    },
+                    sass: {
+                        silenceDeprecations: ['legacy-js-api'],
                     },
                     plugins: [autoprefixer__default["default"]()],
                     autoModules: this.cssModules ? (id) => !id.includes('.global.') : true,
@@ -785,7 +791,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"3.0.0"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"3.0.1"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {
