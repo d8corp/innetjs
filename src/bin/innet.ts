@@ -77,9 +77,10 @@ program
   .description('Release new version of your library')
   .option('-i, --index <index>', 'Root index file name', 'index')
   .option('-p, --public', 'Public the package')
+  .option('-m, --min', 'Add minified version of your library')
   .addOption(errorOption)
-  .action(({ error, index, public: pub }) => {
-    innetJS.release({ index, pub }).catch(e => {
+  .action(({ error, index, public: pub, min }) => {
+    innetJS.release({ index, pub, min }).catch(e => {
       if (error) {
         console.error(e)
         process.exit(1)

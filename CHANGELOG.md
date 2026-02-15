@@ -2,6 +2,11 @@
 
 ## v3.0
 
+### v3.0.2 [![15.02.2026](https://img.shields.io/date/1771168603)](https://github.com/d8corp/innetjs/tree/v3.0.2)
+
+- Add publish tags
+- Add min package file
+
 ### v3.0.1 [![18.06.2025](https://img.shields.io/date/1750194253)](https://github.com/d8corp/innetjs/tree/v3.0.1)
 
 - silence `legacy-js-api` warnings of `sass`

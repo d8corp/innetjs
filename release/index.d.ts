@@ -4,6 +4,7 @@ export interface ReleaseOptions {
     node?: boolean;
     index?: string;
     pub?: boolean;
+    min?: boolean;
 }
 export declare const scriptExtensions: string[];
 export declare const indexExt: string;
@@ -68,7 +69,7 @@ export declare class InnetJS {
         index?: string;
     }): Promise<void>;
     run(file: any): Promise<void>;
-    release({ index, pub }?: ReleaseOptions): Promise<void>;
+    release({ index, pub, min }?: ReleaseOptions): Promise<void>;
     private _lintUsage;
     withLint(options: rollup.RollupOptions, prod?: boolean): void;
     withEnv(options: rollup.RollupOptions, virtual?: boolean, preset?: EnvValues): void;

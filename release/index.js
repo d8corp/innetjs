@@ -90,6 +90,11 @@ const REG_CLEAR_TEXT = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0
 const REG_RPT_ERROR_FILE = /(src[^:]+):(\d+):(\d+)/;
 const REG_TJSX = /\.[tj]sx?$/;
 const REG_EXT = /\.([^.]+)$/;
+const NPM_TAG = /-(.+?)(?:\.|$)/;
+function getNpmTag(version) {
+    const match = version.match(NPM_TAG);
+    return match ? match[1] : 'latest';
+}
 const scriptExtensions = ['ts', 'js', 'tsx', 'jsx'];
 const indexExt = scriptExtensions.join(',');
 class InnetJS {
@@ -448,7 +453,7 @@ class InnetJS {
             }));
         });
     }
-    release({ index = 'index', pub } = {}) {
+    release({ index = 'index', pub, min } = {}) {
         return tslib.__awaiter(this, void 0, void 0, function* () {
             const { releaseFolder, cssModules } = this;
             yield logger__default["default"].start('Remove previous release', () => fs__default["default"].remove(releaseFolder));
@@ -462,12 +467,19 @@ class InnetJS {
                 if (!input.length) {
                     throw Error('index file is not detected');
                 }
-                const options = {
-                    input,
-                    external: ['tslib'],
-                    treeshake: false,
-                    output: {
+                const output = format === 'iife'
+                    ? {
+                        file: path__default["default"].join(releaseFolder, pkg.browser || 'index.min.js'),
+                        inlineDynamicImports: true,
+                        name: pkg.browserName || pkg.name
+                            .split('-')
+                            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+                            .join(''),
+                    }
+                    : {
                         dir: releaseFolder,
+                        preserveModules: true,
+                        exports: 'named',
                         entryFileNames: ({ name, facadeModuleId }) => {
                             if (REG_TJSX.test(facadeModuleId)) {
                                 return `${name}${ext}`;
@@ -475,10 +487,12 @@ class InnetJS {
                             const match = facadeModuleId.match(REG_EXT);
                             return match ? `${name}${match[0]}${ext}` : `${name}${ext}`;
                         },
-                        format,
-                        preserveModules: true,
-                        exports: 'named',
-                    },
+                    };
+                const options = {
+                    input,
+                    external: ['tslib'],
+                    treeshake: false,
+                    output: Object.assign(Object.assign({}, output), { format }),
                     plugins: [
                         json__default["default"](),
                         ts__default["default"]({
@@ -505,6 +519,9 @@ class InnetJS {
                         external__default["default"](),
                     ],
                 };
+                if (format === 'iife') {
+                    options.plugins.push(rollupPluginTerser.terser());
+                }
                 this.withLint(options);
                 this.withEnv(options, true);
                 const bundle = yield rollup__default["default"].rollup(options);
@@ -517,6 +534,11 @@ class InnetJS {
             yield logger__default["default"].start('Build es6 bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 yield build('es');
             }));
+            if (min) {
+                yield logger__default["default"].start('Build min bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
+                    yield build('iife');
+                }));
+            }
             yield logger__default["default"].start('Copy package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 const data = Object.assign({}, pkg);
                 delete data.private;
@@ -575,7 +597,7 @@ class InnetJS {
             if (pub) {
                 const date = (Date.now() / 1000) | 0;
                 yield logger__default["default"].start(`publishing v${pkg.version} ${date}`, () => tslib.__awaiter(this, void 0, void 0, function* () {
-                    yield execAsync(`npm publish ${this.releaseFolder}`);
+                    yield execAsync(`npm publish ${this.releaseFolder} --tag ${getNpmTag(pkg.version)}`);
                 }));
             }
         });

@@ -21,7 +21,7 @@ import { LinesAndColumns } from 'lines-and-columns'
 import { tmpdir } from 'os'
 import path from 'path'
 import prompt from 'prompts'
-import rollup from 'rollup'
+import rollup, { OutputOptions } from 'rollup'
 import external from 'rollup-plugin-external-node-modules'
 import filesize from 'rollup-plugin-filesize'
 import jsx from 'rollup-plugin-innet-jsx'
@@ -59,11 +59,18 @@ const REG_CLEAR_TEXT = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0
 const REG_RPT_ERROR_FILE = /(src[^:]+):(\d+):(\d+)/
 const REG_TJSX = /\.[tj]sx?$/
 const REG_EXT = /\.([^.]+)$/
+const NPM_TAG = /-(.+?)(?:\.|$)/
+
+function getNpmTag (version: string) {
+  const match = version.match(NPM_TAG)
+  return match ? match[1] : 'latest'
+}
 
 export interface ReleaseOptions {
   node?: boolean
   index?: string
   pub?: boolean
+  min?: boolean
 }
 
 export const scriptExtensions = ['ts', 'js', 'tsx', 'jsx']
@@ -544,7 +551,7 @@ export class InnetJS {
     })
   }
 
-  async release ({ index = 'index', pub }: ReleaseOptions = {}) {
+  async release ({ index = 'index', pub, min }: ReleaseOptions = {}) {
     const { releaseFolder, cssModules } = this
     await logger.start('Remove previous release', () => fs.remove(releaseFolder))
 
@@ -561,24 +568,37 @@ export class InnetJS {
         throw Error('index file is not detected')
       }
 
+      const output: OutputOptions = format === 'iife'
+        ? {
+            file: path.join(releaseFolder, pkg.browser || 'index.min.js'),
+            inlineDynamicImports: true,
+            name: pkg.browserName || pkg.name
+              .split('-')
+              .map((part: string) => part.charAt(0).toUpperCase() + part.slice(1))
+              .join(''),
+          }
+        : {
+            dir: releaseFolder,
+            preserveModules: true,
+            exports: 'named',
+            entryFileNames: ({ name, facadeModuleId }) => {
+              if (REG_TJSX.test(facadeModuleId)) {
+                return `${name}${ext}`
+              }
+
+              const match = facadeModuleId.match(REG_EXT)
+
+              return match ? `${name}${match[0]}${ext}` : `${name}${ext}`
+            },
+          }
+
       const options: rollup.RollupOptions = {
         input,
         external: ['tslib'],
         treeshake: false,
         output: {
-          dir: releaseFolder,
-          entryFileNames: ({ name, facadeModuleId }) => {
-            if (REG_TJSX.test(facadeModuleId)) {
-              return `${name}${ext}`
-            }
-
-            const match = facadeModuleId.match(REG_EXT)
-
-            return match ? `${name}${match[0]}${ext}` : `${name}${ext}`
-          },
+          ...output,
           format,
-          preserveModules: true,
-          exports: 'named',
         },
         plugins: [
           json(),
@@ -607,6 +627,10 @@ export class InnetJS {
         ],
       }
 
+      if (format === 'iife') {
+        options.plugins.push(terser())
+      }
+
       this.withLint(options)
       this.withEnv(options, true)
 
@@ -622,6 +646,12 @@ export class InnetJS {
     await logger.start('Build es6 bundle', async () => {
       await build('es')
     })
+
+    if (min) {
+      await logger.start('Build min bundle', async () => {
+        await build('iife')
+      })
+    }
 
     await logger.start('Copy package.json', async () => {
       const data = { ...pkg }
@@ -695,8 +725,9 @@ export class InnetJS {
 
     if (pub) {
       const date = (Date.now() / 1000) | 0
+
       await logger.start(`publishing v${pkg.version} ${date}`, async () => {
-        await execAsync(`npm publish ${this.releaseFolder}`)
+        await execAsync(`npm publish ${this.releaseFolder} --tag ${getNpmTag(pkg.version)}`)
       })
     }
   }

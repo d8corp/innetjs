@@ -1,6 +1,6 @@
 {
   "name": "innetjs",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "CLI for innet boilerplate",
   "homepage": "https://github.com/d8corp/innetjs",
   "author": "Mikhail Lysikov <d8corp@mail.ru>",
@@ -28,7 +28,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/d8corp/innetjs.git"
+    "url": "git+https://github.com/d8corp/innetjs.git"
   },
   "keywords": [
     "watch",
