@@ -435,6 +435,7 @@ class InnetJS {
                         ts__default["default"]({
                             compilerOptions: {
                                 sourceMap: true,
+                                declaration: false,
                             },
                         }),
                     ],

@@ -2,6 +2,11 @@
 
 ## v3.0
 
+### v3.0.3 [![21.02.2026](https://img.shields.io/date/1771699945)](https://github.com/d8corp/innetjs/tree/v3.0.3)
+
+- Fix `INNETJS_JSX_PACKAGE_VERSION` bug
+- Fix `declaration` bug of `run`
+
 ### v3.0.2 [![15.02.2026](https://img.shields.io/date/1771168603)](https://github.com/d8corp/innetjs/tree/v3.0.2)
 
 - Add publish tags

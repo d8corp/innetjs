@@ -530,6 +530,7 @@ export class InnetJS {
           ts({
             compilerOptions: {
               sourceMap: true,
+              declaration: false,
             },
           }),
         ],
