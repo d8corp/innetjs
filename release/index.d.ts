@@ -68,7 +68,9 @@ export declare class InnetJS {
         error?: boolean;
         index?: string;
     }): Promise<void>;
-    run(file: any): Promise<void>;
+    run(file: any, { config }?: {
+        config?: string;
+    }): Promise<void>;
     release({ index, pub, min }?: ReleaseOptions): Promise<void>;
     private _lintUsage;
     withLint(options: rollup.RollupOptions, prod?: boolean): void;

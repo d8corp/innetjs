@@ -411,7 +411,7 @@ class InnetJS {
             }));
         });
     }
-    run(file) {
+    run(file, { config = '' } = {}) {
         return tslib.__awaiter(this, void 0, void 0, function* () {
             const input = yield logger__default["default"].start('Check file', () => helpers.getFile(file));
             const folder = yield new Promise((resolve, reject) => {
@@ -433,6 +433,7 @@ class InnetJS {
                         pluginNodeResolve.nodeResolve(),
                         json__default["default"](),
                         ts__default["default"]({
+                            tsconfig: config || false,
                             compilerOptions: {
                                 sourceMap: true,
                                 declaration: false,

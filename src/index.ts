@@ -505,7 +505,7 @@ export class InnetJS {
     })
   }
 
-  async run (file) {
+  async run (file, { config = '' } = {}) {
     const input = await logger.start('Check file', () => getFile(file))
 
     const folder = await new Promise<string>((resolve, reject) => {
@@ -528,6 +528,7 @@ export class InnetJS {
           nodeResolve(),
           json(),
           ts({
+            tsconfig: config || false,
             compilerOptions: {
               sourceMap: true,
               declaration: false,

@@ -483,7 +483,7 @@ class InnetJS {
             }));
         });
     }
-    run(file) {
+    run(file, { config = '' } = {}) {
         return tslib.__awaiter(this, void 0, void 0, function* () {
             const input = yield logger__default["default"].start('Check file', () => getFile(file));
             const folder = yield new Promise((resolve, reject) => {
@@ -505,6 +505,7 @@ class InnetJS {
                         pluginNodeResolve.nodeResolve(),
                         json__default["default"](),
                         ts__default["default"]({
+                            tsconfig: config || false,
                             compilerOptions: {
                                 sourceMap: true,
                                 declaration: false,
@@ -814,7 +815,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"3.0.3"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"3.0.4"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {
@@ -844,9 +845,10 @@ commander.program
 commander.program
     .command('run <file-path>')
     .description('Run js, ts or tsx file')
+    .option('-c, --config <file-path>', 'Config file for TypeScript')
     .addOption(errorOption)
-    .action((filePath, { error }) => {
-    innetJS.run(filePath).catch(e => {
+    .action((filePath, { error, config }) => {
+    innetJS.run(filePath, { config }).catch(e => {
         if (error) {
             console.error(e);
             process.exit(1);

@@ -2,6 +2,10 @@
 
 ## v3.0
 
+### v3.0.4 [![21.02.2026](https://img.shields.io/date/1771701254)](https://github.com/d8corp/innetjs/tree/v3.0.4)
+
+- Add `--config` flag
+
 ### v3.0.3 [![21.02.2026](https://img.shields.io/date/1771699945)](https://github.com/d8corp/innetjs/tree/v3.0.3)
 
 - Fix `INNETJS_JSX_PACKAGE_VERSION` bug

@@ -30,9 +30,10 @@ program
 program
   .command('run <file-path>')
   .description('Run js, ts or tsx file')
+  .option('-c, --config <file-path>', 'Config file for TypeScript')
   .addOption(errorOption)
-  .action((filePath, { error }) => {
-    innetJS.run(filePath).catch(e => {
+  .action((filePath, { error, config }) => {
+    innetJS.run(filePath, { config }).catch(e => {
       if (error) {
         console.error(e)
         process.exit(1)
