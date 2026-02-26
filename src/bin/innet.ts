@@ -31,9 +31,10 @@ program
   .command('run <file-path>')
   .description('Run js, ts or tsx file')
   .option('-c, --config <file-path>', 'Config file for TypeScript')
+  .option('--expose-gc', 'Run node with global.gc support')
   .addOption(errorOption)
-  .action((filePath, { error, config }) => {
-    innetJS.run(filePath, { config }).catch(e => {
+  .action((filePath, { error, config, exposeGc }) => {
+    innetJS.run(filePath, { config, exposeGc }).catch(e => {
       if (error) {
         console.error(e)
         process.exit(1)

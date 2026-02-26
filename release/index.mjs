@@ -374,7 +374,7 @@ class InnetJS {
             }));
         });
     }
-    run(file, { config = '' } = {}) {
+    run(file, { config = '', exposeGc = false } = {}) {
         return __awaiter(this, void 0, void 0, function* () {
             const input = yield logger.start('Check file', () => getFile(file));
             const folder = yield new Promise((resolve, reject) => {
@@ -414,7 +414,11 @@ class InnetJS {
                 yield bundle.close();
             }));
             yield logger.start('Running of the script', () => __awaiter(this, void 0, void 0, function* () {
-                spawn('node', ['-r', 'source-map-support/register', jsFilePath], { stdio: 'inherit' });
+                const flags = [];
+                if (exposeGc) {
+                    flags.push('--expose-gc');
+                }
+                spawn('node', [...flags, '-r', 'source-map-support/register', jsFilePath], { stdio: 'inherit' });
             }));
         });
     }

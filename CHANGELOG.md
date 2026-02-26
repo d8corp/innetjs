@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.1
+
+### v3.1.0 [![26.02.2026](https://img.shields.io/date/1772130335)](https://github.com/d8corp/innetjs/tree/v3.1.0)
+
+- Add `--expose-gc` flag
+
 ## v3.0
 
 ### v3.0.4 [![21.02.2026](https://img.shields.io/date/1771701254)](https://github.com/d8corp/innetjs/tree/v3.0.4)

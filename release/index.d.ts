@@ -68,8 +68,9 @@ export declare class InnetJS {
         error?: boolean;
         index?: string;
     }): Promise<void>;
-    run(file: any, { config }?: {
+    run(file: any, { config, exposeGc }?: {
         config?: string;
+        exposeGc?: boolean;
     }): Promise<void>;
     release({ index, pub, min }?: ReleaseOptions): Promise<void>;
     private _lintUsage;

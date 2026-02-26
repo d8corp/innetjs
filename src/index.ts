@@ -505,7 +505,7 @@ export class InnetJS {
     })
   }
 
-  async run (file, { config = '' } = {}) {
+  async run (file, { config = '', exposeGc = false } = {}) {
     const input = await logger.start('Check file', () => getFile(file))
 
     const folder = await new Promise<string>((resolve, reject) => {
@@ -549,7 +549,13 @@ export class InnetJS {
     })
 
     await logger.start('Running of the script', async () => {
-      spawn('node', ['-r', 'source-map-support/register', jsFilePath], { stdio: 'inherit' })
+      const flags = []
+
+      if (exposeGc) {
+        flags.push('--expose-gc')
+      }
+
+      spawn('node', [...flags, '-r', 'source-map-support/register', jsFilePath], { stdio: 'inherit' })
     })
   }
 
