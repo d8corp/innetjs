@@ -2,6 +2,10 @@
 
 ## v3.1
 
+### v3.1.1 [![23.03.2026](https://img.shields.io/date/1774275481)](https://github.com/d8corp/innetjs/tree/v3.1.1)
+
+- Fix error handling
+
 ### v3.1.0 [![26.02.2026](https://img.shields.io/date/1772130335)](https://github.com/d8corp/innetjs/tree/v3.1.0)
 
 - Add `--expose-gc` flag

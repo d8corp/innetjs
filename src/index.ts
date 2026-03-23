@@ -392,8 +392,13 @@ export class InnetJS {
         if (warning.code === 'THIS_IS_UNDEFINED' || warning.code === 'SOURCEMAP_ERROR') return
 
         if (warning.plugin === 'typescript') {
-          const { loc: { line, column, file }, frame, message } = warning
-          console.log(`ERROR in ${file}:${line}:${column}`)
+          const { loc, frame, message } = warning
+
+          if (loc) {
+            const { line, column, file } = loc
+            console.log(`ERROR in ${file}:${line}:${column}`)
+          }
+
           console.log(message)
           console.log(frame)
           return

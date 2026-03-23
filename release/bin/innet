@@ -389,8 +389,11 @@ class InnetJS {
                     if (warning.code === 'THIS_IS_UNDEFINED' || warning.code === 'SOURCEMAP_ERROR')
                         return;
                     if (warning.plugin === 'typescript') {
-                        const { loc: { line, column, file }, frame, message } = warning;
-                        console.log(`ERROR in ${file}:${line}:${column}`);
+                        const { loc, frame, message } = warning;
+                        if (loc) {
+                            const { line, column, file } = loc;
+                            console.log(`ERROR in ${file}:${line}:${column}`);
+                        }
                         console.log(message);
                         console.log(frame);
                         return;
@@ -819,7 +822,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"3.1.0"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"3.1.1"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {
