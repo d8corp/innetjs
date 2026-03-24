@@ -1,7 +1,7 @@
 'use strict';
 
 ;(function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"3.1.1"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"3.2.0"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {

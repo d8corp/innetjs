@@ -46,11 +46,12 @@ program
   .command('start')
   .description('Start development with innet boilerplate')
   .option('-n, --node', 'Start development for Node.js')
+  .option('-uco, --usual-console-output', 'Removes custom error output (code-frame, colors...)')
   .option('-in, --inject', 'Injects script element into index.html')
   .option('-i, --index <index>', 'Root index file name', 'index')
   .addOption(errorOption)
-  .action(({ error, node, index, inject }) => {
-    innetJS.start({ node, error, index, inject }).catch(e => {
+  .action(({ error, node, index, inject, usualConsoleOutput }) => {
+    innetJS.start({ node, error, index, inject, usualConsoleOutput }).catch(e => {
       if (error) {
         console.error(e)
         process.exit(1)

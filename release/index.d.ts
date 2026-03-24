@@ -62,10 +62,11 @@ export declare class InnetJS {
         inject?: boolean;
         index?: string;
     }): Promise<void>;
-    start({ node, inject, error, index, }?: {
+    start({ node, inject, error, usualConsoleOutput, index, }?: {
         node?: boolean;
         inject?: boolean;
         error?: boolean;
+        usualConsoleOutput?: boolean;
         index?: string;
     }): Promise<void>;
     run(file: any, { config, exposeGc }?: {
@@ -79,5 +80,5 @@ export declare class InnetJS {
     increaseVersion(release: string): Promise<void>;
     getPackage(): Promise<Record<string, any>>;
     createClient(key: any, cert: any, pkg: any, index: string, inject: boolean): rollup.Plugin;
-    createServer(input: string[]): rollup.Plugin;
+    createServer(input: string[], error?: boolean, usualConsoleOutput?: boolean): rollup.Plugin;
 }
