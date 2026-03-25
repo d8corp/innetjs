@@ -886,7 +886,7 @@ class InnetJS {
                         return;
                     }
                     const child = spawn('node', ['-r', 'source-map-support/register', filePath], {
-                        stdio: ['inherit', 'pipe'],
+                        stdio: ['inherit', 'inherit'],
                     });
                     apps[name] = child;
                     child.stderr.on('data', (chunk) => {
@@ -905,7 +905,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"3.2.0"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"3.2.1"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {

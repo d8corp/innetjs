@@ -2,6 +2,10 @@
 
 ## v3.2
 
+### v3.2.1 [![25.03.2026](https://img.shields.io/date/1774468515)](https://github.com/d8corp/innetjs/tree/v3.2.1)
+
+- Fix output bug
+
 ### v3.2.0 [![23.03.2026](https://img.shields.io/date/1774369613)](https://github.com/d8corp/innetjs/tree/v3.2.0)
 
 - Add beautiful console error messages

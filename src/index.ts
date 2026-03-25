@@ -994,7 +994,7 @@ export class InnetJS {
           }
 
           const child = spawn('node', ['-r', 'source-map-support/register', filePath], {
-            stdio: ['inherit', 'pipe'],
+            stdio: ['inherit', 'inherit'],
           })
 
           apps[name] = child

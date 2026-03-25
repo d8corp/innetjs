@@ -814,7 +814,7 @@ class InnetJS {
                         return;
                     }
                     const child = spawn('node', ['-r', 'source-map-support/register', filePath], {
-                        stdio: ['inherit', 'pipe'],
+                        stdio: ['inherit', 'inherit'],
                     });
                     apps[name] = child;
                     child.stderr.on('data', (chunk) => {
