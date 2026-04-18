@@ -767,7 +767,7 @@ export class InnetJS {
 
     if (pkg.bin) {
       await logger.start('Build bin', async () => {
-        const { bin } = pkg
+        const { bin, type } = pkg
 
         for (const name in bin) {
           const value = bin[name]
@@ -779,7 +779,7 @@ export class InnetJS {
             external: [...Object.keys(pkg.dependencies), 'tslib'],
             output: {
               file,
-              format: 'cjs',
+              format: type === 'module' ? 'es' : 'cjs',
             },
             plugins: [
               preserveShebangs(),

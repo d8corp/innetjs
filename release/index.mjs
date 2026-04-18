@@ -589,7 +589,7 @@ class InnetJS {
             }));
             if (pkg.bin) {
                 yield logger.start('Build bin', () => __awaiter(this, void 0, void 0, function* () {
-                    const { bin } = pkg;
+                    const { bin, type } = pkg;
                     for (const name in bin) {
                         const value = bin[name];
                         const input = glob.sync(`src/${value}.{${indexExt}}`);
@@ -599,7 +599,7 @@ class InnetJS {
                             external: [...Object.keys(pkg.dependencies), 'tslib'],
                             output: {
                                 file,
-                                format: 'cjs',
+                                format: type === 'module' ? 'es' : 'cjs',
                             },
                             plugins: [
                                 preserveShebangs(),

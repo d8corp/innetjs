@@ -2,6 +2,10 @@
 
 ## v3.2
 
+### v3.2.3 [![18.04.2026](https://img.shields.io/date/1776537551)](https://github.com/d8corp/innetjs/tree/v3.2.3)
+
+- Respect `package.json` type field when building bin files
+
 ### v3.2.2 [![18.04.2026](https://img.shields.io/date/1776536186)](https://github.com/d8corp/innetjs/tree/v3.2.2)
 
 - Skip bundle builds based on `package.json` type field
