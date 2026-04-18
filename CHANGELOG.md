@@ -2,6 +2,10 @@
 
 ## v3.2
 
+### v3.2.2 [![18.04.2026](https://img.shields.io/date/1776536186)](https://github.com/d8corp/innetjs/tree/v3.2.2)
+
+- Skip bundle builds based on `package.json` type field
+
 ### v3.2.1 [![25.03.2026](https://img.shields.io/date/1774468515)](https://github.com/d8corp/innetjs/tree/v3.2.1)
 
 - Fix output bug

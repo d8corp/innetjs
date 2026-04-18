@@ -566,12 +566,16 @@ class InnetJS {
                 yield bundle.write(options.output);
                 yield bundle.close();
             });
-            yield logger.start('Build cjs bundle', () => __awaiter(this, void 0, void 0, function* () {
-                yield build('cjs');
-            }));
-            yield logger.start('Build es6 bundle', () => __awaiter(this, void 0, void 0, function* () {
-                yield build('es');
-            }));
+            if (!pkg.type || pkg.type === 'commonjs') {
+                yield logger.start('Build cjs bundle', () => __awaiter(this, void 0, void 0, function* () {
+                    yield build('cjs');
+                }));
+            }
+            if (!pkg.type || pkg.type === 'module') {
+                yield logger.start('Build es6 bundle', () => __awaiter(this, void 0, void 0, function* () {
+                    yield build('es');
+                }));
+            }
             if (min) {
                 yield logger.start('Build min bundle', () => __awaiter(this, void 0, void 0, function* () {
                     yield build('iife');
@@ -581,7 +585,7 @@ class InnetJS {
                 const data = Object.assign({}, pkg);
                 delete data.private;
                 delete data.devDependencies;
-                yield fs.writeFile(path.resolve(this.releaseFolder, 'package.json'), JSON.stringify(data, undefined, 2), 'UTF-8');
+                fs.writeFile(path.resolve(this.releaseFolder, 'package.json'), JSON.stringify(data, undefined, 2), 'UTF-8');
             }));
             if (pkg.bin) {
                 yield logger.start('Build bin', () => __awaiter(this, void 0, void 0, function* () {

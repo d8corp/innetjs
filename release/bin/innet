@@ -675,12 +675,16 @@ class InnetJS {
                 yield bundle.write(options.output);
                 yield bundle.close();
             });
-            yield logger__default["default"].start('Build cjs bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                yield build('cjs');
-            }));
-            yield logger__default["default"].start('Build es6 bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                yield build('es');
-            }));
+            if (!pkg.type || pkg.type === 'commonjs') {
+                yield logger__default["default"].start('Build cjs bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
+                    yield build('cjs');
+                }));
+            }
+            if (!pkg.type || pkg.type === 'module') {
+                yield logger__default["default"].start('Build es6 bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
+                    yield build('es');
+                }));
+            }
             if (min) {
                 yield logger__default["default"].start('Build min bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
                     yield build('iife');
@@ -690,7 +694,7 @@ class InnetJS {
                 const data = Object.assign({}, pkg);
                 delete data.private;
                 delete data.devDependencies;
-                yield fs__default["default"].writeFile(path__default["default"].resolve(this.releaseFolder, 'package.json'), JSON.stringify(data, undefined, 2), 'UTF-8');
+                fs__default["default"].writeFile(path__default["default"].resolve(this.releaseFolder, 'package.json'), JSON.stringify(data, undefined, 2), 'UTF-8');
             }));
             if (pkg.bin) {
                 yield logger__default["default"].start('Build bin', () => tslib.__awaiter(this, void 0, void 0, function* () {
@@ -905,7 +909,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"3.2.1"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"3.2.2"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {

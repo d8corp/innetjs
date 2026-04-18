@@ -734,13 +734,17 @@ export class InnetJS {
       await bundle.close()
     }
 
-    await logger.start('Build cjs bundle', async () => {
-      await build('cjs')
-    })
+    if (!pkg.type || pkg.type === 'commonjs') {
+      await logger.start('Build cjs bundle', async () => {
+        await build('cjs')
+      })
+    }
 
-    await logger.start('Build es6 bundle', async () => {
-      await build('es')
-    })
+    if (!pkg.type || pkg.type === 'module') {
+      await logger.start('Build es6 bundle', async () => {
+        await build('es')
+      })
+    }
 
     if (min) {
       await logger.start('Build min bundle', async () => {
@@ -754,7 +758,7 @@ export class InnetJS {
       delete data.private
       delete data.devDependencies
 
-      await fs.writeFile(
+      fs.writeFile(
         path.resolve(this.releaseFolder, 'package.json'),
         JSON.stringify(data, undefined, 2),
         'UTF-8',
