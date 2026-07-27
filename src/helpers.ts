@@ -4,7 +4,7 @@ import fs from 'fs-extra'
 import path from 'path'
 import { FileSizeRender } from 'rollup-plugin-filesize'
 
-export function getFile (file) {
+export function getFile (file: string) {
   file = path.resolve(file)
 
   if (!fs.existsSync(file)) {

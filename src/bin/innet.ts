@@ -2,7 +2,7 @@
 import { Option, program } from 'commander'
 
 import { InnetJS } from '..'
-import { updateDotenv } from '../updateDotenv'
+import { updateDotenv } from '../utils'
 
 updateDotenv()
 
