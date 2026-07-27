@@ -38,6 +38,12 @@ import { promisify } from 'util'
 import {
   imageInclude,
   lintInclude,
+  NPM_TAG,
+  REG_CLEAR_TEXT,
+  REG_EXT,
+  REG_RPT_ERROR_FILE,
+  REG_TJSX,
+  SCRIPT_EXTENSIONS,
   stringExcludeDom,
   stringExcludeNode,
 } from './constants'
@@ -55,12 +61,6 @@ const pipeline = promisify(stream.pipeline)
 
 updateDotenv()
 
-const REG_CLEAR_TEXT = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g
-const REG_RPT_ERROR_FILE = /(src[^:]+):(\d+):(\d+)/
-const REG_TJSX = /\.[tj]sx?$/
-const REG_EXT = /\.([^.]+)$/
-const NPM_TAG = /-(.+?)(?:\.|$)/
-
 function getNpmTag (version: string) {
   const match = version.match(NPM_TAG)
   return match ? match[1] : 'latest'
@@ -73,8 +73,7 @@ export interface ReleaseOptions {
   min?: boolean
 }
 
-export const scriptExtensions = ['ts', 'js', 'tsx', 'jsx']
-export const indexExt = scriptExtensions.join(',')
+export const indexExt = SCRIPT_EXTENSIONS.join(',')
 
 export class InnetJS {
   baseUrl: string
