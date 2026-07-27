@@ -511,7 +511,7 @@ export class InnetJS {
     })
   }
 
-  async run (file, { config = '', exposeGc = false } = {}) {
+  async run (file: string, { config = '', exposeGc = false } = {}) {
     const input = await logger.start('Check file', () => getFile(file))
 
     const folder = await new Promise<string>((resolve, reject) => {

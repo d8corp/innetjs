@@ -33,7 +33,7 @@ program
   .option('-c, --config <file-path>', 'Config file for TypeScript')
   .option('--expose-gc', 'Run node with global.gc support')
   .addOption(errorOption)
-  .action((filePath, { error, config, exposeGc }) => {
+  .action((filePath: string, { error, config, exposeGc }) => {
     innetJS.run(filePath, { config, exposeGc }).catch(e => {
       if (error) {
         console.error(e)
