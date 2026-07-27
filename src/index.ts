@@ -6,11 +6,8 @@ import json from '@rollup/plugin-json'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 import ts from '@rollup/plugin-typescript'
 import address from 'address'
-import Zip from 'adm-zip'
 import autoprefixer from 'autoprefixer'
-import axios from 'axios'
 import chalk from 'chalk'
-import selector from 'cli-select'
 import express from 'express'
 import proxy from 'express-http-proxy'
 import fs, { promises as fsx } from 'fs-extra'
@@ -18,7 +15,6 @@ import glob from 'glob'
 import http from 'http'
 import https from 'https'
 import { LinesAndColumns } from 'lines-and-columns'
-import { tmpdir } from 'os'
 import path from 'path'
 import prompt from 'prompts'
 import rollup, { OutputOptions } from 'rollup'
@@ -31,14 +27,13 @@ import { preserveShebangs } from 'rollup-plugin-preserve-shebangs'
 import env, { EnvValues } from 'rollup-plugin-process-env'
 import styles from 'rollup-plugin-styles'
 import { terser } from 'rollup-plugin-terser'
-import stream from 'stream'
 import tmp from 'tmp'
 import { promisify } from 'util'
 
+import { init, InitOptions } from './commands'
 import {
   imageInclude,
   lintInclude,
-  NPM_TAG,
   REG_CLEAR_TEXT,
   REG_EXT,
   REG_RPT_ERROR_FILE,
@@ -48,23 +43,16 @@ import {
   stringExcludeNode,
 } from './constants'
 import { convertIndexFile, getFile, reporter } from './helpers'
-import { printErrorWithFrame, updateDotenv } from './utils'
+import { getNpmTag, printErrorWithFrame, updateDotenv } from './utils'
 
 const livereload = require('rollup-plugin-livereload')
 const { string } = require('rollup-plugin-string')
 const { exec, spawn } = require('child_process')
-const readline = require('readline')
 const importAssets = require('rollup-plugin-import-assets')
 const execAsync = promisify(exec)
 const copyFiles = promisify(fs.copy)
-const pipeline = promisify(stream.pipeline)
 
 updateDotenv()
-
-function getNpmTag (version: string) {
-  const match = version.match(NPM_TAG)
-  return match ? match[1] : 'latest'
-}
 
 export interface ReleaseOptions {
   node?: boolean
@@ -73,9 +61,8 @@ export interface ReleaseOptions {
   min?: boolean
 }
 
-export const indexExt = SCRIPT_EXTENSIONS.join(',')
-
 export class InnetJS {
+  indexExt = SCRIPT_EXTENSIONS.join(',')
   baseUrl: string
   projectFolder: string
   publicFolder: string
@@ -155,84 +142,12 @@ export class InnetJS {
   }
 
   // Methods
-  async init (appName: string, { template, force = false } = {} as any) {
-    const appPath = path.resolve(appName)
-    const { data } = await logger.start('Get templates list', async () =>
-      await axios.get('https://api.github.com/repos/d8corp/innetjs-templates/branches'))
-
-    const templates = data.map(({ name }) => name).filter(name => name !== 'main')
-
-    if (!template || !templates.includes(template)) {
-      logger.log(chalk.green('Select one of those templates'))
-
-      const { value } = await selector({
-        values: templates,
-      })
-      template = value
-
-      readline.moveCursor(process.stdout, 0, -1)
-
-      const text = `Selected template: ${chalk.white(value)}`
-      logger.start(text)
-      logger.end(text)
-    }
-
-    if (!force) {
-      await logger.start('Check if app folder is available', async () => {
-        if (fs.existsSync(appPath)) {
-          logger.log(chalk.red(`'${appPath}' already exist, what do you want?`))
-
-          const { id: result, value } = await selector({
-            values: ['Stop the process', 'Remove the folder', 'Merge with template'],
-          })
-
-          readline.moveCursor(process.stdout, 0, -1)
-
-          logger.log(`Already exist, selected: ${value}`)
-
-          if (!result) {
-            throw Error(`'${appPath}' already exist`)
-          }
-
-          if (result === 1) {
-            await fs.remove(appPath)
-          }
-        }
-      })
-    }
-
-    await logger.start('Download template', async () => {
-      const tmpPath = tmpdir()
-      const zipPath = path.join(tmpPath, 'template.zip')
-      const unzipPath = path.join(tmpPath, `innetjs-templates-${template}`)
-      const { data } = await axios.get(`https://github.com/d8corp/innetjs-templates/archive/refs/heads/${template}.zip`, {
-        responseType: 'stream',
-      })
-
-      await pipeline(data, fs.createWriteStream(zipPath))
-
-      const zip = new Zip(zipPath)
-
-      await new Promise((resolve, reject) => {
-        zip.extractAllToAsync(tmpPath, false, false, (error) => {
-          if (error) {
-            reject(error)
-          } else {
-            resolve(undefined)
-          }
-        })
-      })
-
-      await fs.remove(zipPath)
-
-      await fs.move(unzipPath, appPath, { overwrite: true })
-    })
-
-    await logger.start('Install packages', () => execAsync(`cd ${appPath} && npm i`))
+  async init (appName: string, options?: InitOptions) {
+    await init(appName, options)
   }
 
   async build ({ node = false, inject = false, index = 'index' } = {}) {
-    const input = glob.sync(`src/${index}.{${indexExt}}`)
+    const input = glob.sync(`src/${index}.{${this.indexExt}}`)
 
     if (!input.length) {
       throw Error('index file is not detected')
@@ -362,7 +277,7 @@ export class InnetJS {
     index = 'index',
   } = {}) {
     const pkg = await this.getPackage()
-    const input = glob.sync(`src/${index}.{${indexExt}}`)
+    const input = glob.sync(`src/${index}.{${this.indexExt}}`)
 
     if (!input.length) {
       throw Error('index file is not detected')
@@ -575,7 +490,7 @@ export class InnetJS {
         ? (pkg.module || pkg.esnext || pkg['jsnext:main'])?.replace('index', '') || '.mjs'
         : pkg.main?.replace('index', '') || '.js'
 
-      const input = glob.sync(`src/${index}.{${indexExt}}`)
+      const input = glob.sync(`src/${index}.{${this.indexExt}}`)
 
       if (!input.length) {
         throw Error('index file is not detected')
@@ -689,7 +604,7 @@ export class InnetJS {
 
         for (const name in bin) {
           const value = bin[name]
-          const input = glob.sync(`src/${value}.{${indexExt}}`)
+          const input = glob.sync(`src/${value}.{${this.indexExt}}`)
           const file = path.join(this.releaseFolder, value)
 
           const options: rollup.RollupOptions = {
