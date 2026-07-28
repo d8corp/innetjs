@@ -61,6 +61,26 @@ export interface ReleaseOptions {
   min?: boolean
 }
 
+export interface InnetJSParams {
+  envPrefix?: string
+  projectFolder?: string
+  baseUrl?: string
+  publicFolder?: string
+  releaseFolder?: string
+  buildFolder?: string
+  srcFolder?: string
+  sourcemap?: boolean
+  cssModules?: boolean
+  cssInJs?: boolean
+  sslKey?: string
+  sslCrt?: string
+  proxy?: string
+  simulateIP?: string
+  port?: number
+  api?: string
+  tsconfig?: string
+}
+
 export class InnetJS {
   indexExt = SCRIPT_EXTENSIONS.join(',')
   baseUrl: string
@@ -111,7 +131,7 @@ export class InnetJS {
     port = process.env.PORT ? +process.env.PORT : 3000,
     api = process.env.API || '/api/?*',
     tsconfig = process.env.TSCONFIG,
-  } = {}) {
+  }: InnetJSParams = {}) {
     this.projectFolder = path.resolve(projectFolder)
     this.publicFolder = path.resolve(publicFolder)
     this.releaseFolder = path.resolve(releaseFolder)
