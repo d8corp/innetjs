@@ -28,20 +28,21 @@ export async function start ({
   usualConsoleOutput = false,
   index = 'index',
 }: StartOptions, instance: InnetJS) {
+  const params = instance.params
   const pkg = await instance.getPackage()
-  const input = glob.sync(`src/${index}.{${instance.params.indexExt}}`)
+  const input = glob.sync(`src/${index}.{${params.indexExt}}`)
 
   if (!input.length) {
     throw Error('index file is not detected')
   }
 
-  await logger.start('Remove build', () => fs.remove(instance.params.devBuildFolder))
+  await logger.start('Remove build', () => fs.remove(params.devBuildFolder))
 
   const options: rollup.RollupOptions = {
     input,
     preserveEntrySignatures: 'strict',
     output: {
-      dir: instance.params.devBuildFolder,
+      dir: params.devBuildFolder,
       sourcemap: true,
     },
     plugins: [
@@ -74,6 +75,7 @@ export async function start ({
       warn(warning)
     },
   }
+
   let preset: EnvValues
 
   instance.withLint(options)
@@ -92,16 +94,16 @@ export async function start ({
       instance.createServer(input, error, usualConsoleOutput),
     )
   } else {
-    const key = path.basename(instance.params.sslKey) !== instance.params.sslKey
-      ? instance.params.sslKey
-      : fs.existsSync(instance.params.sslKey)
-        ? fs.readFileSync(instance.params.sslKey)
+    const key = path.basename(params.sslKey) !== params.sslKey
+      ? params.sslKey
+      : fs.existsSync(params.sslKey)
+        ? fs.readFileSync(params.sslKey)
         : undefined
 
-    const cert = path.basename(instance.params.sslCrt) !== instance.params.sslCrt
-      ? instance.params.sslCrt
-      : fs.existsSync(instance.params.sslCrt)
-        ? fs.readFileSync(instance.params.sslCrt)
+    const cert = path.basename(params.sslCrt) !== params.sslCrt
+      ? params.sslCrt
+      : fs.existsSync(params.sslCrt)
+        ? fs.readFileSync(params.sslCrt)
         : undefined
 
     // @ts-expect-error
@@ -113,19 +115,19 @@ export async function start ({
       polyfill(),
       importAssets({
         include: imageInclude.map(img => `src/${img}`),
-        publicPath: instance.params.baseUrl,
+        publicPath: params.baseUrl,
       }),
       styles({
-        mode: instance.params.cssInJs ? 'inject' : 'extract',
+        mode: params.cssInJs ? 'inject' : 'extract',
         url: {
           inline: false,
-          publicPath: `${instance.params.baseUrl}assets`,
+          publicPath: `${params.baseUrl}assets`,
         },
         sass: {
           silenceDeprecations: ['legacy-js-api'],
         },
         plugins: [autoprefixer()],
-        autoModules: instance.params.cssModules ? (id: string) => !id.includes('.global.') : true,
+        autoModules: params.cssModules ? (id: string) => !id.includes('.global.') : true,
         sourceMap: true,
       }),
       string({
@@ -135,7 +137,7 @@ export async function start ({
       instance.createClient(key, cert, pkg, path.parse(input[0]).name, inject),
       livereload({
         exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'],
-        watch: [instance.params.devBuildFolder, instance.params.publicFolder],
+        watch: [params.devBuildFolder, params.publicFolder],
         verbose: false,
         ...(key && cert ? { https: { key, cert } } : {}),
       }),
