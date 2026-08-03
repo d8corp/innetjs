@@ -38,13 +38,12 @@ import {
   REG_EXT,
   REG_RPT_ERROR_FILE,
   REG_TJSX,
-  SCRIPT_EXTENSIONS,
   stringExcludeDom,
   stringExcludeNode,
 } from '../constants'
 import { convertIndexFile, getFile, reporter } from '../helpers'
 import { InnetJSParams, ReleaseOptions } from '../types'
-import { getNpmTag, printErrorWithFrame, updateDotenv } from '../utils'
+import { getDefaultOptions, getNpmTag, printErrorWithFrame, updateDotenv } from '../utils'
 
 const livereload = require('rollup-plugin-livereload')
 const { string } = require('rollup-plugin-string')
@@ -56,83 +55,11 @@ const copyFiles = promisify(fs.copy)
 updateDotenv()
 
 export class InnetJS {
-  indexExt = SCRIPT_EXTENSIONS.join(',')
-  baseUrl: string //
-  projectFolder: string //
-  publicFolder: string //
-  releaseFolder: string //
-  licenseFile: string
-  licenseReleaseFile: string
-  readmeFile: string
-  readmeReleaseFile: string
-  declarationFile: string
-  declarationReleaseFile: string
-  buildFolder: string //
-  devBuildFolder: string
-  srcFolder: string //
-  publicIndexFile: string
-  buildIndexFile: string
-  devBuildIndexFile: string
-  sslKey: string //
-  sslCrt: string //
-  proxy: string //
-  sourcemap: boolean //
-  cssModules: boolean //
-  cssInJs: boolean //
-  port: number //
-  api: string //
-  envPrefix: string //
-  simulateIP: string //
-  tsconfig: string //
-
+  options: Required<InnetJSParams>
   private package: object
 
-  constructor ({
-    envPrefix = process.env.INNETJS_ENV_PREFIX || 'INNETJS_',
-    projectFolder = process.env.PROJECT_FOLDER || '',
-    baseUrl = process.env.BASE_URL || '',
-    publicFolder = process.env.PUBLIC_FOLDER || 'public',
-    releaseFolder = process.env.RELEASE_FOLDER || 'release',
-    buildFolder = process.env.BUILD_FOLDER || 'build',
-    srcFolder = process.env.SRC_FOLDER || 'src',
-    sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === 'true' : false,
-    cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === 'true' : true,
-    cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === 'true' : true,
-    sslKey = process.env.SSL_KEY || 'localhost.key',
-    sslCrt = process.env.SSL_CRT || 'localhost.crt',
-    proxy = process.env.PROXY || '',
-    simulateIP = process.env.IP,
-    port = process.env.PORT ? +process.env.PORT : 3000,
-    api = process.env.API || '/api/?*',
-    tsconfig = process.env.TSCONFIG,
-  }: InnetJSParams = {}) {
-    this.projectFolder = path.resolve(projectFolder)
-    this.publicFolder = path.resolve(publicFolder)
-    this.releaseFolder = path.resolve(releaseFolder)
-    this.buildFolder = path.resolve(buildFolder)
-    this.srcFolder = path.resolve(srcFolder)
-    this.licenseFile = path.join(projectFolder, 'LICENSE')
-    this.licenseReleaseFile = path.join(releaseFolder, 'LICENSE')
-    this.readmeFile = path.join(projectFolder, 'README.md')
-    this.readmeReleaseFile = path.join(releaseFolder, 'README.md')
-    this.declarationFile = path.join(srcFolder, 'declaration.d.ts')
-    this.declarationReleaseFile = path.join(releaseFolder, 'declaration.d.ts')
-    this.publicIndexFile = path.join(publicFolder, 'index.html')
-    this.buildIndexFile = path.join(buildFolder, 'index.html')
-    this.devBuildFolder = path.resolve(projectFolder, 'node_modules', '.cache', 'innetjs', 'build')
-    this.devBuildIndexFile = path.join(this.devBuildFolder, 'index.html')
-    this.sourcemap = sourcemap
-    this.cssModules = cssModules
-    this.cssInJs = cssInJs
-    this.sslKey = sslKey
-    this.sslCrt = sslCrt
-    this.port = port
-    this.proxy = proxy
-    this.api = api
-    this.baseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
-    this.envPrefix = envPrefix
-    this.simulateIP = simulateIP
-    this.tsconfig = tsconfig
+  constructor (options: InnetJSParams = {}) {
+    this.options = getDefaultOptions(options)
   }
 
   // Methods
@@ -141,13 +68,13 @@ export class InnetJS {
   }
 
   async build ({ node = false, inject = false, index = 'index' } = {}) {
-    const input = glob.sync(`src/${index}.{${this.indexExt}}`)
+    const input = glob.sync(`src/${index}.{${this.options.indexExt}}`)
 
     if (!input.length) {
       throw Error('index file is not detected')
     }
 
-    await logger.start('Remove build', () => fs.remove(this.buildFolder))
+    await logger.start('Remove build', () => fs.remove(this.options.buildFolder))
 
     const pkg = node && await this.getPackage()
     const options: rollup.RollupOptions = {
@@ -173,8 +100,8 @@ export class InnetJS {
     this.withLint(options, true)
 
     const outputOptions = {
-      dir: this.buildFolder,
-      sourcemap: this.sourcemap,
+      dir: this.options.buildFolder,
+      sourcemap: this.options.sourcemap,
     } as Record<string, any>
 
     if (node) {
@@ -195,20 +122,20 @@ export class InnetJS {
         polyfill(),
         importAssets({
           include: imageInclude.map(img => `src/${img}`),
-          publicPath: this.baseUrl,
+          publicPath: this.options.baseUrl,
         }),
         styles({
           sass: {
             outputStyle: 'compressed',
           },
-          mode: this.cssInJs ? 'inject' : 'extract',
+          mode: this.options.cssInJs ? 'inject' : 'extract',
           url: {
             inline: false,
-            publicPath: `${this.baseUrl}assets`,
+            publicPath: `${this.options.baseUrl}assets`,
           },
           plugins: [autoprefixer()],
-          autoModules: this.cssModules ? (id: string) => !id.includes('.global.') : true,
-          sourceMap: this.sourcemap,
+          autoModules: this.options.cssModules ? (id: string) => !id.includes('.global.') : true,
+          sourceMap: this.options.sourcemap,
           minimize: true,
         }),
         string({
@@ -232,12 +159,12 @@ export class InnetJS {
       await bundle.write(outputOptions)
       await bundle.close()
       if (!node) {
-        await copyFiles(this.publicFolder, this.buildFolder)
-        const data = await fsx.readFile(this.publicIndexFile)
+        await copyFiles(this.options.publicFolder, this.options.buildFolder)
+        const data = await fsx.readFile(this.options.publicIndexFile)
         const pkg = await this.getPackage()
         await fsx.writeFile(
-          this.buildIndexFile,
-          await convertIndexFile(data, pkg.version, this.baseUrl, path.parse(input[0]).name, inject),
+          this.options.buildIndexFile,
+          await convertIndexFile(data, pkg.version, this.options.baseUrl, path.parse(input[0]).name, inject),
         )
       }
     })
@@ -249,15 +176,15 @@ export class InnetJS {
         delete data.devDependencies
 
         await fs.writeFile(
-          path.resolve(this.buildFolder, 'package.json'),
+          path.resolve(this.options.buildFolder, 'package.json'),
           JSON.stringify(data, undefined, 2),
           'UTF-8',
         )
       })
-      const pkgLockPath = path.resolve(this.projectFolder, 'package-lock.json')
+      const pkgLockPath = path.resolve(this.options.projectFolder, 'package-lock.json')
       if (fs.existsSync(pkgLockPath)) {
         await logger.start('Copy package-lock.json', () => {
-          return fs.copy(pkgLockPath, path.resolve(this.buildFolder, 'package-lock.json'))
+          return fs.copy(pkgLockPath, path.resolve(this.options.buildFolder, 'package-lock.json'))
         })
       }
     }
@@ -271,19 +198,19 @@ export class InnetJS {
     index = 'index',
   } = {}) {
     const pkg = await this.getPackage()
-    const input = glob.sync(`src/${index}.{${this.indexExt}}`)
+    const input = glob.sync(`src/${index}.{${this.options.indexExt}}`)
 
     if (!input.length) {
       throw Error('index file is not detected')
     }
 
-    await logger.start('Remove build', () => fs.remove(this.devBuildFolder))
+    await logger.start('Remove build', () => fs.remove(this.options.devBuildFolder))
 
     const options: rollup.RollupOptions = {
       input,
       preserveEntrySignatures: 'strict',
       output: {
-        dir: this.devBuildFolder,
+        dir: this.options.devBuildFolder,
         sourcemap: true,
       },
       plugins: [
@@ -334,16 +261,16 @@ export class InnetJS {
         this.createServer(input, error, usualConsoleOutput),
       )
     } else {
-      const key = path.basename(this.sslKey) !== this.sslKey
-        ? this.sslKey
-        : fs.existsSync(this.sslKey)
-          ? fs.readFileSync(this.sslKey)
+      const key = path.basename(this.options.sslKey) !== this.options.sslKey
+        ? this.options.sslKey
+        : fs.existsSync(this.options.sslKey)
+          ? fs.readFileSync(this.options.sslKey)
           : undefined
 
-      const cert = path.basename(this.sslCrt) !== this.sslCrt
-        ? this.sslCrt
-        : fs.existsSync(this.sslCrt)
-          ? fs.readFileSync(this.sslCrt)
+      const cert = path.basename(this.options.sslCrt) !== this.options.sslCrt
+        ? this.options.sslCrt
+        : fs.existsSync(this.options.sslCrt)
+          ? fs.readFileSync(this.options.sslCrt)
           : undefined
 
       // @ts-expect-error
@@ -355,19 +282,19 @@ export class InnetJS {
         polyfill(),
         importAssets({
           include: imageInclude.map(img => `src/${img}`),
-          publicPath: this.baseUrl,
+          publicPath: this.options.baseUrl,
         }),
         styles({
-          mode: this.cssInJs ? 'inject' : 'extract',
+          mode: this.options.cssInJs ? 'inject' : 'extract',
           url: {
             inline: false,
-            publicPath: `${this.baseUrl}assets`,
+            publicPath: `${this.options.baseUrl}assets`,
           },
           sass: {
             silenceDeprecations: ['legacy-js-api'],
           },
           plugins: [autoprefixer()],
-          autoModules: this.cssModules ? (id: string) => !id.includes('.global.') : true,
+          autoModules: this.options.cssModules ? (id: string) => !id.includes('.global.') : true,
           sourceMap: true,
         }),
         string({
@@ -377,7 +304,7 @@ export class InnetJS {
         this.createClient(key, cert, pkg, path.parse(input[0]).name, inject),
         livereload({
           exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'],
-          watch: [this.devBuildFolder, this.publicFolder],
+          watch: [this.options.devBuildFolder, this.options.publicFolder],
           verbose: false,
           ...(key && cert ? { https: { key, cert } } : {}),
         }),
@@ -474,7 +401,7 @@ export class InnetJS {
   }
 
   async release ({ index = 'index', pub, min }: ReleaseOptions = {}) {
-    const { releaseFolder, cssModules } = this
+    const { releaseFolder, cssModules } = this.options
     await logger.start('Remove previous release', () => fs.remove(releaseFolder))
 
     const pkg = await this.getPackage()
@@ -484,7 +411,7 @@ export class InnetJS {
         ? (pkg.module || pkg.esnext || pkg['jsnext:main'])?.replace('index', '') || '.mjs'
         : pkg.main?.replace('index', '') || '.js'
 
-      const input = glob.sync(`src/${index}.{${this.indexExt}}`)
+      const input = glob.sync(`src/${index}.{${this.options.indexExt}}`)
 
       if (!input.length) {
         throw Error('index file is not detected')
@@ -525,7 +452,7 @@ export class InnetJS {
         plugins: [
           json(),
           ts({
-            tsconfig: this.tsconfig,
+            tsconfig: this.options.tsconfig,
             compilerOptions: {
               sourceMap: false,
               outDir: releaseFolder,
@@ -539,7 +466,7 @@ export class InnetJS {
           }),
           image(),
           styles({
-            mode: this.cssInJs ? 'inject' : 'extract',
+            mode: this.options.cssInJs ? 'inject' : 'extract',
             plugins: [autoprefixer()],
             autoModules: cssModules ? (id: string) => !id.includes('.global.') : true,
             minimize: true,
@@ -586,7 +513,7 @@ export class InnetJS {
       delete data.devDependencies
 
       fs.writeFile(
-        path.resolve(this.releaseFolder, 'package.json'),
+        path.resolve(this.options.releaseFolder, 'package.json'),
         JSON.stringify(data, undefined, 2),
         'UTF-8',
       )
@@ -598,8 +525,8 @@ export class InnetJS {
 
         for (const name in bin) {
           const value = bin[name]
-          const input = glob.sync(`src/${value}.{${this.indexExt}}`)
-          const file = path.join(this.releaseFolder, value)
+          const input = glob.sync(`src/${value}.{${this.options.indexExt}}`)
+          const file = path.join(this.options.releaseFolder, value)
 
           const options: rollup.RollupOptions = {
             input,
@@ -631,21 +558,21 @@ export class InnetJS {
       })
     }
 
-    if (fs.existsSync(this.licenseFile)) {
+    if (fs.existsSync(this.options.licenseFile)) {
       await logger.start('Copy license', async () => {
-        await fsx.copyFile(this.licenseFile, this.licenseReleaseFile)
+        await fsx.copyFile(this.options.licenseFile, this.options.licenseReleaseFile)
       })
     }
 
-    if (fs.existsSync(this.readmeFile)) {
+    if (fs.existsSync(this.options.readmeFile)) {
       await logger.start('Copy readme', async () => {
-        await fsx.copyFile(this.readmeFile, this.readmeReleaseFile)
+        await fsx.copyFile(this.options.readmeFile, this.options.readmeReleaseFile)
       })
     }
 
-    if (fs.existsSync(this.declarationFile)) {
+    if (fs.existsSync(this.options.declarationFile)) {
       await logger.start('Copy declaration', async () => {
-        await fsx.copyFile(this.declarationFile, this.declarationReleaseFile)
+        await fsx.copyFile(this.options.declarationFile, this.options.declarationReleaseFile)
       })
     }
 
@@ -653,7 +580,7 @@ export class InnetJS {
       const date = (Date.now() / 1000) | 0
 
       await logger.start(`publishing v${pkg.version} ${date}`, async () => {
-        await execAsync(`npm publish ${this.releaseFolder} --tag ${getNpmTag(pkg.version)}`)
+        await execAsync(`npm publish ${this.options.releaseFolder} --tag ${getNpmTag(pkg.version)}`)
       })
     }
   }
@@ -663,7 +590,7 @@ export class InnetJS {
   private _lintUsage: boolean
   withLint (options: rollup.RollupOptions, prod = false) {
     if (this._lintUsage === undefined) {
-      this._lintUsage = fs.existsSync(path.join(this.projectFolder, '.eslintrc'))
+      this._lintUsage = fs.existsSync(path.join(this.options.projectFolder, '.eslintrc'))
     }
 
     if (this._lintUsage) {
@@ -675,7 +602,7 @@ export class InnetJS {
   }
 
   withEnv (options: rollup.RollupOptions, virtual?: boolean, preset?: EnvValues) {
-    options.plugins.push(env(this.envPrefix, {
+    options.plugins.push(env(this.options.envPrefix, {
       include: options.input as string[],
       virtual,
       preset,
@@ -710,7 +637,7 @@ export class InnetJS {
       pkg.version = version.join('.')
 
       await fs.writeFile(
-        path.resolve(this.projectFolder, 'package.json'),
+        path.resolve(this.options.projectFolder, 'package.json'),
         JSON.stringify(pkg, undefined, 2),
         'UTF-8',
       )
@@ -722,7 +649,7 @@ export class InnetJS {
       return this.package
     }
 
-    const packageFolder = path.resolve(this.projectFolder, 'package.json')
+    const packageFolder = path.resolve(this.options.projectFolder, 'package.json')
 
     await logger.start('Check package.json', async () => {
       if (fs.existsSync(packageFolder)) {
@@ -742,30 +669,30 @@ export class InnetJS {
         if (!app) {
           app = express()
           const update = async () => {
-            const data = await fsx.readFile(this.publicIndexFile)
+            const data = await fsx.readFile(this.options.publicIndexFile)
             await fsx.writeFile(
-              this.devBuildIndexFile,
-              await convertIndexFile(data, pkg.version, this.baseUrl, index, inject),
+              this.options.devBuildIndexFile,
+              await convertIndexFile(data, pkg.version, this.options.baseUrl, index, inject),
             )
           }
 
-          fs.watch(this.publicIndexFile, update)
+          fs.watch(this.options.publicIndexFile, update)
           await update()
 
           const httpsUsing = !!(cert && key)
 
-          app.use(this.baseUrl, express.static(this.devBuildFolder))
-          app.use(this.baseUrl, express.static(this.publicFolder))
+          app.use(this.options.baseUrl, express.static(this.options.devBuildFolder))
+          app.use(this.options.baseUrl, express.static(this.options.publicFolder))
 
-          if (this.proxy?.startsWith('http')) {
-            if (this.simulateIP) {
+          if (this.options.proxy?.startsWith('http')) {
+            if (this.options.simulateIP) {
               app.use((req, res, next) => {
-                req.headers['X-Real-IP'] = this.simulateIP
+                req.headers['X-Real-IP'] = this.options.simulateIP
                 next()
               })
             }
 
-            app.use(this.api, proxy(this.proxy, {
+            app.use(this.options.api, proxy(this.options.proxy, {
               https: httpsUsing,
               limit: '1000mb',
               proxyReqPathResolver: req => req.originalUrl,
@@ -773,13 +700,13 @@ export class InnetJS {
           }
 
           app.use(/^([^.]*|.*\.[^.]{5,})$/, (req, res) => {
-            res.sendFile(this.devBuildFolder + '/index.html')
+            res.sendFile(this.options.devBuildFolder + '/index.html')
           })
 
           const server = httpsUsing ? https.createServer({ key, cert }, app) : http.createServer(app)
-          let port = this.port
+          let port = this.options.port
           const listener = () => {
-            const baseUrl = this.baseUrl === '/' ? '' : this.baseUrl
+            const baseUrl = this.options.baseUrl === '/' ? '' : this.options.baseUrl
             console.log(`${chalk.green('➤')} Started on http${httpsUsing ? 's' : ''}://localhost:${port}${baseUrl} and http${httpsUsing ? 's' : ''}://${address.ip()}:${port}${baseUrl}`)
           }
 
@@ -817,7 +744,7 @@ export class InnetJS {
           let stderrBuffer = ''
           const { name } = path.parse(file)
           apps[name]?.kill()
-          const filePath = path.resolve(this.devBuildFolder, `${name}.js`)
+          const filePath = path.resolve(this.options.devBuildFolder, `${name}.js`)
 
           if (usualConsoleOutput) {
             apps[name] = spawn('node', ['-r', 'source-map-support/register', filePath], { stdio: 'inherit' })

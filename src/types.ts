@@ -16,6 +16,17 @@ export interface InnetJSParams {
   port?: number
   api?: string
   tsconfig?: string
+  licenseFile?: string
+  licenseReleaseFile?: string
+  readmeFile?: string
+  readmeReleaseFile?: string
+  declarationFile?: string
+  declarationReleaseFile?: string
+  devBuildFolder?: string
+  publicIndexFile?: string
+  buildIndexFile?: string
+  devBuildIndexFile?: string
+  indexExt?: string
 }
 
 export interface ReleaseOptions {
