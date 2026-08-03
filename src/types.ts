@@ -29,6 +29,25 @@ export interface InnetJSParams {
   indexExt?: string
 }
 
+export interface InitOptions {
+  template?: string
+  force?: boolean
+}
+
+export interface BuildOptions {
+  node?: boolean
+  inject?: boolean
+  index?: string
+}
+
+export interface StartOptions {
+  node?: boolean
+  inject?: boolean
+  error?: boolean
+  usualConsoleOutput?: boolean
+  index?: string
+}
+
 export interface ReleaseOptions {
   node?: boolean
   index?: string

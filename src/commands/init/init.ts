@@ -11,13 +11,10 @@ import readline from 'readline'
 import stream from 'stream'
 import { promisify } from 'util'
 
+import { InitOptions } from '../../types'
+
 const execAsync = promisify(exec)
 const pipeline = promisify(stream.pipeline)
-
-export interface InitOptions {
-  template?: string
-  force?: boolean
-}
 
 export async function init (appName: string, { template, force = false }: InitOptions = {}) {
   const appPath = path.resolve(appName)

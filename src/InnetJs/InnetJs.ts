@@ -19,7 +19,6 @@ import path from 'path'
 import prompt from 'prompts'
 import rollup, { OutputOptions } from 'rollup'
 import external from 'rollup-plugin-external-node-modules'
-import filesize from 'rollup-plugin-filesize'
 import jsx from 'rollup-plugin-innet-jsx'
 import externals from 'rollup-plugin-node-externals'
 import polyfill from 'rollup-plugin-polyfill-node'
@@ -30,7 +29,7 @@ import { terser } from 'rollup-plugin-terser'
 import tmp from 'tmp'
 import { promisify } from 'util'
 
-import { init, InitOptions } from '../commands'
+import { build, init } from '../commands'
 import {
   imageInclude,
   lintInclude,
@@ -41,8 +40,8 @@ import {
   stringExcludeDom,
   stringExcludeNode,
 } from '../constants'
-import { convertIndexFile, getFile, reporter } from '../helpers'
-import { InnetJSParams, ReleaseOptions } from '../types'
+import { convertIndexFile, getFile } from '../helpers'
+import { BuildOptions, InitOptions, InnetJSParams, ReleaseOptions, StartOptions } from '../types'
 import { getDefaultOptions, getNpmTag, printErrorWithFrame, updateDotenv } from '../utils'
 
 const livereload = require('rollup-plugin-livereload')
@@ -50,7 +49,6 @@ const { string } = require('rollup-plugin-string')
 const { exec, spawn } = require('child_process')
 const importAssets = require('rollup-plugin-import-assets')
 const execAsync = promisify(exec)
-const copyFiles = promisify(fs.copy)
 
 updateDotenv()
 
@@ -67,127 +65,8 @@ export class InnetJS {
     await init(appName, options)
   }
 
-  async build ({ node = false, inject = false, index = 'index' } = {}) {
-    const input = glob.sync(`src/${index}.{${this.options.indexExt}}`)
-
-    if (!input.length) {
-      throw Error('index file is not detected')
-    }
-
-    await logger.start('Remove build', () => fs.remove(this.options.buildFolder))
-
-    const pkg = node && await this.getPackage()
-    const options: rollup.RollupOptions = {
-      input,
-      preserveEntrySignatures: 'strict',
-      plugins: [
-        commonjs(),
-        json(),
-        ts({
-          noEmitOnError: true,
-          compilerOptions: {
-            declaration: false,
-          },
-        }),
-        jsx(),
-      ],
-      onwarn (warning, warn) {
-        if (warning.code === 'THIS_IS_UNDEFINED' || warning.code === 'SOURCEMAP_ERROR') return
-        warn(warning)
-      },
-    }
-
-    this.withLint(options, true)
-
-    const outputOptions = {
-      dir: this.options.buildFolder,
-      sourcemap: this.options.sourcemap,
-    } as Record<string, any>
-
-    if (node) {
-      outputOptions.format = 'cjs'
-      options.external = Object.keys(pkg?.dependencies || {})
-      options.plugins.push(
-        nodeResolve(),
-        string({
-          include: '**/*.*',
-          exclude: stringExcludeNode,
-        }),
-      )
-    } else {
-      options.plugins.push(
-        nodeResolve({
-          browser: true,
-        }),
-        polyfill(),
-        importAssets({
-          include: imageInclude.map(img => `src/${img}`),
-          publicPath: this.options.baseUrl,
-        }),
-        styles({
-          sass: {
-            outputStyle: 'compressed',
-          },
-          mode: this.options.cssInJs ? 'inject' : 'extract',
-          url: {
-            inline: false,
-            publicPath: `${this.options.baseUrl}assets`,
-          },
-          plugins: [autoprefixer()],
-          autoModules: this.options.cssModules ? (id: string) => !id.includes('.global.') : true,
-          sourceMap: this.options.sourcemap,
-          minimize: true,
-        }),
-        string({
-          include: '**/*.*',
-          exclude: stringExcludeDom,
-        }),
-      )
-      outputOptions.format = 'es'
-      outputOptions.plugins = [
-        terser(),
-        filesize({
-          reporter,
-        }),
-      ]
-    }
-
-    this.withEnv(options, true)
-
-    await logger.start('Build production bundle', async () => {
-      const bundle = await rollup.rollup(options)
-      await bundle.write(outputOptions)
-      await bundle.close()
-      if (!node) {
-        await copyFiles(this.options.publicFolder, this.options.buildFolder)
-        const data = await fsx.readFile(this.options.publicIndexFile)
-        const pkg = await this.getPackage()
-        await fsx.writeFile(
-          this.options.buildIndexFile,
-          await convertIndexFile(data, pkg.version, this.options.baseUrl, path.parse(input[0]).name, inject),
-        )
-      }
-    })
-
-    if (pkg) {
-      await logger.start('Copy package.json', async () => {
-        const data = { ...pkg }
-        delete data.private
-        delete data.devDependencies
-
-        await fs.writeFile(
-          path.resolve(this.options.buildFolder, 'package.json'),
-          JSON.stringify(data, undefined, 2),
-          'UTF-8',
-        )
-      })
-      const pkgLockPath = path.resolve(this.options.projectFolder, 'package-lock.json')
-      if (fs.existsSync(pkgLockPath)) {
-        await logger.start('Copy package-lock.json', () => {
-          return fs.copy(pkgLockPath, path.resolve(this.options.buildFolder, 'package-lock.json'))
-        })
-      }
-    }
+  async build (options: BuildOptions = {}) {
+    await build(options, this)
   }
 
   async start ({
@@ -196,7 +75,7 @@ export class InnetJS {
     error = false,
     usualConsoleOutput = false,
     index = 'index',
-  } = {}) {
+  }: StartOptions = {}) {
     const pkg = await this.getPackage()
     const input = glob.sync(`src/${index}.{${this.options.indexExt}}`)
 
