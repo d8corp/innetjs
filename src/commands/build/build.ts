@@ -20,12 +20,12 @@ import { promisify } from 'util'
 
 import { imageInclude, stringExcludeDom, stringExcludeNode } from '../../constants'
 import { convertIndexFile, reporter } from '../../helpers'
-import { InnetJS } from '../../InnetJs'
+import type { InnetJS } from '../../InnetJs'
 import { BuildOptions } from '../../types'
 
 const copyFiles = promisify(fs.copy)
 
-export async function build ({ node = false, inject = false, index = 'index' }: BuildOptions = {}, instance: InnetJS) {
+export async function build ({ node = false, inject = false, index = 'index' }: BuildOptions, instance: InnetJS) {
   const params = instance.params
   const input = glob.sync(`src/${index}.{${params.indexExt}}`)
 

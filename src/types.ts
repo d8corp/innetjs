@@ -48,6 +48,11 @@ export interface StartOptions {
   index?: string
 }
 
+export interface RunOptions {
+  config?: string
+  exposeGc?: boolean
+}
+
 export interface ReleaseOptions {
   node?: boolean
   index?: string
