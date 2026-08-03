@@ -53,11 +53,11 @@ const execAsync = promisify(exec)
 updateDotenv()
 
 export class InnetJS {
-  options: Required<InnetJSParams>
+  params: Required<InnetJSParams>
   private package: object
 
   constructor (options: InnetJSParams = {}) {
-    this.options = getDefaultOptions(options)
+    this.params = getDefaultOptions(options)
   }
 
   // Methods
@@ -77,19 +77,19 @@ export class InnetJS {
     index = 'index',
   }: StartOptions = {}) {
     const pkg = await this.getPackage()
-    const input = glob.sync(`src/${index}.{${this.options.indexExt}}`)
+    const input = glob.sync(`src/${index}.{${this.params.indexExt}}`)
 
     if (!input.length) {
       throw Error('index file is not detected')
     }
 
-    await logger.start('Remove build', () => fs.remove(this.options.devBuildFolder))
+    await logger.start('Remove build', () => fs.remove(this.params.devBuildFolder))
 
     const options: rollup.RollupOptions = {
       input,
       preserveEntrySignatures: 'strict',
       output: {
-        dir: this.options.devBuildFolder,
+        dir: this.params.devBuildFolder,
         sourcemap: true,
       },
       plugins: [
@@ -140,16 +140,16 @@ export class InnetJS {
         this.createServer(input, error, usualConsoleOutput),
       )
     } else {
-      const key = path.basename(this.options.sslKey) !== this.options.sslKey
-        ? this.options.sslKey
-        : fs.existsSync(this.options.sslKey)
-          ? fs.readFileSync(this.options.sslKey)
+      const key = path.basename(this.params.sslKey) !== this.params.sslKey
+        ? this.params.sslKey
+        : fs.existsSync(this.params.sslKey)
+          ? fs.readFileSync(this.params.sslKey)
           : undefined
 
-      const cert = path.basename(this.options.sslCrt) !== this.options.sslCrt
-        ? this.options.sslCrt
-        : fs.existsSync(this.options.sslCrt)
-          ? fs.readFileSync(this.options.sslCrt)
+      const cert = path.basename(this.params.sslCrt) !== this.params.sslCrt
+        ? this.params.sslCrt
+        : fs.existsSync(this.params.sslCrt)
+          ? fs.readFileSync(this.params.sslCrt)
           : undefined
 
       // @ts-expect-error
@@ -161,19 +161,19 @@ export class InnetJS {
         polyfill(),
         importAssets({
           include: imageInclude.map(img => `src/${img}`),
-          publicPath: this.options.baseUrl,
+          publicPath: this.params.baseUrl,
         }),
         styles({
-          mode: this.options.cssInJs ? 'inject' : 'extract',
+          mode: this.params.cssInJs ? 'inject' : 'extract',
           url: {
             inline: false,
-            publicPath: `${this.options.baseUrl}assets`,
+            publicPath: `${this.params.baseUrl}assets`,
           },
           sass: {
             silenceDeprecations: ['legacy-js-api'],
           },
           plugins: [autoprefixer()],
-          autoModules: this.options.cssModules ? (id: string) => !id.includes('.global.') : true,
+          autoModules: this.params.cssModules ? (id: string) => !id.includes('.global.') : true,
           sourceMap: true,
         }),
         string({
@@ -183,7 +183,7 @@ export class InnetJS {
         this.createClient(key, cert, pkg, path.parse(input[0]).name, inject),
         livereload({
           exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'],
-          watch: [this.options.devBuildFolder, this.options.publicFolder],
+          watch: [this.params.devBuildFolder, this.params.publicFolder],
           verbose: false,
           ...(key && cert ? { https: { key, cert } } : {}),
         }),
@@ -280,7 +280,7 @@ export class InnetJS {
   }
 
   async release ({ index = 'index', pub, min }: ReleaseOptions = {}) {
-    const { releaseFolder, cssModules } = this.options
+    const { releaseFolder, cssModules } = this.params
     await logger.start('Remove previous release', () => fs.remove(releaseFolder))
 
     const pkg = await this.getPackage()
@@ -290,7 +290,7 @@ export class InnetJS {
         ? (pkg.module || pkg.esnext || pkg['jsnext:main'])?.replace('index', '') || '.mjs'
         : pkg.main?.replace('index', '') || '.js'
 
-      const input = glob.sync(`src/${index}.{${this.options.indexExt}}`)
+      const input = glob.sync(`src/${index}.{${this.params.indexExt}}`)
 
       if (!input.length) {
         throw Error('index file is not detected')
@@ -331,7 +331,7 @@ export class InnetJS {
         plugins: [
           json(),
           ts({
-            tsconfig: this.options.tsconfig,
+            tsconfig: this.params.tsconfig,
             compilerOptions: {
               sourceMap: false,
               outDir: releaseFolder,
@@ -345,7 +345,7 @@ export class InnetJS {
           }),
           image(),
           styles({
-            mode: this.options.cssInJs ? 'inject' : 'extract',
+            mode: this.params.cssInJs ? 'inject' : 'extract',
             plugins: [autoprefixer()],
             autoModules: cssModules ? (id: string) => !id.includes('.global.') : true,
             minimize: true,
@@ -392,7 +392,7 @@ export class InnetJS {
       delete data.devDependencies
 
       fs.writeFile(
-        path.resolve(this.options.releaseFolder, 'package.json'),
+        path.resolve(this.params.releaseFolder, 'package.json'),
         JSON.stringify(data, undefined, 2),
         'UTF-8',
       )
@@ -404,8 +404,8 @@ export class InnetJS {
 
         for (const name in bin) {
           const value = bin[name]
-          const input = glob.sync(`src/${value}.{${this.options.indexExt}}`)
-          const file = path.join(this.options.releaseFolder, value)
+          const input = glob.sync(`src/${value}.{${this.params.indexExt}}`)
+          const file = path.join(this.params.releaseFolder, value)
 
           const options: rollup.RollupOptions = {
             input,
@@ -437,21 +437,21 @@ export class InnetJS {
       })
     }
 
-    if (fs.existsSync(this.options.licenseFile)) {
+    if (fs.existsSync(this.params.licenseFile)) {
       await logger.start('Copy license', async () => {
-        await fsx.copyFile(this.options.licenseFile, this.options.licenseReleaseFile)
+        await fsx.copyFile(this.params.licenseFile, this.params.licenseReleaseFile)
       })
     }
 
-    if (fs.existsSync(this.options.readmeFile)) {
+    if (fs.existsSync(this.params.readmeFile)) {
       await logger.start('Copy readme', async () => {
-        await fsx.copyFile(this.options.readmeFile, this.options.readmeReleaseFile)
+        await fsx.copyFile(this.params.readmeFile, this.params.readmeReleaseFile)
       })
     }
 
-    if (fs.existsSync(this.options.declarationFile)) {
+    if (fs.existsSync(this.params.declarationFile)) {
       await logger.start('Copy declaration', async () => {
-        await fsx.copyFile(this.options.declarationFile, this.options.declarationReleaseFile)
+        await fsx.copyFile(this.params.declarationFile, this.params.declarationReleaseFile)
       })
     }
 
@@ -459,7 +459,7 @@ export class InnetJS {
       const date = (Date.now() / 1000) | 0
 
       await logger.start(`publishing v${pkg.version} ${date}`, async () => {
-        await execAsync(`npm publish ${this.options.releaseFolder} --tag ${getNpmTag(pkg.version)}`)
+        await execAsync(`npm publish ${this.params.releaseFolder} --tag ${getNpmTag(pkg.version)}`)
       })
     }
   }
@@ -469,7 +469,7 @@ export class InnetJS {
   private _lintUsage: boolean
   withLint (options: rollup.RollupOptions, prod = false) {
     if (this._lintUsage === undefined) {
-      this._lintUsage = fs.existsSync(path.join(this.options.projectFolder, '.eslintrc'))
+      this._lintUsage = fs.existsSync(path.join(this.params.projectFolder, '.eslintrc'))
     }
 
     if (this._lintUsage) {
@@ -481,7 +481,7 @@ export class InnetJS {
   }
 
   withEnv (options: rollup.RollupOptions, virtual?: boolean, preset?: EnvValues) {
-    options.plugins.push(env(this.options.envPrefix, {
+    options.plugins.push(env(this.params.envPrefix, {
       include: options.input as string[],
       virtual,
       preset,
@@ -516,7 +516,7 @@ export class InnetJS {
       pkg.version = version.join('.')
 
       await fs.writeFile(
-        path.resolve(this.options.projectFolder, 'package.json'),
+        path.resolve(this.params.projectFolder, 'package.json'),
         JSON.stringify(pkg, undefined, 2),
         'UTF-8',
       )
@@ -528,7 +528,7 @@ export class InnetJS {
       return this.package
     }
 
-    const packageFolder = path.resolve(this.options.projectFolder, 'package.json')
+    const packageFolder = path.resolve(this.params.projectFolder, 'package.json')
 
     await logger.start('Check package.json', async () => {
       if (fs.existsSync(packageFolder)) {
@@ -548,30 +548,30 @@ export class InnetJS {
         if (!app) {
           app = express()
           const update = async () => {
-            const data = await fsx.readFile(this.options.publicIndexFile)
+            const data = await fsx.readFile(this.params.publicIndexFile)
             await fsx.writeFile(
-              this.options.devBuildIndexFile,
-              await convertIndexFile(data, pkg.version, this.options.baseUrl, index, inject),
+              this.params.devBuildIndexFile,
+              await convertIndexFile(data, pkg.version, this.params.baseUrl, index, inject),
             )
           }
 
-          fs.watch(this.options.publicIndexFile, update)
+          fs.watch(this.params.publicIndexFile, update)
           await update()
 
           const httpsUsing = !!(cert && key)
 
-          app.use(this.options.baseUrl, express.static(this.options.devBuildFolder))
-          app.use(this.options.baseUrl, express.static(this.options.publicFolder))
+          app.use(this.params.baseUrl, express.static(this.params.devBuildFolder))
+          app.use(this.params.baseUrl, express.static(this.params.publicFolder))
 
-          if (this.options.proxy?.startsWith('http')) {
-            if (this.options.simulateIP) {
+          if (this.params.proxy?.startsWith('http')) {
+            if (this.params.simulateIP) {
               app.use((req, res, next) => {
-                req.headers['X-Real-IP'] = this.options.simulateIP
+                req.headers['X-Real-IP'] = this.params.simulateIP
                 next()
               })
             }
 
-            app.use(this.options.api, proxy(this.options.proxy, {
+            app.use(this.params.api, proxy(this.params.proxy, {
               https: httpsUsing,
               limit: '1000mb',
               proxyReqPathResolver: req => req.originalUrl,
@@ -579,13 +579,13 @@ export class InnetJS {
           }
 
           app.use(/^([^.]*|.*\.[^.]{5,})$/, (req, res) => {
-            res.sendFile(this.options.devBuildFolder + '/index.html')
+            res.sendFile(this.params.devBuildFolder + '/index.html')
           })
 
           const server = httpsUsing ? https.createServer({ key, cert }, app) : http.createServer(app)
-          let port = this.options.port
+          let port = this.params.port
           const listener = () => {
-            const baseUrl = this.options.baseUrl === '/' ? '' : this.options.baseUrl
+            const baseUrl = this.params.baseUrl === '/' ? '' : this.params.baseUrl
             console.log(`${chalk.green('➤')} Started on http${httpsUsing ? 's' : ''}://localhost:${port}${baseUrl} and http${httpsUsing ? 's' : ''}://${address.ip()}:${port}${baseUrl}`)
           }
 
@@ -623,7 +623,7 @@ export class InnetJS {
           let stderrBuffer = ''
           const { name } = path.parse(file)
           apps[name]?.kill()
-          const filePath = path.resolve(this.options.devBuildFolder, `${name}.js`)
+          const filePath = path.resolve(this.params.devBuildFolder, `${name}.js`)
 
           if (usualConsoleOutput) {
             apps[name] = spawn('node', ['-r', 'source-map-support/register', filePath], { stdio: 'inherit' })

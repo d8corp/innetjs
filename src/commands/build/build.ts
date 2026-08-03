@@ -26,7 +26,7 @@ import { BuildOptions } from '../../types'
 const copyFiles = promisify(fs.copy)
 
 export async function build ({ node = false, inject = false, index = 'index' }: BuildOptions = {}, instance: InnetJS) {
-  const params = instance.options
+  const params = instance.params
   const input = glob.sync(`src/${index}.{${params.indexExt}}`)
 
   if (!input.length) {
