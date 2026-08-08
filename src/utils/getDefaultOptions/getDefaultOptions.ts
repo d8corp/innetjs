@@ -23,6 +23,8 @@ export function getDefaultOptions ({
   tsconfig = process.env.TSCONFIG,
   indexExt = SCRIPT_EXTENSIONS.join(','),
 }: InnetJSParams): Required<InnetJSParams> {
+  const devBuildFolder = path.resolve(projectFolder, 'node_modules', '.cache', 'innetjs', 'build')
+
   return {
     projectFolder: path.resolve(projectFolder),
     publicFolder: path.resolve(publicFolder),
@@ -37,8 +39,8 @@ export function getDefaultOptions ({
     declarationReleaseFile: path.join(releaseFolder, 'declaration.d.ts'),
     publicIndexFile: path.join(publicFolder, 'index.html'),
     buildIndexFile: path.join(buildFolder, 'index.html'),
-    devBuildFolder: path.resolve(projectFolder, 'node_modules', '.cache', 'innetjs', 'build'),
-    devBuildIndexFile: path.join(this.devBuildFolder, 'index.html'),
+    devBuildFolder,
+    devBuildIndexFile: path.join(devBuildFolder, 'index.html'),
     sourcemap,
     cssModules,
     cssInJs,

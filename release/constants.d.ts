@@ -1,3 +1,9 @@
+export declare const SCRIPT_EXTENSIONS: string[];
+export declare const REG_CLEAR_TEXT: RegExp;
+export declare const REG_RPT_ERROR_FILE: RegExp;
+export declare const REG_TJSX: RegExp;
+export declare const REG_EXT: RegExp;
+export declare const NPM_TAG: RegExp;
 export declare const lintInclude: string[];
 export declare const imageInclude: string[];
 export declare const stringExcludeDom: string[];
