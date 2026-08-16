@@ -1,4 +1,4 @@
-import logger from '@cantinc/logger'
+import { logger } from '@cantinc/logger'
 import eslint from '@rollup/plugin-eslint'
 import address from 'address'
 import chalk from 'chalk'
@@ -176,7 +176,7 @@ export class InnetJS {
           let port = this.params.port
           const listener = () => {
             const baseUrl = this.params.baseUrl === '/' ? '' : this.params.baseUrl
-            console.log(`${chalk.green('➤')} Started on http${httpsUsing ? 's' : ''}://localhost:${port}${baseUrl} and http${httpsUsing ? 's' : ''}://${address.ip()}:${port}${baseUrl}`)
+            logger.log(`${chalk.green('➤')} Started on http${httpsUsing ? 's' : ''}://localhost:${port}${baseUrl} and http${httpsUsing ? 's' : ''}://${address.ip()}:${port}${baseUrl}`)
           }
 
           server.listen(port, listener)

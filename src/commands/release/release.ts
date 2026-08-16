@@ -1,6 +1,6 @@
 import { ReleaseOptions } from '../../types'
 import type { InnetJS } from '../../InnetJs'
-import logger from '@cantinc/logger'
+import { logger } from '@cantinc/logger'
 import fs from 'fs-extra'
 import rollup, { OutputOptions } from 'rollup'
 import { string } from 'rollup-plugin-string'
