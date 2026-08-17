@@ -1,11 +1,4 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-var start = require('./start.js');
-
-
-
-exports.lintCheckWatchPlugin = start.lintCheckWatchPlugin;
-exports.start = start.start;
-exports.typecheckWatchPlugin = start.typecheckWatchPlugin;
+const require_start = require("./start.js");
+exports.lintCheckWatchPlugin = require_start.lintCheckWatchPlugin;
+exports.start = require_start.start;
+exports.typecheckWatchPlugin = require_start.typecheckWatchPlugin;

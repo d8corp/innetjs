@@ -1,1 +1,2 @@
-export { build } from './build.mjs';
+import { build } from "./build.mjs";
+export { build };

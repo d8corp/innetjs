@@ -1,30 +1,24 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-require('./_virtual/_rollup-plugin-process-env.js');
-var constants = require('./constants.js');
-require('./InnetJs/index.js');
-require('./types.js');
-require('./utils/index.js');
-var InnetJs = require('./InnetJs/InnetJs.js');
-var getDefaultOptions = require('./utils/getDefaultOptions/getDefaultOptions.js');
-var getNpmTag = require('./utils/getNpmTag/getNpmTag.js');
-var printErrorWithFrame = require('./utils/printErrorWithFrame/printErrorWithFrame.js');
-var updateDotenv = require('./utils/updateDotenv/updateDotenv.js');
-
-
-
-exports.NPM_TAG = constants.NPM_TAG;
-exports.REG_EXT = constants.REG_EXT;
-exports.REG_TJSX = constants.REG_TJSX;
-exports.SCRIPT_EXTENSIONS = constants.SCRIPT_EXTENSIONS;
-exports.imageInclude = constants.imageInclude;
-exports.lintInclude = constants.lintInclude;
-exports.stringExcludeDom = constants.stringExcludeDom;
-exports.stringExcludeNode = constants.stringExcludeNode;
-exports.InnetJS = InnetJs.InnetJS;
-exports.getDefaultOptions = getDefaultOptions.getDefaultOptions;
-exports.getNpmTag = getNpmTag.getNpmTag;
-exports.printErrorWithFrame = printErrorWithFrame.printErrorWithFrame;
-exports.updateDotenv = updateDotenv.updateDotenv;
+Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
+require("./_virtual/_rollup-plugin-process-env.js");
+const require_constants = require("./constants.js");
+const require_getDefaultOptions = require("./utils/getDefaultOptions/getDefaultOptions.js");
+const require_getNpmTag = require("./utils/getNpmTag/getNpmTag.js");
+const require_printErrorWithFrame = require("./utils/printErrorWithFrame/printErrorWithFrame.js");
+const require_updateDotenv = require("./utils/updateDotenv/updateDotenv.js");
+require("./utils/index.js");
+const require_InnetJs = require("./InnetJs/InnetJs.js");
+require("./InnetJs/index.js");
+require("./types.js");
+exports.InnetJS = require_InnetJs.InnetJS;
+exports.NPM_TAG = require_constants.NPM_TAG;
+exports.REG_EXT = require_constants.REG_EXT;
+exports.REG_TJSX = require_constants.REG_TJSX;
+exports.SCRIPT_EXTENSIONS = require_constants.SCRIPT_EXTENSIONS;
+exports.getDefaultOptions = require_getDefaultOptions.getDefaultOptions;
+exports.getNpmTag = require_getNpmTag.getNpmTag;
+exports.imageInclude = require_constants.imageInclude;
+exports.lintInclude = require_constants.lintInclude;
+exports.printErrorWithFrame = require_printErrorWithFrame.printErrorWithFrame;
+exports.stringExcludeDom = require_constants.stringExcludeDom;
+exports.stringExcludeNode = require_constants.stringExcludeNode;
+exports.updateDotenv = require_updateDotenv.updateDotenv;

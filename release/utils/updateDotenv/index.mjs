@@ -1,1 +1,2 @@
-export { updateDotenv } from './updateDotenv.mjs';
+import { updateDotenv } from "./updateDotenv.mjs";
+export { updateDotenv };

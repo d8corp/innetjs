@@ -1,1 +1,2 @@
-export { init } from './init.mjs';
+import { init } from "./init.mjs";
+export { init };

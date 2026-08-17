@@ -1,9 +1,2 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-var printErrorWithFrame = require('./printErrorWithFrame.js');
-
-
-
-exports.printErrorWithFrame = printErrorWithFrame.printErrorWithFrame;
+const require_printErrorWithFrame = require("./printErrorWithFrame.js");
+exports.printErrorWithFrame = require_printErrorWithFrame.printErrorWithFrame;

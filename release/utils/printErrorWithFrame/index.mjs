@@ -1,1 +1,2 @@
-export { printErrorWithFrame } from './printErrorWithFrame.mjs';
+import { printErrorWithFrame } from "./printErrorWithFrame.mjs";
+export { printErrorWithFrame };

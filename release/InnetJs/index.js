@@ -1,9 +1,2 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-var InnetJs = require('./InnetJs.js');
-
-
-
-exports.InnetJS = InnetJs.InnetJS;
+const require_InnetJs = require("./InnetJs.js");
+exports.InnetJS = require_InnetJs.InnetJS;

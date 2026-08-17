@@ -1,7 +1,12 @@
-'use strict';
-
-require('./getDefaultOptions/index.js');
-require('./getNpmTag/index.js');
-require('./printErrorWithFrame/index.js');
-require('./updateDotenv/index.js');
-
+const require_getDefaultOptions = require("./getDefaultOptions/getDefaultOptions.js");
+require("./getDefaultOptions/index.js");
+const require_getNpmTag = require("./getNpmTag/getNpmTag.js");
+require("./getNpmTag/index.js");
+const require_printErrorWithFrame = require("./printErrorWithFrame/printErrorWithFrame.js");
+require("./printErrorWithFrame/index.js");
+const require_updateDotenv = require("./updateDotenv/updateDotenv.js");
+require("./updateDotenv/index.js");
+exports.getDefaultOptions = require_getDefaultOptions.getDefaultOptions;
+exports.getNpmTag = require_getNpmTag.getNpmTag;
+exports.printErrorWithFrame = require_printErrorWithFrame.printErrorWithFrame;
+exports.updateDotenv = require_updateDotenv.updateDotenv;

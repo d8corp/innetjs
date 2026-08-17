@@ -1,1 +1,2 @@
-export { release } from './release.mjs';
+import { release } from "./release.mjs";
+export { release };

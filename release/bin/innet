@@ -1,1040 +1,871 @@
 #!/usr/bin/env node
-'use strict';
-
-var commander = require('commander');
-var codeFrame = require('@babel/code-frame');
-var chalk = require('chalk');
-var fs = require('fs-extra');
-var tslib = require('tslib');
-var logger = require('@cantinc/logger');
-var address = require('address');
-var node_child_process = require('node:child_process');
-var express = require('express');
-var proxy = require('express-http-proxy');
-var http = require('node:http');
-var https = require('node:https');
-var path = require('node:path');
-var prompt = require('prompts');
-var terser = require('@rollup/plugin-terser');
-var autoprefixer = require('autoprefixer');
-var node_fs = require('node:fs');
-var glob = require('glob');
-var rolldown = require('rolldown');
-var filesize = require('rollup-plugin-filesize');
-var importAssets = require('rollup-plugin-import-assets');
-var polyfill = require('rollup-plugin-polyfill-node');
-var env = require('rollup-plugin-process-env');
-var rollupPluginString = require('rollup-plugin-string');
-var styles = require('rollup-plugin-styles');
-var node_util = require('node:util');
-var Zip = require('adm-zip');
-var axios = require('axios');
-var selector = require('cli-select');
-var node_os = require('node:os');
-var readline = require('node:readline');
-var stream = require('node:stream');
-var image = require('@rollup/plugin-image');
-var external = require('rollup-plugin-external-node-modules');
-var rollupPluginNodeExternals = require('rollup-plugin-node-externals');
-var rollupPluginPreserveShebangs = require('rollup-plugin-preserve-shebangs');
-var tmp = require('tmp');
-var livereload = require('rollup-plugin-livereload');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var chalk__default = /*#__PURE__*/_interopDefaultLegacy(chalk);
-var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
-var address__default = /*#__PURE__*/_interopDefaultLegacy(address);
-var express__default = /*#__PURE__*/_interopDefaultLegacy(express);
-var proxy__default = /*#__PURE__*/_interopDefaultLegacy(proxy);
-var http__default = /*#__PURE__*/_interopDefaultLegacy(http);
-var https__default = /*#__PURE__*/_interopDefaultLegacy(https);
-var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
-var prompt__default = /*#__PURE__*/_interopDefaultLegacy(prompt);
-var terser__default = /*#__PURE__*/_interopDefaultLegacy(terser);
-var autoprefixer__default = /*#__PURE__*/_interopDefaultLegacy(autoprefixer);
-var glob__default = /*#__PURE__*/_interopDefaultLegacy(glob);
-var filesize__default = /*#__PURE__*/_interopDefaultLegacy(filesize);
-var importAssets__default = /*#__PURE__*/_interopDefaultLegacy(importAssets);
-var polyfill__default = /*#__PURE__*/_interopDefaultLegacy(polyfill);
-var env__default = /*#__PURE__*/_interopDefaultLegacy(env);
-var styles__default = /*#__PURE__*/_interopDefaultLegacy(styles);
-var Zip__default = /*#__PURE__*/_interopDefaultLegacy(Zip);
-var axios__default = /*#__PURE__*/_interopDefaultLegacy(axios);
-var selector__default = /*#__PURE__*/_interopDefaultLegacy(selector);
-var readline__default = /*#__PURE__*/_interopDefaultLegacy(readline);
-var stream__default = /*#__PURE__*/_interopDefaultLegacy(stream);
-var image__default = /*#__PURE__*/_interopDefaultLegacy(image);
-var external__default = /*#__PURE__*/_interopDefaultLegacy(external);
-var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
-var livereload__default = /*#__PURE__*/_interopDefaultLegacy(livereload);
-
-const SCRIPT_EXTENSIONS = ['ts', 'js', 'tsx', 'jsx'];
+//#region \0rolldown/runtime.js
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __copyProps = (to, from, except, desc) => {
+	if (from && typeof from === "object" || typeof from === "function") for (var keys = __getOwnPropNames(from), i = 0, n = keys.length, key; i < n; i++) {
+		key = keys[i];
+		if (!__hasOwnProp.call(to, key) && key !== except) __defProp(to, key, {
+			get: ((k) => from[k]).bind(null, key),
+			enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable
+		});
+	}
+	return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule || !__hasOwnProp.call(mod, "default") ? __defProp(target, "default", {
+	value: mod,
+	enumerable: true
+}) : target, mod));
+//#endregion
+let commander = require("commander");
+let node_path = require("node:path");
+node_path = __toESM(node_path);
+let _babel_code_frame = require("@babel/code-frame");
+let chalk = require("chalk");
+chalk = __toESM(chalk);
+let fs_extra = require("fs-extra");
+fs_extra = __toESM(fs_extra);
+let _cantinc_logger = require("@cantinc/logger");
+let address = require("address");
+address = __toESM(address);
+let node_child_process = require("node:child_process");
+let express = require("express");
+express = __toESM(express);
+let express_http_proxy = require("express-http-proxy");
+express_http_proxy = __toESM(express_http_proxy);
+let node_http = require("node:http");
+node_http = __toESM(node_http);
+let node_https = require("node:https");
+node_https = __toESM(node_https);
+let prompts = require("prompts");
+prompts = __toESM(prompts);
+let _rollup_plugin_terser = require("@rollup/plugin-terser");
+_rollup_plugin_terser = __toESM(_rollup_plugin_terser);
+let autoprefixer = require("autoprefixer");
+autoprefixer = __toESM(autoprefixer);
+let node_fs = require("node:fs");
+let glob = require("glob");
+glob = __toESM(glob);
+let rolldown = require("rolldown");
+let rollup_plugin_filesize = require("rollup-plugin-filesize");
+rollup_plugin_filesize = __toESM(rollup_plugin_filesize);
+let rollup_plugin_import_assets = require("rollup-plugin-import-assets");
+rollup_plugin_import_assets = __toESM(rollup_plugin_import_assets);
+let rollup_plugin_polyfill_node = require("rollup-plugin-polyfill-node");
+rollup_plugin_polyfill_node = __toESM(rollup_plugin_polyfill_node);
+let rollup_plugin_process_env = require("rollup-plugin-process-env");
+rollup_plugin_process_env = __toESM(rollup_plugin_process_env);
+let rollup_plugin_string = require("rollup-plugin-string");
+let rollup_plugin_styles = require("rollup-plugin-styles");
+rollup_plugin_styles = __toESM(rollup_plugin_styles);
+let node_util = require("node:util");
+let adm_zip = require("adm-zip");
+adm_zip = __toESM(adm_zip);
+let axios = require("axios");
+axios = __toESM(axios);
+let cli_select = require("cli-select");
+cli_select = __toESM(cli_select);
+let node_os = require("node:os");
+let node_readline = require("node:readline");
+node_readline = __toESM(node_readline);
+let node_stream = require("node:stream");
+node_stream = __toESM(node_stream);
+let _rollup_plugin_image = require("@rollup/plugin-image");
+_rollup_plugin_image = __toESM(_rollup_plugin_image);
+let rollup_plugin_external_node_modules = require("rollup-plugin-external-node-modules");
+rollup_plugin_external_node_modules = __toESM(rollup_plugin_external_node_modules);
+let rollup_plugin_node_externals = require("rollup-plugin-node-externals");
+let rollup_plugin_preserve_shebangs = require("rollup-plugin-preserve-shebangs");
+let tmp = require("tmp");
+tmp = __toESM(tmp);
+let rollup_plugin_livereload = require("rollup-plugin-livereload");
+rollup_plugin_livereload = __toESM(rollup_plugin_livereload);
+//#region src/constants.ts
+const SCRIPT_EXTENSIONS = [
+	"ts",
+	"js",
+	"tsx",
+	"jsx"
+];
 const REG_TJSX = /\.[tj]sx?$/;
 const REG_EXT = /\.([^.]+)$/;
 const NPM_TAG = /-(.+?)(?:\.|$)/;
 const lintInclude = [
-    '**/*.ts',
-    '**/*.tsx',
-    '**/*.js',
-    '**/*.jsx',
-    '**/*.mjs',
+	"**/*.ts",
+	"**/*.tsx",
+	"**/*.js",
+	"**/*.jsx",
+	"**/*.mjs"
 ];
 const imageInclude = [
-    '**/*.gif',
-    '**/*.png',
-    '**/*.jpeg',
-    '**/*.jpg',
-    '**/*.svg',
-    '**/*.webp',
+	"**/*.gif",
+	"**/*.png",
+	"**/*.jpeg",
+	"**/*.jpg",
+	"**/*.svg",
+	"**/*.webp"
 ];
 const stringExcludeDom = [
-    ...lintInclude,
-    '**/*.json',
-    '**/*.css',
-    '**/*.scss',
-    '**/*.webp',
-    ...imageInclude,
+	...lintInclude,
+	"**/*.json",
+	"**/*.css",
+	"**/*.scss",
+	"**/*.webp",
+	...imageInclude
 ];
-const stringExcludeNode = [
-    ...lintInclude,
-    '**/*.json',
-];
-
-function getDefaultOptions({ envPrefix = process.env.INNETJS_ENV_PREFIX || 'INNETJS_', projectFolder = process.env.PROJECT_FOLDER || '', baseUrl = process.env.BASE_URL || '', publicFolder = process.env.PUBLIC_FOLDER || 'public', releaseFolder = process.env.RELEASE_FOLDER || 'release', buildFolder = process.env.BUILD_FOLDER || 'build', srcFolder = process.env.SRC_FOLDER || 'src', sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === 'true' : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === 'true' : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === 'true' : true, sslKey = process.env.SSL_KEY || 'localhost.key', sslCrt = process.env.SSL_CRT || 'localhost.crt', proxy = process.env.PROXY || '', simulateIP = process.env.IP, port = process.env.PORT ? +process.env.PORT : 3000, api = process.env.API || '/api/?*', tsconfig = process.env.TSCONFIG, indexExt = SCRIPT_EXTENSIONS.join(','), }) {
-    const devBuildFolder = path__default["default"].resolve(projectFolder, 'node_modules', '.cache', 'innetjs', 'build');
-    return {
-        projectFolder: path__default["default"].resolve(projectFolder),
-        publicFolder: path__default["default"].resolve(publicFolder),
-        releaseFolder: path__default["default"].resolve(releaseFolder),
-        buildFolder: path__default["default"].resolve(buildFolder),
-        srcFolder: path__default["default"].resolve(srcFolder),
-        licenseFile: path__default["default"].join(projectFolder, 'LICENSE'),
-        licenseReleaseFile: path__default["default"].join(releaseFolder, 'LICENSE'),
-        readmeFile: path__default["default"].join(projectFolder, 'README.md'),
-        readmeReleaseFile: path__default["default"].join(releaseFolder, 'README.md'),
-        declarationFile: path__default["default"].join(srcFolder, 'declaration.d.ts'),
-        declarationReleaseFile: path__default["default"].join(releaseFolder, 'declaration.d.ts'),
-        publicIndexFile: path__default["default"].join(publicFolder, 'index.html'),
-        buildIndexFile: path__default["default"].join(buildFolder, 'index.html'),
-        devBuildFolder,
-        devBuildIndexFile: path__default["default"].join(devBuildFolder, 'index.html'),
-        sourcemap,
-        cssModules,
-        cssInJs,
-        sslKey,
-        sslCrt,
-        port,
-        proxy,
-        api,
-        baseUrl: baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`,
-        envPrefix,
-        simulateIP,
-        tsconfig,
-        indexExt,
-    };
+const stringExcludeNode = [...lintInclude, "**/*.json"];
+//#endregion
+//#region src/utils/getDefaultOptions/getDefaultOptions.ts
+function getDefaultOptions({ envPrefix = process.env.INNETJS_ENV_PREFIX || "INNETJS_", projectFolder = process.env.PROJECT_FOLDER || "", baseUrl = process.env.BASE_URL || "", publicFolder = process.env.PUBLIC_FOLDER || "public", releaseFolder = process.env.RELEASE_FOLDER || "release", buildFolder = process.env.BUILD_FOLDER || "build", srcFolder = process.env.SRC_FOLDER || "src", sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === "true" : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === "true" : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === "true" : true, sslKey = process.env.SSL_KEY || "localhost.key", sslCrt = process.env.SSL_CRT || "localhost.crt", proxy = process.env.PROXY || "", simulateIP = process.env.IP, port = process.env.PORT ? +process.env.PORT : 3e3, api = process.env.API || "/api/?*", tsconfig = process.env.TSCONFIG, indexExt = SCRIPT_EXTENSIONS.join(",") }) {
+	const devBuildFolder = node_path.default.resolve(projectFolder, "node_modules", ".cache", "innetjs", "build");
+	return {
+		projectFolder: node_path.default.resolve(projectFolder),
+		publicFolder: node_path.default.resolve(publicFolder),
+		releaseFolder: node_path.default.resolve(releaseFolder),
+		buildFolder: node_path.default.resolve(buildFolder),
+		srcFolder: node_path.default.resolve(srcFolder),
+		licenseFile: node_path.default.join(projectFolder, "LICENSE"),
+		licenseReleaseFile: node_path.default.join(releaseFolder, "LICENSE"),
+		readmeFile: node_path.default.join(projectFolder, "README.md"),
+		readmeReleaseFile: node_path.default.join(releaseFolder, "README.md"),
+		declarationFile: node_path.default.join(srcFolder, "declaration.d.ts"),
+		declarationReleaseFile: node_path.default.join(releaseFolder, "declaration.d.ts"),
+		publicIndexFile: node_path.default.join(publicFolder, "index.html"),
+		buildIndexFile: node_path.default.join(buildFolder, "index.html"),
+		devBuildFolder,
+		devBuildIndexFile: node_path.default.join(devBuildFolder, "index.html"),
+		sourcemap,
+		cssModules,
+		cssInJs,
+		sslKey,
+		sslCrt,
+		port,
+		proxy,
+		api,
+		baseUrl: baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`,
+		envPrefix,
+		simulateIP,
+		tsconfig,
+		indexExt
+	};
 }
-
+//#endregion
+//#region src/utils/getNpmTag/getNpmTag.ts
 function getNpmTag(version) {
-    const match = version.match(NPM_TAG);
-    return match ? match[1] : 'latest';
+	const match = version.match(NPM_TAG);
+	return match ? match[1] : "latest";
 }
-
+//#endregion
+//#region src/utils/printErrorWithFrame/printErrorWithFrame.ts
 function printErrorWithFrame(output, deep = 0, hide = false) {
-    var _a, _b, _c, _d, _e;
-    if (!output)
-        return '';
-    const input = output.split('\n');
-    const start = input.findIndex(line => line.trim().startsWith(deep ? '[cause]: Error:' : 'Error:'));
-    if (!~start)
-        return output;
-    const inputFrame = input.slice(0, start);
-    const end = input.slice(start + 1).findIndex(line => line.trim().startsWith('[cause]: Error:'));
-    const inputBody = input.slice(start, ~end ? start + end - 1 : undefined);
-    const inputCauses = ~end ? input.slice(start + end - 1) : [];
-    const bodyStackStart = inputBody.findIndex(line => line.trim().startsWith('at '));
-    const bodyText = ~bodyStackStart ? inputBody.slice(0, bodyStackStart).join('\n') : inputBody.join('\n');
-    const bodyStack = ~bodyStackStart ? inputBody.slice(bodyStackStart) : [];
-    const filePathWithNumber = bodyStack.length ? (_a = bodyStack[0].match(/\(([^(]+)\)$/)) === null || _a === void 0 ? void 0 : _a[1] : undefined;
-    const splitFilePath = (_b = filePathWithNumber === null || filePathWithNumber === void 0 ? void 0 : filePathWithNumber.split(':')) !== null && _b !== void 0 ? _b : [];
-    const filePath = (_c = splitFilePath[0]) === null || _c === void 0 ? void 0 : _c.trim();
-    const line = Number((_d = splitFilePath[1]) !== null && _d !== void 0 ? _d : 1);
-    const column = Number((_e = splitFilePath[2]) !== null && _e !== void 0 ? _e : 1);
-    let frame = '';
-    if (filePath && !filePath.includes('node_modules')) {
-        try {
-            const source = fs__default["default"].readFileSync(filePath, 'utf8');
-            frame = codeFrame.codeFrameColumns(source, { start: { line, column } }, { highlightCode: true });
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        }
-        catch (e) { }
-    }
-    else {
-        frame = inputFrame.join('\n');
-    }
-    const title = bodyText.trim();
-    const baseOffset = ' '.repeat(2);
-    const offset = baseOffset.repeat(deep);
-    const titleOffset = offset + baseOffset + baseOffset;
-    let hiddenCount = 0;
-    let collapse = titleOffset + 'at ... (0 more node_modules calls)';
-    const stack = hide
-        ? bodyStack.slice(1).reduce((cur, line) => {
-            if (line.includes('node_modules')) {
-                if (cur.at(-1) === collapse) {
-                    collapse = collapse.replace(`${hiddenCount} more`, `${++hiddenCount} more`);
-                    return [
-                        ...cur.slice(0, -1),
-                        collapse,
-                    ];
-                }
-                collapse = collapse.replace(`${hiddenCount} more`, `${++hiddenCount} more`);
-                return [...cur, collapse];
-            }
-            hiddenCount = 0;
-            collapse = titleOffset + 'at ... (0 more node_modules calls)';
-            return [...cur, line];
-        }, [])
-        : bodyStack.slice(1);
-    return [
-        chalk__default["default"].red(`${titleOffset}${title}`),
-        bodyStack[0],
-        frame && `${offset}${frame.replaceAll('\n', `\n${offset}`)}`,
-        ...stack
-            .filter(line => line.trim() !== '}')
-            .map(line => line.includes('node_modules') ? chalk__default["default"].gray(line) : line),
-        printErrorWithFrame(inputCauses.join('\n'), deep + 1, hide),
-    ].filter(Boolean).join('\n');
+	if (!output) return "";
+	const input = output.split("\n");
+	const start = input.findIndex((line) => line.trim().startsWith(deep ? "[cause]: Error:" : "Error:"));
+	if (!~start) return output;
+	const inputFrame = input.slice(0, start);
+	const end = input.slice(start + 1).findIndex((line) => line.trim().startsWith("[cause]: Error:"));
+	const inputBody = input.slice(start, ~end ? start + end - 1 : void 0);
+	const inputCauses = ~end ? input.slice(start + end - 1) : [];
+	const bodyStackStart = inputBody.findIndex((line) => line.trim().startsWith("at "));
+	const bodyText = ~bodyStackStart ? inputBody.slice(0, bodyStackStart).join("\n") : inputBody.join("\n");
+	const bodyStack = ~bodyStackStart ? inputBody.slice(bodyStackStart) : [];
+	const splitFilePath = (bodyStack.length ? bodyStack[0].match(/\(([^(]+)\)$/)?.[1] : void 0)?.split(":") ?? [];
+	const filePath = splitFilePath[0]?.trim();
+	const line = Number(splitFilePath[1] ?? 1);
+	const column = Number(splitFilePath[2] ?? 1);
+	let frame = "";
+	if (filePath && !filePath.includes("node_modules")) try {
+		const source = fs_extra.default.readFileSync(filePath, "utf8");
+		frame = (0, _babel_code_frame.codeFrameColumns)(source, { start: {
+			line,
+			column
+		} }, { highlightCode: true });
+	} catch (e) {}
+	else frame = inputFrame.join("\n");
+	const title = bodyText.trim();
+	const baseOffset = " ".repeat(2);
+	const offset = baseOffset.repeat(deep);
+	const titleOffset = offset + baseOffset + baseOffset;
+	let hiddenCount = 0;
+	let collapse = titleOffset + "at ... (0 more node_modules calls)";
+	const stack = hide ? bodyStack.slice(1).reduce((cur, line) => {
+		if (line.includes("node_modules")) {
+			if (cur.at(-1) === collapse) {
+				collapse = collapse.replace(`${hiddenCount} more`, `${++hiddenCount} more`);
+				return [...cur.slice(0, -1), collapse];
+			}
+			collapse = collapse.replace(`${hiddenCount} more`, `${++hiddenCount} more`);
+			return [...cur, collapse];
+		}
+		hiddenCount = 0;
+		collapse = titleOffset + "at ... (0 more node_modules calls)";
+		return [...cur, line];
+	}, []) : bodyStack.slice(1);
+	return [
+		chalk.default.red(`${titleOffset}${title}`),
+		bodyStack[0],
+		frame && `${offset}${frame.replaceAll("\n", `\n${offset}`)}`,
+		...stack.filter((line) => line.trim() !== "}").map((line) => line.includes("node_modules") ? chalk.default.gray(line) : line),
+		printErrorWithFrame(inputCauses.join("\n"), deep + 1, hide)
+	].filter(Boolean).join("\n");
 }
-
+//#endregion
+//#region src/utils/updateDotenv/updateDotenv.ts
 function updateDotenv() {
-    const { __INNETJS__PACKAGE_VERSION: before } = process.env;
-    delete process.env.__INNETJS__PACKAGE_VERSION;
-    require('dotenv-expand').expand(require('dotenv').config());
-    if (!('__INNETJS__PACKAGE_VERSION' in process.env)) {
-        process.env.__INNETJS__PACKAGE_VERSION = before;
-    }
+	const { __INNETJS__PACKAGE_VERSION: before } = process.env;
+	delete process.env.__INNETJS__PACKAGE_VERSION;
+	require("dotenv-expand").expand(require("dotenv").config());
+	if (!("__INNETJS__PACKAGE_VERSION" in process.env)) process.env.__INNETJS__PACKAGE_VERSION = before;
 }
-
+//#endregion
+//#region src/helpers.ts
 function getFile(file) {
-    file = path__default["default"].resolve(file);
-    if (!fs__default["default"].existsSync(file)) {
-        throw Error('Cannot find the file: ' + file);
-    }
-    if (fs__default["default"].lstatSync(file).isDirectory()) {
-        let tmpFile = file;
-        if (!fs__default["default"].existsSync(tmpFile = path__default["default"].join(file, 'index.ts')) &&
-            !fs__default["default"].existsSync(tmpFile = path__default["default"].join(file, 'index.tsx')) &&
-            !fs__default["default"].existsSync(tmpFile = path__default["default"].join(file, 'index.js'))) {
-            throw Error('Cannot find index file in: ' + file);
-        }
-        file = tmpFile;
-    }
-    else if (!file.endsWith('.ts') && !file.endsWith('.tsx') && !file.endsWith('.js')) {
-        throw Error('File should has `.ts` or `.tsx` or `.js` extension: ' + file);
-    }
-    if (!fs__default["default"].existsSync(file)) {
-        throw Error('Cannot find the file: ' + file);
-    }
-    return file;
+	file = node_path.default.resolve(file);
+	if (!fs_extra.default.existsSync(file)) throw Error("Cannot find the file: " + file);
+	if (fs_extra.default.lstatSync(file).isDirectory()) {
+		let tmpFile = file;
+		if (!fs_extra.default.existsSync(tmpFile = node_path.default.join(file, "index.ts")) && !fs_extra.default.existsSync(tmpFile = node_path.default.join(file, "index.tsx")) && !fs_extra.default.existsSync(tmpFile = node_path.default.join(file, "index.js"))) throw Error("Cannot find index file in: " + file);
+		file = tmpFile;
+	} else if (!file.endsWith(".ts") && !file.endsWith(".tsx") && !file.endsWith(".js")) throw Error("File should has `.ts` or `.tsx` or `.js` extension: " + file);
+	if (!fs_extra.default.existsSync(file)) throw Error("Cannot find the file: " + file);
+	return file;
 }
-function convertIndexFile(data, version, baseUrl, index, inject) {
-    return tslib.__awaiter(this, void 0, void 0, function* () {
-        const { env } = process;
-        const indexString = data
-            .toString()
-            .replace(/%([A-Z0-9_]+)%/g, (placeholder, placeholderId) => { var _a; return (_a = env[placeholderId]) !== null && _a !== void 0 ? _a : placeholder; });
-        return inject
-            ? indexString
-                .replace('</head>', `<script type="module" defer src="${baseUrl}${index}.js${version ? `?v=${version}` : ''}"></script></head>`)
-            : indexString;
-    });
+async function convertIndexFile(data, version, baseUrl, index, inject) {
+	const { env } = process;
+	const indexString = data.toString().replace(/%([A-Z0-9_]+)%/g, (placeholder, placeholderId) => env[placeholderId] ?? placeholder);
+	return inject ? indexString.replace("</head>", `<script type="module" defer src="${baseUrl}${index}.js${version ? `?v=${version}` : ""}"><\/script></head>`) : indexString;
 }
 const reporter = (options, outputOptions, info) => {
-    logger.logger.log(`${chalk__default["default"].yellow(info.fileName)} ${chalk__default["default"].green(info.bundleSize)} [ gzip: ${chalk__default["default"].green(info.gzipSize)} ]`);
-    return '';
+	_cantinc_logger.logger.log(`${chalk.default.yellow(info.fileName)} ${chalk.default.green(info.bundleSize)} [ gzip: ${chalk.default.green(info.gzipSize)} ]`);
+	return "";
 };
-
-const copyFiles = node_util.promisify(fs__default["default"].copy);
-function build(_a, instance_1) {
-    return tslib.__awaiter(this, arguments, void 0, function* ({ node = false, inject = false, index = 'index', typeCheck, lintCheck }, instance) {
-        const params = instance.params;
-        const input = glob__default["default"].sync(`src/${index}.{${params.indexExt}}`);
-        if (!input.length) {
-            throw Error('index file is not detected');
-        }
-        if (typeCheck) {
-            yield logger.logger.start('Check TypeScript', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                const { resolve, reject, promise } = Promise.withResolvers();
-                const process = node_child_process.spawn('tsc', ['--noEmit'], {
-                    stdio: 'inherit',
-                    shell: true,
-                });
-                process.on('close', (code) => {
-                    if (code) {
-                        reject();
-                    }
-                    else {
-                        resolve(undefined);
-                    }
-                });
-                yield promise;
-            }));
-        }
-        if (lintCheck) {
-            yield logger.logger.start('Check ESLint', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                const { resolve, reject, promise } = Promise.withResolvers();
-                const process = node_child_process.spawn('eslint', ['src'], {
-                    stdio: 'inherit',
-                    shell: true,
-                });
-                process.on('close', (code) => {
-                    if (code) {
-                        reject();
-                    }
-                    else {
-                        resolve(undefined);
-                    }
-                });
-                yield promise;
-            }));
-        }
-        yield logger.logger.start('Remove build', () => fs__default["default"].remove(params.buildFolder));
-        const pkg = node && (yield instance.getPackage());
-        const plugins = [
-            env__default["default"](instance.params.envPrefix, {
-                include: input,
-                virtual: true,
-            }),
-        ];
-        const options = {
-            input,
-            preserveEntrySignatures: 'strict',
-            plugins,
-        };
-        const outputOptions = {
-            dir: params.buildFolder,
-            sourcemap: params.sourcemap,
-        };
-        if (node) {
-            outputOptions.format = 'cjs';
-            options.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
-            plugins.push(rollupPluginString.string({
-                include: '**/*.*',
-                exclude: stringExcludeNode,
-            }));
-        }
-        else {
-            plugins.push(polyfill__default["default"](), importAssets__default["default"]({
-                include: imageInclude.map(img => `src/${img}`),
-                publicPath: params.baseUrl,
-            }), styles__default["default"]({
-                mode: params.cssInJs ? 'inject' : 'extract',
-                url: {
-                    inline: false,
-                    publicPath: `${params.baseUrl}assets`,
-                },
-                sass: {
-                    outputStyle: 'compressed',
-                    silenceDeprecations: ['legacy-js-api'],
-                },
-                plugins: [autoprefixer__default["default"]()],
-                autoModules: params.cssModules ? (id) => !id.includes('.global.') : true,
-                sourceMap: params.sourcemap,
-                minimize: true,
-            }), rollupPluginString.string({
-                include: '**/*.*',
-                exclude: stringExcludeDom,
-            }));
-            outputOptions.format = 'es';
-            outputOptions.plugins = [
-                terser__default["default"](),
-                filesize__default["default"]({
-                    reporter,
-                }),
-            ];
-        }
-        yield logger.logger.start('Build production bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
-            const bundle = yield rolldown.rolldown(options);
-            yield bundle.write(outputOptions);
-            yield bundle.close();
-            if (!node) {
-                yield copyFiles(params.publicFolder, params.buildFolder);
-                const data = yield node_fs.promises.readFile(params.publicIndexFile);
-                const pkg = yield instance.getPackage();
-                yield node_fs.promises.writeFile(params.buildIndexFile, yield convertIndexFile(data, pkg.version, params.baseUrl, path__default["default"].parse(input[0]).name, inject));
-            }
-        }));
-        if (pkg) {
-            yield logger.logger.start('Copy package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                const data = Object.assign({}, pkg);
-                delete data.private;
-                delete data.devDependencies;
-                yield fs__default["default"].writeFile(path__default["default"].resolve(params.buildFolder, 'package.json'), JSON.stringify(data, undefined, 2), 'UTF-8');
-            }));
-            const pkgLockPath = path__default["default"].resolve(params.projectFolder, 'package-lock.json');
-            if (fs__default["default"].existsSync(pkgLockPath)) {
-                yield logger.logger.start('Copy package-lock.json', () => {
-                    return fs__default["default"].copy(pkgLockPath, path__default["default"].resolve(params.buildFolder, 'package-lock.json'));
-                });
-            }
-        }
-    });
+//#endregion
+//#region src/commands/build/build.ts
+const copyFiles = (0, node_util.promisify)(fs_extra.default.copy);
+async function build({ node = false, inject = false, index = "index", typeCheck, lintCheck }, instance) {
+	const params = instance.params;
+	const input = glob.default.sync(`src/${index}.{${params.indexExt}}`);
+	if (!input.length) throw Error("index file is not detected");
+	if (typeCheck) await _cantinc_logger.logger.start("Check TypeScript", async () => {
+		const { resolve, reject, promise } = Promise.withResolvers();
+		(0, node_child_process.spawn)("tsc", ["--noEmit"], {
+			stdio: "inherit",
+			shell: true
+		}).on("close", (code) => {
+			if (code) reject();
+			else resolve(void 0);
+		});
+		await promise;
+	});
+	if (lintCheck) await _cantinc_logger.logger.start("Check ESLint", async () => {
+		const { resolve, reject, promise } = Promise.withResolvers();
+		(0, node_child_process.spawn)("eslint", ["src"], {
+			stdio: "inherit",
+			shell: true
+		}).on("close", (code) => {
+			if (code) reject();
+			else resolve(void 0);
+		});
+		await promise;
+	});
+	await _cantinc_logger.logger.start("Remove build", () => fs_extra.default.remove(params.buildFolder));
+	const pkg = node && await instance.getPackage();
+	const plugins = [(0, rollup_plugin_process_env.default)(instance.params.envPrefix, {
+		include: input,
+		virtual: true
+	})];
+	const options = {
+		input,
+		preserveEntrySignatures: "strict",
+		plugins
+	};
+	const outputOptions = {
+		dir: params.buildFolder,
+		sourcemap: params.sourcemap
+	};
+	if (node) {
+		outputOptions.format = "cjs";
+		options.external = Object.keys(pkg?.dependencies || {});
+		plugins.push((0, rollup_plugin_string.string)({
+			include: "**/*.*",
+			exclude: stringExcludeNode
+		}));
+	} else {
+		plugins.push((0, rollup_plugin_polyfill_node.default)(), (0, rollup_plugin_import_assets.default)({
+			include: imageInclude.map((img) => `src/${img}`),
+			publicPath: params.baseUrl
+		}), (0, rollup_plugin_styles.default)({
+			mode: params.cssInJs ? "inject" : "extract",
+			url: {
+				inline: false,
+				publicPath: `${params.baseUrl}assets`
+			},
+			sass: {
+				outputStyle: "compressed",
+				silenceDeprecations: ["legacy-js-api"]
+			},
+			plugins: [(0, autoprefixer.default)()],
+			autoModules: params.cssModules ? (id) => !id.includes(".global.") : true,
+			sourceMap: params.sourcemap,
+			minimize: true
+		}), (0, rollup_plugin_string.string)({
+			include: "**/*.*",
+			exclude: stringExcludeDom
+		}));
+		outputOptions.format = "es";
+		outputOptions.plugins = [(0, _rollup_plugin_terser.default)(), (0, rollup_plugin_filesize.default)({ reporter })];
+	}
+	await _cantinc_logger.logger.start("Build production bundle", async () => {
+		const bundle = await (0, rolldown.rolldown)(options);
+		await bundle.write(outputOptions);
+		await bundle.close();
+		if (!node) {
+			await copyFiles(params.publicFolder, params.buildFolder);
+			const data = await node_fs.promises.readFile(params.publicIndexFile);
+			const pkg = await instance.getPackage();
+			await node_fs.promises.writeFile(params.buildIndexFile, await convertIndexFile(data, pkg.version, params.baseUrl, node_path.default.parse(input[0]).name, inject));
+		}
+	});
+	if (pkg) {
+		await _cantinc_logger.logger.start("Copy package.json", async () => {
+			const data = { ...pkg };
+			delete data.private;
+			delete data.devDependencies;
+			await fs_extra.default.writeFile(node_path.default.resolve(params.buildFolder, "package.json"), JSON.stringify(data, void 0, 2), "UTF-8");
+		});
+		const pkgLockPath = node_path.default.resolve(params.projectFolder, "package-lock.json");
+		if (fs_extra.default.existsSync(pkgLockPath)) await _cantinc_logger.logger.start("Copy package-lock.json", () => {
+			return fs_extra.default.copy(pkgLockPath, node_path.default.resolve(params.buildFolder, "package-lock.json"));
+		});
+	}
 }
-
-const execAsync$1 = node_util.promisify(node_child_process.exec);
-const pipeline = node_util.promisify(stream__default["default"].pipeline);
-function init(appName_1) {
-    return tslib.__awaiter(this, arguments, void 0, function* (appName, { template, force = false } = {}) {
-        const appPath = path__default["default"].resolve(appName);
-        const { data } = yield logger.logger.start('Get templates list', () => tslib.__awaiter(this, void 0, void 0, function* () { return yield axios__default["default"].get('https://api.github.com/repos/d8corp/innetjs-templates/branches'); }));
-        const templates = data.map(({ name }) => name).filter((name) => name !== 'main');
-        if (!template || !templates.includes(template)) {
-            logger.logger.log(chalk__default["default"].green('Select one of those templates'));
-            const { value } = yield selector__default["default"]({
-                values: templates,
-            });
-            template = value;
-            readline__default["default"].moveCursor(process.stdout, 0, -1);
-            const text = `Selected template: ${chalk__default["default"].white(value)}`;
-            logger.logger.start(text);
-            logger.logger.end(text);
-        }
-        if (!force) {
-            yield logger.logger.start('Check if app folder is available', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                if (fs__default["default"].existsSync(appPath)) {
-                    logger.logger.log(chalk__default["default"].red(`'${appPath}' already exist, what do you want?`));
-                    const { id: result, value } = yield selector__default["default"]({
-                        values: ['Stop the process', 'Remove the folder', 'Merge with template'],
-                    });
-                    readline__default["default"].moveCursor(process.stdout, 0, -1);
-                    logger.logger.log(`Already exist, selected: ${value}`);
-                    if (!result) {
-                        throw Error(`'${appPath}' already exist`);
-                    }
-                    if (result === 1) {
-                        yield fs__default["default"].remove(appPath);
-                    }
-                }
-            }));
-        }
-        yield logger.logger.start('Download template', () => tslib.__awaiter(this, void 0, void 0, function* () {
-            const tmpPath = node_os.tmpdir();
-            const zipPath = path__default["default"].join(tmpPath, 'template.zip');
-            const unzipPath = path__default["default"].join(tmpPath, `innetjs-templates-${template}`);
-            const { data } = yield axios__default["default"].get(`https://github.com/d8corp/innetjs-templates/archive/refs/heads/${template}.zip`, {
-                responseType: 'stream',
-            });
-            yield pipeline(data, fs__default["default"].createWriteStream(zipPath));
-            const zip = new Zip__default["default"](zipPath);
-            yield new Promise((resolve, reject) => {
-                zip.extractAllToAsync(tmpPath, false, false, (error) => {
-                    if (error) {
-                        reject(error);
-                    }
-                    else {
-                        resolve(undefined);
-                    }
-                });
-            });
-            yield fs__default["default"].remove(zipPath);
-            yield fs__default["default"].move(unzipPath, appPath, { overwrite: true });
-        }));
-        yield logger.logger.start('Install packages', () => execAsync$1(`cd ${appPath} && npm i`));
-    });
+//#endregion
+//#region src/commands/init/init.ts
+const execAsync$1 = (0, node_util.promisify)(node_child_process.exec);
+const pipeline = (0, node_util.promisify)(node_stream.default.pipeline);
+async function init(appName, { template, force = false } = {}) {
+	const appPath = node_path.default.resolve(appName);
+	const { data } = await _cantinc_logger.logger.start("Get templates list", async () => await axios.default.get("https://api.github.com/repos/d8corp/innetjs-templates/branches"));
+	const templates = data.map(({ name }) => name).filter((name) => name !== "main");
+	if (!template || !templates.includes(template)) {
+		_cantinc_logger.logger.log(chalk.default.green("Select one of those templates"));
+		const { value } = await (0, cli_select.default)({ values: templates });
+		template = value;
+		node_readline.default.moveCursor(process.stdout, 0, -1);
+		const text = `Selected template: ${chalk.default.white(value)}`;
+		_cantinc_logger.logger.start(text);
+		_cantinc_logger.logger.end(text);
+	}
+	if (!force) await _cantinc_logger.logger.start("Check if app folder is available", async () => {
+		if (fs_extra.default.existsSync(appPath)) {
+			_cantinc_logger.logger.log(chalk.default.red(`'${appPath}' already exist, what do you want?`));
+			const { id: result, value } = await (0, cli_select.default)({ values: [
+				"Stop the process",
+				"Remove the folder",
+				"Merge with template"
+			] });
+			node_readline.default.moveCursor(process.stdout, 0, -1);
+			_cantinc_logger.logger.log(`Already exist, selected: ${value}`);
+			if (!result) throw Error(`'${appPath}' already exist`);
+			if (result === 1) await fs_extra.default.remove(appPath);
+		}
+	});
+	await _cantinc_logger.logger.start("Download template", async () => {
+		const tmpPath = (0, node_os.tmpdir)();
+		const zipPath = node_path.default.join(tmpPath, "template.zip");
+		const unzipPath = node_path.default.join(tmpPath, `innetjs-templates-${template}`);
+		const { data } = await axios.default.get(`https://github.com/d8corp/innetjs-templates/archive/refs/heads/${template}.zip`, { responseType: "stream" });
+		await pipeline(data, fs_extra.default.createWriteStream(zipPath));
+		const zip = new adm_zip.default(zipPath);
+		await new Promise((resolve, reject) => {
+			zip.extractAllToAsync(tmpPath, false, false, (error) => {
+				if (error) reject(error);
+				else resolve(void 0);
+			});
+		});
+		await fs_extra.default.remove(zipPath);
+		await fs_extra.default.move(unzipPath, appPath, { overwrite: true });
+	});
+	await _cantinc_logger.logger.start("Install packages", () => execAsync$1(`cd ${appPath} && npm i`));
 }
-
-const execAsync = node_util.promisify(node_child_process.exec);
-function release(_a, instance_1) {
-    return tslib.__awaiter(this, arguments, void 0, function* ({ index = 'index', pub, min, typeCheck, lintCheck }, instance) {
-        const { releaseFolder, cssModules } = instance.params;
-        if (lintCheck) {
-            yield logger.logger.start('Check ESLint', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                const { resolve, reject, promise } = Promise.withResolvers();
-                const process = node_child_process.spawn('eslint', ['src'], {
-                    stdio: 'inherit',
-                    shell: true,
-                });
-                process.on('close', (code) => {
-                    if (code) {
-                        reject();
-                    }
-                    else {
-                        resolve(undefined);
-                    }
-                });
-                yield promise;
-            }));
-        }
-        yield logger.logger.start('Remove previous release', () => fs__default["default"].remove(releaseFolder));
-        if (typeCheck) {
-            yield logger.logger.start('Check TypeScript', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                const { resolve, reject, promise } = Promise.withResolvers();
-                const params = ['--emitDeclarationOnly', '--outDir', releaseFolder];
-                if (instance.params.tsconfig) {
-                    params.push('-p', instance.params.tsconfig);
-                }
-                const process = node_child_process.spawn('tsc', params, {
-                    stdio: 'inherit',
-                    shell: true,
-                });
-                process.on('close', (code) => {
-                    if (code) {
-                        reject();
-                    }
-                    else {
-                        resolve(undefined);
-                    }
-                });
-                yield promise;
-            }));
-        }
-        const pkg = yield instance.getPackage();
-        const build = (format) => tslib.__awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
-            const ext = format === 'es'
-                ? ((_a = (pkg.module || pkg.esnext || pkg['jsnext:main'])) === null || _a === void 0 ? void 0 : _a.replace('index', '')) || '.mjs'
-                : ((_b = pkg.main) === null || _b === void 0 ? void 0 : _b.replace('index', '')) || '.js';
-            const input = glob__default["default"].sync(`src/${index}.{${instance.params.indexExt}}`);
-            if (!input.length) {
-                throw Error('index file is not detected');
-            }
-            const output = format === 'iife'
-                ? {
-                    file: path__default["default"].join(releaseFolder, pkg.browser || 'index.min.js'),
-                    codeSplitting: false,
-                    name: pkg.browserName || pkg.name
-                        .split('-')
-                        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-                        .join(''),
-                }
-                : {
-                    dir: releaseFolder,
-                    preserveModules: true,
-                    exports: 'named',
-                    entryFileNames: ({ name, facadeModuleId }) => {
-                        if (REG_TJSX.test(facadeModuleId)) {
-                            return `${name}${ext}`;
-                        }
-                        const match = facadeModuleId.match(REG_EXT);
-                        return match ? `${name}${match[0]}${ext}` : `${name}${ext}`;
-                    },
-                };
-            const plugins = [
-                rollupPluginNodeExternals.externals(),
-                rollupPluginString.string({
-                    include: '**/*.*',
-                    exclude: stringExcludeDom,
-                }),
-                image__default["default"](),
-                styles__default["default"]({
-                    mode: instance.params.cssInJs ? 'inject' : 'extract',
-                    plugins: [autoprefixer__default["default"]()],
-                    autoModules: cssModules ? (id) => !id.includes('.global.') : true,
-                    minimize: true,
-                }),
-                external__default["default"](),
-                env__default["default"](instance.params.envPrefix, {
-                    include: input,
-                    virtual: true,
-                }),
-            ];
-            const options = {
-                input,
-                external: ['tslib'],
-                treeshake: false,
-                output: Object.assign(Object.assign({}, output), { format }),
-                plugins,
-            };
-            if (format === 'iife') {
-                plugins.push(terser__default["default"]());
-            }
-            const bundle = yield rolldown.rolldown(options);
-            yield bundle.write(options.output);
-            yield bundle.close();
-        });
-        if (!pkg.type || pkg.type === 'commonjs') {
-            yield logger.logger.start('Build cjs bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                yield build('cjs');
-            }));
-        }
-        if (!pkg.type || pkg.type === 'module') {
-            yield logger.logger.start('Build es6 bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                yield build('es');
-            }));
-        }
-        if (min) {
-            yield logger.logger.start('Build min bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                yield build('iife');
-            }));
-        }
-        yield logger.logger.start('Copy package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
-            const data = Object.assign({}, pkg);
-            delete data.private;
-            delete data.devDependencies;
-            fs__default["default"].writeFile(path__default["default"].resolve(instance.params.releaseFolder, 'package.json'), JSON.stringify(data, undefined, 2), 'UTF-8');
-        }));
-        if (pkg.bin) {
-            yield logger.logger.start('Build bin', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                const { bin, type } = pkg;
-                for (const name in bin) {
-                    const value = bin[name];
-                    const input = glob__default["default"].sync(`src/${value}.{${instance.params.indexExt}}`);
-                    const file = path__default["default"].join(instance.params.releaseFolder, value);
-                    const plugins = [
-                        rollupPluginPreserveShebangs.preserveShebangs(),
-                        rollupPluginNodeExternals.externals(),
-                        env__default["default"](instance.params.envPrefix, {
-                            include: input,
-                        }),
-                    ];
-                    const options = {
-                        input,
-                        external: [...Object.keys(pkg.dependencies), 'tslib'],
-                        output: {
-                            file,
-                            format: type === 'module' ? 'es' : 'cjs',
-                        },
-                        plugins,
-                    };
-                    const bundle = yield rolldown.rolldown(options);
-                    yield bundle.write(options.output);
-                    yield bundle.close();
-                }
-            }));
-        }
-        if (fs__default["default"].existsSync(instance.params.licenseFile)) {
-            yield logger.logger.start('Copy license', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                yield node_fs.promises.copyFile(instance.params.licenseFile, instance.params.licenseReleaseFile);
-            }));
-        }
-        if (fs__default["default"].existsSync(instance.params.readmeFile)) {
-            yield logger.logger.start('Copy readme', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                yield node_fs.promises.copyFile(instance.params.readmeFile, instance.params.readmeReleaseFile);
-            }));
-        }
-        if (fs__default["default"].existsSync(instance.params.declarationFile)) {
-            yield logger.logger.start('Copy declaration', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                yield node_fs.promises.copyFile(instance.params.declarationFile, instance.params.declarationReleaseFile);
-            }));
-        }
-        if (pub) {
-            const date = (Date.now() / 1000) | 0;
-            yield logger.logger.start(`publishing v${pkg.version} ${date}`, () => tslib.__awaiter(this, void 0, void 0, function* () {
-                yield execAsync(`npm publish ${instance.params.releaseFolder} --tag ${getNpmTag(pkg.version)}`);
-            }));
-        }
-    });
+//#endregion
+//#region src/commands/release/release.ts
+const execAsync = (0, node_util.promisify)(node_child_process.exec);
+async function release({ index = "index", pub, min, typeCheck, lintCheck }, instance) {
+	const { releaseFolder, cssModules } = instance.params;
+	if (lintCheck) await _cantinc_logger.logger.start("Check ESLint", async () => {
+		const { resolve, reject, promise } = Promise.withResolvers();
+		(0, node_child_process.spawn)("eslint", ["src"], {
+			stdio: "inherit",
+			shell: true
+		}).on("close", (code) => {
+			if (code) reject();
+			else resolve(void 0);
+		});
+		await promise;
+	});
+	await _cantinc_logger.logger.start("Remove previous release", () => fs_extra.default.remove(releaseFolder));
+	if (typeCheck) await _cantinc_logger.logger.start("Check TypeScript", async () => {
+		const { resolve, reject, promise } = Promise.withResolvers();
+		const params = [
+			"--emitDeclarationOnly",
+			"--outDir",
+			releaseFolder
+		];
+		if (instance.params.tsconfig) params.push("-p", instance.params.tsconfig);
+		(0, node_child_process.spawn)("tsc", params, {
+			stdio: "inherit",
+			shell: true
+		}).on("close", (code) => {
+			if (code) reject();
+			else resolve(void 0);
+		});
+		await promise;
+	});
+	const pkg = await instance.getPackage();
+	const build = async (format) => {
+		const ext = format === "es" ? (pkg.module || pkg.esnext || pkg["jsnext:main"])?.replace("index", "") || ".mjs" : pkg.main?.replace("index", "") || ".js";
+		const input = glob.default.sync(`src/${index}.{${instance.params.indexExt}}`);
+		if (!input.length) throw Error("index file is not detected");
+		const output = format === "iife" ? {
+			file: node_path.default.join(releaseFolder, pkg.browser || "index.min.js"),
+			codeSplitting: false,
+			name: pkg.browserName || pkg.name.split("-").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join("")
+		} : {
+			dir: releaseFolder,
+			preserveModules: true,
+			exports: "named",
+			entryFileNames: ({ name, facadeModuleId }) => {
+				if (REG_TJSX.test(facadeModuleId)) return `${name}${ext}`;
+				const match = facadeModuleId.match(REG_EXT);
+				return match ? `${name}${match[0]}${ext}` : `${name}${ext}`;
+			}
+		};
+		const plugins = [
+			(0, rollup_plugin_node_externals.externals)(),
+			(0, rollup_plugin_string.string)({
+				include: "**/*.*",
+				exclude: stringExcludeDom
+			}),
+			(0, _rollup_plugin_image.default)(),
+			(0, rollup_plugin_styles.default)({
+				mode: instance.params.cssInJs ? "inject" : "extract",
+				plugins: [(0, autoprefixer.default)()],
+				autoModules: cssModules ? (id) => !id.includes(".global.") : true,
+				minimize: true
+			}),
+			(0, rollup_plugin_external_node_modules.default)(),
+			(0, rollup_plugin_process_env.default)(instance.params.envPrefix, {
+				include: input,
+				virtual: true
+			})
+		];
+		const options = {
+			input,
+			external: ["tslib"],
+			treeshake: false,
+			output: {
+				...output,
+				format
+			},
+			plugins
+		};
+		if (format === "iife") plugins.push((0, _rollup_plugin_terser.default)());
+		const bundle = await (0, rolldown.rolldown)(options);
+		await bundle.write(options.output);
+		await bundle.close();
+	};
+	if (!pkg.type || pkg.type === "commonjs") await _cantinc_logger.logger.start("Build cjs bundle", async () => {
+		await build("cjs");
+	});
+	if (!pkg.type || pkg.type === "module") await _cantinc_logger.logger.start("Build es6 bundle", async () => {
+		await build("es");
+	});
+	if (min) await _cantinc_logger.logger.start("Build min bundle", async () => {
+		await build("iife");
+	});
+	await _cantinc_logger.logger.start("Copy package.json", async () => {
+		const data = { ...pkg };
+		delete data.private;
+		delete data.devDependencies;
+		fs_extra.default.writeFile(node_path.default.resolve(instance.params.releaseFolder, "package.json"), JSON.stringify(data, void 0, 2), "UTF-8");
+	});
+	if (pkg.bin) await _cantinc_logger.logger.start("Build bin", async () => {
+		const { bin, type } = pkg;
+		for (const name in bin) {
+			const value = bin[name];
+			const input = glob.default.sync(`src/${value}.{${instance.params.indexExt}}`);
+			const file = node_path.default.join(instance.params.releaseFolder, value);
+			const plugins = [
+				(0, rollup_plugin_preserve_shebangs.preserveShebangs)(),
+				(0, rollup_plugin_node_externals.externals)(),
+				(0, rollup_plugin_process_env.default)(instance.params.envPrefix, { include: input })
+			];
+			const options = {
+				input,
+				external: [...Object.keys(pkg.dependencies), "tslib"],
+				output: {
+					file,
+					format: type === "module" ? "es" : "cjs"
+				},
+				plugins
+			};
+			const bundle = await (0, rolldown.rolldown)(options);
+			await bundle.write(options.output);
+			await bundle.close();
+		}
+	});
+	if (fs_extra.default.existsSync(instance.params.licenseFile)) await _cantinc_logger.logger.start("Copy license", async () => {
+		await node_fs.promises.copyFile(instance.params.licenseFile, instance.params.licenseReleaseFile);
+	});
+	if (fs_extra.default.existsSync(instance.params.readmeFile)) await _cantinc_logger.logger.start("Copy readme", async () => {
+		await node_fs.promises.copyFile(instance.params.readmeFile, instance.params.readmeReleaseFile);
+	});
+	if (fs_extra.default.existsSync(instance.params.declarationFile)) await _cantinc_logger.logger.start("Copy declaration", async () => {
+		await node_fs.promises.copyFile(instance.params.declarationFile, instance.params.declarationReleaseFile);
+	});
+	if (pub) {
+		const date = Date.now() / 1e3 | 0;
+		await _cantinc_logger.logger.start(`publishing v${pkg.version} ${date}`, async () => {
+			await execAsync(`npm publish ${instance.params.releaseFolder} --tag ${getNpmTag(pkg.version)}`);
+		});
+	}
 }
-
-function run(file_1) {
-    return tslib.__awaiter(this, arguments, void 0, function* (file, { config = '', exposeGc = false, typeCheck } = {}) {
-        const input = yield logger.logger.start('Check file', () => getFile(file));
-        if (!input.length) {
-            throw Error('index file is not detected');
-        }
-        if (typeCheck) {
-            yield logger.logger.start('Check TypeScript', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                const { resolve, reject, promise } = Promise.withResolvers();
-                const params = ['--noEmit'];
-                if (config) {
-                    params.push('-p', config);
-                }
-                const process = node_child_process.spawn('tsc', params, {
-                    stdio: 'inherit',
-                    shell: true,
-                });
-                process.on('close', (code) => {
-                    if (code) {
-                        reject();
-                    }
-                    else {
-                        resolve(undefined);
-                    }
-                });
-                yield promise;
-            }));
-        }
-        const folder = yield new Promise((resolve, reject) => {
-            tmp__default["default"].dir((err, folder) => {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve(folder);
-                }
-            });
-        });
-        const jsFilePath = `${folder}/index.js`;
-        yield logger.logger.start('Build bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
-            const inputOptions = {
-                input,
-                plugins: [],
-            };
-            const outputOptions = {
-                format: 'cjs',
-                file: jsFilePath,
-                sourcemap: true,
-            };
-            const bundle = yield rolldown.rolldown(inputOptions);
-            yield bundle.write(outputOptions);
-            yield bundle.close();
-        }));
-        yield logger.logger.start('Running of the script', () => tslib.__awaiter(this, void 0, void 0, function* () {
-            const flags = [];
-            if (exposeGc) {
-                flags.push('--expose-gc');
-            }
-            node_child_process.spawn('node', [...flags, '-r', 'source-map-support/register', jsFilePath], { stdio: 'inherit' });
-        }));
-    });
+//#endregion
+//#region src/commands/run/run.ts
+async function run(file, { config = "", exposeGc = false, typeCheck } = {}) {
+	const input = await _cantinc_logger.logger.start("Check file", () => getFile(file));
+	if (!input.length) throw Error("index file is not detected");
+	if (typeCheck) await _cantinc_logger.logger.start("Check TypeScript", async () => {
+		const { resolve, reject, promise } = Promise.withResolvers();
+		const params = ["--noEmit"];
+		if (config) params.push("-p", config);
+		(0, node_child_process.spawn)("tsc", params, {
+			stdio: "inherit",
+			shell: true
+		}).on("close", (code) => {
+			if (code) reject();
+			else resolve(void 0);
+		});
+		await promise;
+	});
+	const jsFilePath = `${await new Promise((resolve, reject) => {
+		tmp.default.dir((err, folder) => {
+			if (err) reject(err);
+			else resolve(folder);
+		});
+	})}/index.js`;
+	await _cantinc_logger.logger.start("Build bundle", async () => {
+		const inputOptions = {
+			input,
+			plugins: []
+		};
+		const outputOptions = {
+			format: "cjs",
+			file: jsFilePath,
+			sourcemap: true
+		};
+		const bundle = await (0, rolldown.rolldown)(inputOptions);
+		await bundle.write(outputOptions);
+		await bundle.close();
+	});
+	await _cantinc_logger.logger.start("Running of the script", async () => {
+		const flags = [];
+		if (exposeGc) flags.push("--expose-gc");
+		(0, node_child_process.spawn)("node", [
+			...flags,
+			"-r",
+			"source-map-support/register",
+			jsFilePath
+		], { stdio: "inherit" });
+	});
 }
-
+//#endregion
+//#region src/commands/start/start.ts
 function typecheckWatchPlugin() {
-    let tscProcess = null;
-    return {
-        name: 'type-check',
-        buildStart() {
-            if (tscProcess) {
-                logger.logger.end('Check TypeScript');
-                tscProcess.kill();
-            }
-            logger.logger.start('Check TypeScript');
-            tscProcess = node_child_process.spawn('tsc', ['--noEmit'], {
-                stdio: 'inherit',
-                shell: true,
-            });
-            tscProcess.on('close', (code) => {
-                logger.logger.end('Check TypeScript', code ? 'TypeScript has errors' : undefined);
-            });
-        },
-    };
+	let tscProcess = null;
+	return {
+		name: "type-check",
+		buildStart() {
+			if (tscProcess) {
+				_cantinc_logger.logger.end("Check TypeScript");
+				tscProcess.kill();
+			}
+			_cantinc_logger.logger.start("Check TypeScript");
+			tscProcess = (0, node_child_process.spawn)("tsc", ["--noEmit"], {
+				stdio: "inherit",
+				shell: true
+			});
+			tscProcess.on("close", (code) => {
+				_cantinc_logger.logger.end("Check TypeScript", code ? "TypeScript has errors" : void 0);
+			});
+		}
+	};
 }
 function lintCheckWatchPlugin() {
-    let lintProcess = null;
-    return {
-        name: 'lint-check',
-        buildStart() {
-            if (lintProcess) {
-                logger.logger.end('Check ESLint');
-                lintProcess.kill();
-            }
-            logger.logger.start('Check ESLint');
-            lintProcess = node_child_process.spawn('eslint', ['src'], {
-                stdio: 'inherit',
-                shell: true,
-            });
-            lintProcess.on('close', (code) => {
-                logger.logger.end('Check ESLint', code ? 'ESLint has errors' : undefined);
-            });
-        },
-    };
+	let lintProcess = null;
+	return {
+		name: "lint-check",
+		buildStart() {
+			if (lintProcess) {
+				_cantinc_logger.logger.end("Check ESLint");
+				lintProcess.kill();
+			}
+			_cantinc_logger.logger.start("Check ESLint");
+			lintProcess = (0, node_child_process.spawn)("eslint", ["src"], {
+				stdio: "inherit",
+				shell: true
+			});
+			lintProcess.on("close", (code) => {
+				_cantinc_logger.logger.end("Check ESLint", code ? "ESLint has errors" : void 0);
+			});
+		}
+	};
 }
-function start(_a, instance_1) {
-    return tslib.__awaiter(this, arguments, void 0, function* ({ node = false, inject = false, error = false, typeCheck = false, lintCheck = false, usualConsoleOutput = false, index = 'index', }, instance) {
-        const params = instance.params;
-        const pkg = yield instance.getPackage();
-        const input = glob__default["default"].sync(`src/${index}.{${params.indexExt}}`);
-        if (!input.length) {
-            throw Error('index file is not detected');
-        }
-        yield logger.logger.start('Remove build', () => fs__default["default"].remove(params.devBuildFolder));
-        const plugins = [];
-        const output = {
-            dir: params.devBuildFolder,
-            sourcemap: true,
-        };
-        const options = {
-            input,
-            preserveEntrySignatures: 'strict',
-            output,
-            plugins,
-        };
-        let preset;
-        if (node) {
-            preset = { NODE_ENV: 'dev' };
-            output.format = 'cjs';
-            options.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
-            plugins.push(rollupPluginString.string({
-                include: '**/*.*',
-                exclude: stringExcludeNode,
-            }), instance.createServer(input, error, usualConsoleOutput));
-        }
-        else {
-            const key = path__default["default"].basename(params.sslKey) !== params.sslKey
-                ? params.sslKey
-                : fs__default["default"].existsSync(params.sslKey)
-                    ? fs__default["default"].readFileSync(params.sslKey)
-                    : undefined;
-            const cert = path__default["default"].basename(params.sslCrt) !== params.sslCrt
-                ? params.sslCrt
-                : fs__default["default"].existsSync(params.sslCrt)
-                    ? fs__default["default"].readFileSync(params.sslCrt)
-                    : undefined;
-            output.format = 'es';
-            plugins.push(polyfill__default["default"](), importAssets__default["default"]({
-                include: imageInclude.map(img => `src/${img}`),
-                publicPath: params.baseUrl,
-            }), styles__default["default"]({
-                mode: params.cssInJs ? 'inject' : 'extract',
-                url: {
-                    inline: false,
-                    publicPath: `${params.baseUrl}assets`,
-                },
-                sass: {
-                    silenceDeprecations: ['legacy-js-api'],
-                },
-                plugins: [autoprefixer__default["default"]()],
-                autoModules: params.cssModules ? (id) => !id.includes('.global.') : true,
-                sourceMap: true,
-            }), rollupPluginString.string({
-                include: '**/*.*',
-                exclude: stringExcludeDom,
-            }), instance.createClient(key, cert, pkg, path__default["default"].parse(input[0]).name, inject), livereload__default["default"](Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [params.devBuildFolder, params.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
-        }
-        if (typeCheck) {
-            plugins.push(typecheckWatchPlugin());
-        }
-        if (lintCheck) {
-            plugins.push(lintCheckWatchPlugin());
-        }
-        plugins.push(env__default["default"](instance.params.envPrefix, {
-            include: input,
-            virtual: true,
-            preset,
-        }));
-        const watcher = rolldown.watch(options);
-        watcher.on('event', (e) => tslib.__awaiter(this, void 0, void 0, function* () {
-            if (e.code === 'ERROR') {
-                logger.logger.end('Bundling', error ? e.error.stack : e.error.message);
-            }
-            else if (e.code === 'BUNDLE_START') {
-                logger.logger.start('Bundling');
-            }
-            else if (e.code === 'BUNDLE_END') {
-                logger.logger.end('Bundling');
-            }
-        }));
-    });
+async function start({ node = false, inject = false, error = false, typeCheck = false, lintCheck = false, usualConsoleOutput = false, index = "index" }, instance) {
+	const params = instance.params;
+	const pkg = await instance.getPackage();
+	const input = glob.default.sync(`src/${index}.{${params.indexExt}}`);
+	if (!input.length) throw Error("index file is not detected");
+	await _cantinc_logger.logger.start("Remove build", () => fs_extra.default.remove(params.devBuildFolder));
+	const plugins = [];
+	const output = {
+		dir: params.devBuildFolder,
+		sourcemap: true
+	};
+	const options = {
+		input,
+		preserveEntrySignatures: "strict",
+		output,
+		plugins
+	};
+	let preset;
+	if (node) {
+		preset = { NODE_ENV: "dev" };
+		output.format = "cjs";
+		options.external = Object.keys(pkg?.dependencies || {});
+		plugins.push((0, rollup_plugin_string.string)({
+			include: "**/*.*",
+			exclude: stringExcludeNode
+		}), instance.createServer(input, error, usualConsoleOutput));
+	} else {
+		const key = node_path.default.basename(params.sslKey) !== params.sslKey ? params.sslKey : fs_extra.default.existsSync(params.sslKey) ? fs_extra.default.readFileSync(params.sslKey) : void 0;
+		const cert = node_path.default.basename(params.sslCrt) !== params.sslCrt ? params.sslCrt : fs_extra.default.existsSync(params.sslCrt) ? fs_extra.default.readFileSync(params.sslCrt) : void 0;
+		output.format = "es";
+		plugins.push((0, rollup_plugin_polyfill_node.default)(), (0, rollup_plugin_import_assets.default)({
+			include: imageInclude.map((img) => `src/${img}`),
+			publicPath: params.baseUrl
+		}), (0, rollup_plugin_styles.default)({
+			mode: params.cssInJs ? "inject" : "extract",
+			url: {
+				inline: false,
+				publicPath: `${params.baseUrl}assets`
+			},
+			sass: { silenceDeprecations: ["legacy-js-api"] },
+			plugins: [(0, autoprefixer.default)()],
+			autoModules: params.cssModules ? (id) => !id.includes(".global.") : true,
+			sourceMap: true
+		}), (0, rollup_plugin_string.string)({
+			include: "**/*.*",
+			exclude: stringExcludeDom
+		}), instance.createClient(key, cert, pkg, node_path.default.parse(input[0]).name, inject), (0, rollup_plugin_livereload.default)({
+			exts: [
+				"html",
+				"css",
+				"js",
+				"png",
+				"svg",
+				"webp",
+				"gif",
+				"jpg",
+				"json"
+			],
+			watch: [params.devBuildFolder, params.publicFolder],
+			verbose: false,
+			...key && cert ? { https: {
+				key,
+				cert
+			} } : {}
+		}));
+	}
+	if (typeCheck) plugins.push(typecheckWatchPlugin());
+	if (lintCheck) plugins.push(lintCheckWatchPlugin());
+	plugins.push((0, rollup_plugin_process_env.default)(instance.params.envPrefix, {
+		include: input,
+		virtual: true,
+		preset
+	}));
+	(0, rolldown.watch)(options).on("event", async (e) => {
+		if (e.code === "ERROR") _cantinc_logger.logger.end("Bundling", error ? e.error.stack : e.error.message);
+		else if (e.code === "BUNDLE_START") _cantinc_logger.logger.start("Bundling");
+		else if (e.code === "BUNDLE_END") _cantinc_logger.logger.end("Bundling");
+	});
 }
-
-class InnetJS {
-    constructor(options = {}) {
-        this.params = getDefaultOptions(options);
-    }
-    // Methods
-    init(appName, options) {
-        return tslib.__awaiter(this, void 0, void 0, function* () {
-            yield init(appName, options);
-        });
-    }
-    build() {
-        return tslib.__awaiter(this, arguments, void 0, function* (options = {}) {
-            yield build(options, this);
-        });
-    }
-    start() {
-        return tslib.__awaiter(this, arguments, void 0, function* (options = {}) {
-            yield start(options, this);
-        });
-    }
-    run(file_1) {
-        return tslib.__awaiter(this, arguments, void 0, function* (file, options = {}) {
-            yield run(file, options);
-        });
-    }
-    release() {
-        return tslib.__awaiter(this, arguments, void 0, function* (options = {}) {
-            yield release(options, this);
-        });
-    }
-    // Helpers
-    getPackage() {
-        return tslib.__awaiter(this, void 0, void 0, function* () {
-            if (this.package) {
-                return this.package;
-            }
-            const packageFolder = path__default["default"].resolve(this.params.projectFolder, 'package.json');
-            yield logger.logger.start('Check package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                if (fs__default["default"].existsSync(packageFolder)) {
-                    this.package = yield fs__default["default"].readJson(packageFolder);
-                }
-            }));
-            return this.package;
-        });
-    }
-    createClient(key, cert, pkg, index, inject) {
-        let app;
-        return {
-            name: 'client',
-            writeBundle: () => tslib.__awaiter(this, void 0, void 0, function* () {
-                var _a;
-                if (!app) {
-                    app = express__default["default"]();
-                    const update = () => tslib.__awaiter(this, void 0, void 0, function* () {
-                        const data = yield fs.promises.readFile(this.params.publicIndexFile);
-                        yield fs.promises.writeFile(this.params.devBuildIndexFile, yield convertIndexFile(data, pkg.version, this.params.baseUrl, index, inject));
-                    });
-                    fs__default["default"].watch(this.params.publicIndexFile, update);
-                    yield update();
-                    const httpsUsing = !!(cert && key);
-                    app.use(this.params.baseUrl, express__default["default"].static(this.params.devBuildFolder));
-                    app.use(this.params.baseUrl, express__default["default"].static(this.params.publicFolder));
-                    if ((_a = this.params.proxy) === null || _a === void 0 ? void 0 : _a.startsWith('http')) {
-                        if (this.params.simulateIP) {
-                            app.use((req, res, next) => {
-                                req.headers['X-Real-IP'] = this.params.simulateIP;
-                                next();
-                            });
-                        }
-                        app.use(this.params.api, proxy__default["default"](this.params.proxy, {
-                            https: httpsUsing,
-                            limit: '1000mb',
-                            proxyReqPathResolver: req => req.originalUrl,
-                        }));
-                    }
-                    app.use(/^([^.]*|.*\.[^.]{5,})$/, (req, res) => {
-                        res.sendFile(this.params.devBuildFolder + '/index.html');
-                    });
-                    const server = httpsUsing ? https__default["default"].createServer({ key, cert }, app) : http__default["default"].createServer(app);
-                    let port = this.params.port;
-                    const listener = () => {
-                        const baseUrl = this.params.baseUrl === '/' ? '' : this.params.baseUrl;
-                        logger.logger.log(`${chalk__default["default"].green('➤')} Started on http${httpsUsing ? 's' : ''}://localhost:${port}${baseUrl} and http${httpsUsing ? 's' : ''}://${address__default["default"].ip()}:${port}${baseUrl}`);
-                    };
-                    server.listen(port, listener);
-                    server.on('error', (e) => tslib.__awaiter(this, void 0, void 0, function* () {
-                        if (e.code === 'EADDRINUSE') {
-                            port++;
-                            const { userPort } = yield prompt__default["default"]({
-                                name: 'userPort',
-                                type: 'number',
-                                message: `Port ${e.port} is reserved, please enter another one [${port}]:`,
-                            });
-                            if (userPort) {
-                                port = userPort;
-                            }
-                            server.listen(port);
-                        }
-                        else {
-                            throw e;
-                        }
-                    }));
-                }
-            }),
-        };
-    }
-    createServer(input, error = false, usualConsoleOutput = false) {
-        const apps = {};
-        return {
-            name: 'server',
-            writeBundle: () => tslib.__awaiter(this, void 0, void 0, function* () {
-                var _a;
-                for (const file of input) {
-                    let stderrBuffer = '';
-                    const { name } = path__default["default"].parse(file);
-                    (_a = apps[name]) === null || _a === void 0 ? void 0 : _a.kill();
-                    const filePath = path__default["default"].resolve(this.params.devBuildFolder, `${name}.js`);
-                    if (usualConsoleOutput) {
-                        apps[name] = node_child_process.spawn('node', ['-r', 'source-map-support/register', filePath], { stdio: 'inherit' });
-                        return;
-                    }
-                    const child = node_child_process.spawn('node', ['-r', 'source-map-support/register', filePath], {
-                        stdio: ['inherit', 'inherit'],
-                    });
-                    apps[name] = child;
-                    child.stderr.on('data', (chunk) => {
-                        stderrBuffer += chunk.toString();
-                    });
-                    child.on('close', (code) => {
-                        if (code !== 0 && stderrBuffer) {
-                            // eslint-disable-next-line no-console
-                            console.error(printErrorWithFrame(stderrBuffer, 0, !error));
-                            stderrBuffer = '';
-                        }
-                    });
-                }
-            }),
-        };
-    }
-}
-
-(function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"4.0.0-alpha.17"};
-  if (typeof process === 'undefined') {
-    globalThis.process = { env: env };
-  } else if (process.env) {
-    Object.assign(process.env, env);
-  } else {
-    process.env = env;
-  }
+//#endregion
+//#region src/InnetJs/InnetJs.ts
+var InnetJS = class {
+	constructor(options = {}) {
+		this.params = getDefaultOptions(options);
+	}
+	async init(appName, options) {
+		await init(appName, options);
+	}
+	async build(options = {}) {
+		await build(options, this);
+	}
+	async start(options = {}) {
+		await start(options, this);
+	}
+	async run(file, options = {}) {
+		await run(file, options);
+	}
+	async release(options = {}) {
+		await release(options, this);
+	}
+	async getPackage() {
+		if (this.package) return this.package;
+		const packageFolder = node_path.default.resolve(this.params.projectFolder, "package.json");
+		await _cantinc_logger.logger.start("Check package.json", async () => {
+			if (fs_extra.default.existsSync(packageFolder)) this.package = await fs_extra.default.readJson(packageFolder);
+		});
+		return this.package;
+	}
+	createClient(key, cert, pkg, index, inject) {
+		let app;
+		return {
+			name: "client",
+			writeBundle: async () => {
+				if (!app) {
+					app = (0, express.default)();
+					const update = async () => {
+						const data = await fs_extra.promises.readFile(this.params.publicIndexFile);
+						await fs_extra.promises.writeFile(this.params.devBuildIndexFile, await convertIndexFile(data, pkg.version, this.params.baseUrl, index, inject));
+					};
+					fs_extra.default.watch(this.params.publicIndexFile, update);
+					await update();
+					const httpsUsing = !!(cert && key);
+					app.use(this.params.baseUrl, express.default.static(this.params.devBuildFolder));
+					app.use(this.params.baseUrl, express.default.static(this.params.publicFolder));
+					if (this.params.proxy?.startsWith("http")) {
+						if (this.params.simulateIP) app.use((req, res, next) => {
+							req.headers["X-Real-IP"] = this.params.simulateIP;
+							next();
+						});
+						app.use(this.params.api, (0, express_http_proxy.default)(this.params.proxy, {
+							https: httpsUsing,
+							limit: "1000mb",
+							proxyReqPathResolver: (req) => req.originalUrl
+						}));
+					}
+					app.use(/^([^.]*|.*\.[^.]{5,})$/, (req, res) => {
+						res.sendFile(this.params.devBuildFolder + "/index.html");
+					});
+					const server = httpsUsing ? node_https.default.createServer({
+						key,
+						cert
+					}, app) : node_http.default.createServer(app);
+					let port = this.params.port;
+					const listener = () => {
+						const baseUrl = this.params.baseUrl === "/" ? "" : this.params.baseUrl;
+						_cantinc_logger.logger.log(`${chalk.default.green("➤")} Started on http${httpsUsing ? "s" : ""}://localhost:${port}${baseUrl} and http${httpsUsing ? "s" : ""}://${address.default.ip()}:${port}${baseUrl}`);
+					};
+					server.listen(port, listener);
+					server.on("error", async (e) => {
+						if (e.code === "EADDRINUSE") {
+							port++;
+							const { userPort } = await (0, prompts.default)({
+								name: "userPort",
+								type: "number",
+								message: `Port ${e.port} is reserved, please enter another one [${port}]:`
+							});
+							if (userPort) port = userPort;
+							server.listen(port);
+						} else throw e;
+					});
+				}
+			}
+		};
+	}
+	createServer(input, error = false, usualConsoleOutput = false) {
+		const apps = {};
+		return {
+			name: "server",
+			writeBundle: async () => {
+				for (const file of input) {
+					let stderrBuffer = "";
+					const { name } = node_path.default.parse(file);
+					apps[name]?.kill();
+					const filePath = node_path.default.resolve(this.params.devBuildFolder, `${name}.js`);
+					if (usualConsoleOutput) {
+						apps[name] = (0, node_child_process.spawn)("node", [
+							"-r",
+							"source-map-support/register",
+							filePath
+						], { stdio: "inherit" });
+						return;
+					}
+					const child = (0, node_child_process.spawn)("node", [
+						"-r",
+						"source-map-support/register",
+						filePath
+					], { stdio: ["inherit", "inherit"] });
+					apps[name] = child;
+					child.stderr.on("data", (chunk) => {
+						stderrBuffer += chunk.toString();
+					});
+					child.on("close", (code) => {
+						if (code !== 0 && stderrBuffer) {
+							console.error(printErrorWithFrame(stderrBuffer, 0, !error));
+							stderrBuffer = "";
+						}
+					});
+				}
+			}
+		};
+	}
+};
+//#endregion
+//#region src/bin/innet.ts
+(function() {
+	const env = { "__INNETJS__PACKAGE_VERSION": "4.0.0-alpha.18" };
+	if (typeof process === "undefined") globalThis.process = { env };
+	else if (process.env) Object.assign(process.env, env);
+	else process.env = env;
 })();
 updateDotenv();
 const innetJS = new InnetJS();
-const errorOption = new commander.Option('-e, --error', 'Show error details');
+const errorOption = new commander.Option("-e, --error", "Show error details");
 const checkError = (flag) => (error) => {
-    if (flag) {
-        // eslint-disable-next-line no-console
-        console.error(error);
-        process.exit(1);
-    }
+	if (flag) {
+		console.error(error);
+		process.exit(1);
+	}
 };
-commander.program
-    .version(process.env.__INNETJS__PACKAGE_VERSION, '-v, --version');
-commander.program
-    .command('init <app-name>')
-    .description('Create innet boilerplate')
-    .option('-t, --template <template>', 'Select template fe or be')
-    .addOption(errorOption)
-    .action((appName, { error, template }) => {
-    innetJS.init(appName, { template }).catch(checkError(error));
+commander.program.version(process.env.__INNETJS__PACKAGE_VERSION, "-v, --version");
+commander.program.command("init <app-name>").description("Create innet boilerplate").option("-t, --template <template>", "Select template fe or be").addOption(errorOption).action((appName, { error, template }) => {
+	innetJS.init(appName, { template }).catch(checkError(error));
 });
-commander.program
-    .command('run <file-path>')
-    .description('Run js, ts or tsx file')
-    .option('-c, --config <file-path>', 'Config file for TypeScript')
-    .option('--expose-gc', 'Run node with global.gc support')
-    .option('-tc, --type-check', 'Runes TypeScript errors checker')
-    .addOption(errorOption)
-    .action((filePath, params) => {
-    innetJS.run(filePath, params).catch(checkError(params.error));
+commander.program.command("run <file-path>").description("Run js, ts or tsx file").option("-c, --config <file-path>", "Config file for TypeScript").option("--expose-gc", "Run node with global.gc support").option("-tc, --type-check", "Runes TypeScript errors checker").addOption(errorOption).action((filePath, params) => {
+	innetJS.run(filePath, params).catch(checkError(params.error));
 });
-commander.program
-    .command('start')
-    .description('Start development with innet boilerplate')
-    .option('-n, --node', 'Start development for Node.js')
-    .option('-uco, --usual-console-output', 'Removes custom error output (code-frame, colors...)')
-    .option('-in, --inject', 'Injects script element into index.html')
-    .option('-tc, --type-check', 'Runes TypeScript errors checker')
-    .option('-lc, --lint-check', 'Runes ESLint errors checker')
-    .option('-i, --index <index>', 'Root index file name', 'index')
-    .addOption(errorOption)
-    .action((params) => {
-    innetJS.start(params).catch(checkError(params.error));
+commander.program.command("start").description("Start development with innet boilerplate").option("-n, --node", "Start development for Node.js").option("-uco, --usual-console-output", "Removes custom error output (code-frame, colors...)").option("-in, --inject", "Injects script element into index.html").option("-tc, --type-check", "Runes TypeScript errors checker").option("-lc, --lint-check", "Runes ESLint errors checker").option("-i, --index <index>", "Root index file name", "index").addOption(errorOption).action((params) => {
+	innetJS.start(params).catch(checkError(params.error));
 });
-commander.program
-    .command('build')
-    .description('Build production bundle')
-    .addOption(errorOption)
-    .option('-n, --node', 'Build for node.js')
-    .option('-in, --inject', 'Injects script element into index.html')
-    .option('-i, --index <index>', 'Root index file name', 'index')
-    .option('-tc, --type-check', 'Runes TypeScript errors checker')
-    .option('-lc, --lint-check', 'Runes ESLint errors checker')
-    .action((params) => {
-    innetJS.build(params).catch(checkError(params.error));
+commander.program.command("build").description("Build production bundle").addOption(errorOption).option("-n, --node", "Build for node.js").option("-in, --inject", "Injects script element into index.html").option("-i, --index <index>", "Root index file name", "index").option("-tc, --type-check", "Runes TypeScript errors checker").option("-lc, --lint-check", "Runes ESLint errors checker").action((params) => {
+	innetJS.build(params).catch(checkError(params.error));
 });
-commander.program
-    .command('release')
-    .description('Release new version of your library')
-    .option('-i, --index <index>', 'Root index file name', 'index')
-    .option('-p, --public', 'Public the package')
-    .option('-m, --min', 'Add minified version of your library')
-    .option('-tc, --type-check', 'Runes TypeScript errors checker')
-    .option('-lc, --lint-check', 'Runes ESLint errors checker')
-    .addOption(errorOption)
-    .action(({ error, index, public: pub, min, lintCheck, typeCheck }) => {
-    innetJS.release({ index, pub, min, lintCheck, typeCheck }).catch(checkError(error));
+commander.program.command("release").description("Release new version of your library").option("-i, --index <index>", "Root index file name", "index").option("-p, --public", "Public the package").option("-m, --min", "Add minified version of your library").option("-tc, --type-check", "Runes TypeScript errors checker").option("-lc, --lint-check", "Runes ESLint errors checker").addOption(errorOption).action(({ error, index, public: pub, min, lintCheck, typeCheck }) => {
+	innetJS.release({
+		index,
+		pub,
+		min,
+		lintCheck,
+		typeCheck
+	}).catch(checkError(error));
 });
-commander.program
-    .parse(process.argv);
+commander.program.parse(process.argv);
+//#endregion

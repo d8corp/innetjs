@@ -1,1 +1,2 @@
-export { getNpmTag } from './getNpmTag.mjs';
+import { getNpmTag } from "./getNpmTag.mjs";
+export { getNpmTag };

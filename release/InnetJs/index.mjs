@@ -1,1 +1,2 @@
-export { InnetJS } from './InnetJs.mjs';
+import { InnetJS } from "./InnetJs.mjs";
+export { InnetJS };

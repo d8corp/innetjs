@@ -1,9 +1,2 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-var updateDotenv = require('./updateDotenv.js');
-
-
-
-exports.updateDotenv = updateDotenv.updateDotenv;
+const require_updateDotenv = require("./updateDotenv.js");
+exports.updateDotenv = require_updateDotenv.updateDotenv;

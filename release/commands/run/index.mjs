@@ -1,1 +1,2 @@
-export { run } from './run.mjs';
+import { run } from "./run.mjs";
+export { run };

@@ -1,148 +1,119 @@
-import { __awaiter } from 'tslib';
-import { logger } from '@cantinc/logger';
-import terser from '@rollup/plugin-terser';
-import autoprefixer from 'autoprefixer';
-import { spawn } from 'node:child_process';
-import { promises } from 'node:fs';
-import fs from 'fs-extra';
-import glob from 'glob';
-import path from 'node:path';
-import { rolldown } from 'rolldown';
-import filesize from 'rollup-plugin-filesize';
-import importAssets from 'rollup-plugin-import-assets';
-import polyfill from 'rollup-plugin-polyfill-node';
-import env from 'rollup-plugin-process-env';
-import { string } from 'rollup-plugin-string';
-import styles from 'rollup-plugin-styles';
-import { promisify } from 'node:util';
-import { stringExcludeNode, imageInclude, stringExcludeDom } from '../../constants.mjs';
-import { reporter, convertIndexFile } from '../../helpers.mjs';
-
+import { imageInclude, stringExcludeDom, stringExcludeNode } from "../../constants.mjs";
+import { convertIndexFile, reporter } from "../../helpers.mjs";
+import { logger } from "@cantinc/logger";
+import { spawn } from "node:child_process";
+import fs from "fs-extra";
+import path from "node:path";
+import terser from "@rollup/plugin-terser";
+import autoprefixer from "autoprefixer";
+import { promises as promises$1 } from "node:fs";
+import glob from "glob";
+import { rolldown } from "rolldown";
+import filesize from "rollup-plugin-filesize";
+import importAssets from "rollup-plugin-import-assets";
+import polyfill from "rollup-plugin-polyfill-node";
+import env from "rollup-plugin-process-env";
+import { string } from "rollup-plugin-string";
+import styles from "rollup-plugin-styles";
+import { promisify } from "node:util";
+//#region src/commands/build/build.ts
 const copyFiles = promisify(fs.copy);
-function build(_a, instance_1) {
-    return __awaiter(this, arguments, void 0, function* ({ node = false, inject = false, index = 'index', typeCheck, lintCheck }, instance) {
-        const params = instance.params;
-        const input = glob.sync(`src/${index}.{${params.indexExt}}`);
-        if (!input.length) {
-            throw Error('index file is not detected');
-        }
-        if (typeCheck) {
-            yield logger.start('Check TypeScript', () => __awaiter(this, void 0, void 0, function* () {
-                const { resolve, reject, promise } = Promise.withResolvers();
-                const process = spawn('tsc', ['--noEmit'], {
-                    stdio: 'inherit',
-                    shell: true,
-                });
-                process.on('close', (code) => {
-                    if (code) {
-                        reject();
-                    }
-                    else {
-                        resolve(undefined);
-                    }
-                });
-                yield promise;
-            }));
-        }
-        if (lintCheck) {
-            yield logger.start('Check ESLint', () => __awaiter(this, void 0, void 0, function* () {
-                const { resolve, reject, promise } = Promise.withResolvers();
-                const process = spawn('eslint', ['src'], {
-                    stdio: 'inherit',
-                    shell: true,
-                });
-                process.on('close', (code) => {
-                    if (code) {
-                        reject();
-                    }
-                    else {
-                        resolve(undefined);
-                    }
-                });
-                yield promise;
-            }));
-        }
-        yield logger.start('Remove build', () => fs.remove(params.buildFolder));
-        const pkg = node && (yield instance.getPackage());
-        const plugins = [
-            env(instance.params.envPrefix, {
-                include: input,
-                virtual: true,
-            }),
-        ];
-        const options = {
-            input,
-            preserveEntrySignatures: 'strict',
-            plugins,
-        };
-        const outputOptions = {
-            dir: params.buildFolder,
-            sourcemap: params.sourcemap,
-        };
-        if (node) {
-            outputOptions.format = 'cjs';
-            options.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
-            plugins.push(string({
-                include: '**/*.*',
-                exclude: stringExcludeNode,
-            }));
-        }
-        else {
-            plugins.push(polyfill(), importAssets({
-                include: imageInclude.map(img => `src/${img}`),
-                publicPath: params.baseUrl,
-            }), styles({
-                mode: params.cssInJs ? 'inject' : 'extract',
-                url: {
-                    inline: false,
-                    publicPath: `${params.baseUrl}assets`,
-                },
-                sass: {
-                    outputStyle: 'compressed',
-                    silenceDeprecations: ['legacy-js-api'],
-                },
-                plugins: [autoprefixer()],
-                autoModules: params.cssModules ? (id) => !id.includes('.global.') : true,
-                sourceMap: params.sourcemap,
-                minimize: true,
-            }), string({
-                include: '**/*.*',
-                exclude: stringExcludeDom,
-            }));
-            outputOptions.format = 'es';
-            outputOptions.plugins = [
-                terser(),
-                filesize({
-                    reporter,
-                }),
-            ];
-        }
-        yield logger.start('Build production bundle', () => __awaiter(this, void 0, void 0, function* () {
-            const bundle = yield rolldown(options);
-            yield bundle.write(outputOptions);
-            yield bundle.close();
-            if (!node) {
-                yield copyFiles(params.publicFolder, params.buildFolder);
-                const data = yield promises.readFile(params.publicIndexFile);
-                const pkg = yield instance.getPackage();
-                yield promises.writeFile(params.buildIndexFile, yield convertIndexFile(data, pkg.version, params.baseUrl, path.parse(input[0]).name, inject));
-            }
-        }));
-        if (pkg) {
-            yield logger.start('Copy package.json', () => __awaiter(this, void 0, void 0, function* () {
-                const data = Object.assign({}, pkg);
-                delete data.private;
-                delete data.devDependencies;
-                yield fs.writeFile(path.resolve(params.buildFolder, 'package.json'), JSON.stringify(data, undefined, 2), 'UTF-8');
-            }));
-            const pkgLockPath = path.resolve(params.projectFolder, 'package-lock.json');
-            if (fs.existsSync(pkgLockPath)) {
-                yield logger.start('Copy package-lock.json', () => {
-                    return fs.copy(pkgLockPath, path.resolve(params.buildFolder, 'package-lock.json'));
-                });
-            }
-        }
-    });
+async function build({ node = false, inject = false, index = "index", typeCheck, lintCheck }, instance) {
+	const params = instance.params;
+	const input = glob.sync(`src/${index}.{${params.indexExt}}`);
+	if (!input.length) throw Error("index file is not detected");
+	if (typeCheck) await logger.start("Check TypeScript", async () => {
+		const { resolve, reject, promise } = Promise.withResolvers();
+		spawn("tsc", ["--noEmit"], {
+			stdio: "inherit",
+			shell: true
+		}).on("close", (code) => {
+			if (code) reject();
+			else resolve(void 0);
+		});
+		await promise;
+	});
+	if (lintCheck) await logger.start("Check ESLint", async () => {
+		const { resolve, reject, promise } = Promise.withResolvers();
+		spawn("eslint", ["src"], {
+			stdio: "inherit",
+			shell: true
+		}).on("close", (code) => {
+			if (code) reject();
+			else resolve(void 0);
+		});
+		await promise;
+	});
+	await logger.start("Remove build", () => fs.remove(params.buildFolder));
+	const pkg = node && await instance.getPackage();
+	const plugins = [env(instance.params.envPrefix, {
+		include: input,
+		virtual: true
+	})];
+	const options = {
+		input,
+		preserveEntrySignatures: "strict",
+		plugins
+	};
+	const outputOptions = {
+		dir: params.buildFolder,
+		sourcemap: params.sourcemap
+	};
+	if (node) {
+		outputOptions.format = "cjs";
+		options.external = Object.keys(pkg?.dependencies || {});
+		plugins.push(string({
+			include: "**/*.*",
+			exclude: stringExcludeNode
+		}));
+	} else {
+		plugins.push(polyfill(), importAssets({
+			include: imageInclude.map((img) => `src/${img}`),
+			publicPath: params.baseUrl
+		}), styles({
+			mode: params.cssInJs ? "inject" : "extract",
+			url: {
+				inline: false,
+				publicPath: `${params.baseUrl}assets`
+			},
+			sass: {
+				outputStyle: "compressed",
+				silenceDeprecations: ["legacy-js-api"]
+			},
+			plugins: [autoprefixer()],
+			autoModules: params.cssModules ? (id) => !id.includes(".global.") : true,
+			sourceMap: params.sourcemap,
+			minimize: true
+		}), string({
+			include: "**/*.*",
+			exclude: stringExcludeDom
+		}));
+		outputOptions.format = "es";
+		outputOptions.plugins = [terser(), filesize({ reporter })];
+	}
+	await logger.start("Build production bundle", async () => {
+		const bundle = await rolldown(options);
+		await bundle.write(outputOptions);
+		await bundle.close();
+		if (!node) {
+			await copyFiles(params.publicFolder, params.buildFolder);
+			const data = await promises$1.readFile(params.publicIndexFile);
+			const pkg = await instance.getPackage();
+			await promises$1.writeFile(params.buildIndexFile, await convertIndexFile(data, pkg.version, params.baseUrl, path.parse(input[0]).name, inject));
+		}
+	});
+	if (pkg) {
+		await logger.start("Copy package.json", async () => {
+			const data = { ...pkg };
+			delete data.private;
+			delete data.devDependencies;
+			await fs.writeFile(path.resolve(params.buildFolder, "package.json"), JSON.stringify(data, void 0, 2), "UTF-8");
+		});
+		const pkgLockPath = path.resolve(params.projectFolder, "package-lock.json");
+		if (fs.existsSync(pkgLockPath)) await logger.start("Copy package-lock.json", () => {
+			return fs.copy(pkgLockPath, path.resolve(params.buildFolder, "package-lock.json"));
+		});
+	}
 }
-
+//#endregion
 export { build };

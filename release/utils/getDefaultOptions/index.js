@@ -1,9 +1,2 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-var getDefaultOptions = require('./getDefaultOptions.js');
-
-
-
-exports.getDefaultOptions = getDefaultOptions.getDefaultOptions;
+const require_getDefaultOptions = require("./getDefaultOptions.js");
+exports.getDefaultOptions = require_getDefaultOptions.getDefaultOptions;

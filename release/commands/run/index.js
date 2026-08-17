@@ -1,9 +1,2 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-var run = require('./run.js');
-
-
-
-exports.run = run.run;
+const require_run = require("./run.js");
+exports.run = require_run.run;

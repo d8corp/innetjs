@@ -1,79 +1,57 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-var tslib = require('tslib');
-var logger = require('@cantinc/logger');
-var node_child_process = require('node:child_process');
-var rolldown = require('rolldown');
-var tmp = require('tmp');
-var helpers = require('../../helpers.js');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
-
-function run(file_1) {
-    return tslib.__awaiter(this, arguments, void 0, function* (file, { config = '', exposeGc = false, typeCheck } = {}) {
-        const input = yield logger.logger.start('Check file', () => helpers.getFile(file));
-        if (!input.length) {
-            throw Error('index file is not detected');
-        }
-        if (typeCheck) {
-            yield logger.logger.start('Check TypeScript', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                const { resolve, reject, promise } = Promise.withResolvers();
-                const params = ['--noEmit'];
-                if (config) {
-                    params.push('-p', config);
-                }
-                const process = node_child_process.spawn('tsc', params, {
-                    stdio: 'inherit',
-                    shell: true,
-                });
-                process.on('close', (code) => {
-                    if (code) {
-                        reject();
-                    }
-                    else {
-                        resolve(undefined);
-                    }
-                });
-                yield promise;
-            }));
-        }
-        const folder = yield new Promise((resolve, reject) => {
-            tmp__default["default"].dir((err, folder) => {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve(folder);
-                }
-            });
-        });
-        const jsFilePath = `${folder}/index.js`;
-        yield logger.logger.start('Build bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
-            const inputOptions = {
-                input,
-                plugins: [],
-            };
-            const outputOptions = {
-                format: 'cjs',
-                file: jsFilePath,
-                sourcemap: true,
-            };
-            const bundle = yield rolldown.rolldown(inputOptions);
-            yield bundle.write(outputOptions);
-            yield bundle.close();
-        }));
-        yield logger.logger.start('Running of the script', () => tslib.__awaiter(this, void 0, void 0, function* () {
-            const flags = [];
-            if (exposeGc) {
-                flags.push('--expose-gc');
-            }
-            node_child_process.spawn('node', [...flags, '-r', 'source-map-support/register', jsFilePath], { stdio: 'inherit' });
-        }));
-    });
+const require_runtime = require("../../_virtual/_rolldown/runtime.js");
+const require_helpers = require("../../helpers.js");
+let _cantinc_logger = require("@cantinc/logger");
+let node_child_process = require("node:child_process");
+let rolldown = require("rolldown");
+let tmp = require("tmp");
+tmp = require_runtime.__toESM(tmp);
+//#region src/commands/run/run.ts
+async function run(file, { config = "", exposeGc = false, typeCheck } = {}) {
+	const input = await _cantinc_logger.logger.start("Check file", () => require_helpers.getFile(file));
+	if (!input.length) throw Error("index file is not detected");
+	if (typeCheck) await _cantinc_logger.logger.start("Check TypeScript", async () => {
+		const { resolve, reject, promise } = Promise.withResolvers();
+		const params = ["--noEmit"];
+		if (config) params.push("-p", config);
+		(0, node_child_process.spawn)("tsc", params, {
+			stdio: "inherit",
+			shell: true
+		}).on("close", (code) => {
+			if (code) reject();
+			else resolve(void 0);
+		});
+		await promise;
+	});
+	const jsFilePath = `${await new Promise((resolve, reject) => {
+		tmp.default.dir((err, folder) => {
+			if (err) reject(err);
+			else resolve(folder);
+		});
+	})}/index.js`;
+	await _cantinc_logger.logger.start("Build bundle", async () => {
+		const inputOptions = {
+			input,
+			plugins: []
+		};
+		const outputOptions = {
+			format: "cjs",
+			file: jsFilePath,
+			sourcemap: true
+		};
+		const bundle = await (0, rolldown.rolldown)(inputOptions);
+		await bundle.write(outputOptions);
+		await bundle.close();
+	});
+	await _cantinc_logger.logger.start("Running of the script", async () => {
+		const flags = [];
+		if (exposeGc) flags.push("--expose-gc");
+		(0, node_child_process.spawn)("node", [
+			...flags,
+			"-r",
+			"source-map-support/register",
+			jsFilePath
+		], { stdio: "inherit" });
+	});
 }
-
+//#endregion
 exports.run = run;

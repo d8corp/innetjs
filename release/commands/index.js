@@ -1,8 +1,17 @@
-'use strict';
-
-require('./build/index.js');
-require('./init/index.js');
-require('./release/index.js');
-require('./run/index.js');
-require('./start/index.js');
-
+const require_build = require("./build/build.js");
+require("./build/index.js");
+const require_init = require("./init/init.js");
+require("./init/index.js");
+const require_release = require("./release/release.js");
+require("./release/index.js");
+const require_run = require("./run/run.js");
+require("./run/index.js");
+const require_start = require("./start/start.js");
+require("./start/index.js");
+exports.build = require_build.build;
+exports.init = require_init.init;
+exports.lintCheckWatchPlugin = require_start.lintCheckWatchPlugin;
+exports.release = require_release.release;
+exports.run = require_run.run;
+exports.start = require_start.start;
+exports.typecheckWatchPlugin = require_start.typecheckWatchPlugin;

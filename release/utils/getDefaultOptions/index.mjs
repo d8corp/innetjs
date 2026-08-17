@@ -1,1 +1,2 @@
-export { getDefaultOptions } from './getDefaultOptions.mjs';
+import { getDefaultOptions } from "./getDefaultOptions.mjs";
+export { getDefaultOptions };

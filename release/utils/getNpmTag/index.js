@@ -1,9 +1,2 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-var getNpmTag = require('./getNpmTag.js');
-
-
-
-exports.getNpmTag = getNpmTag.getNpmTag;
+const require_getNpmTag = require("./getNpmTag.js");
+exports.getNpmTag = require_getNpmTag.getNpmTag;
