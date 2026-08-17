@@ -24,28 +24,6 @@ const execAsync = promisify(exec);
 function release(_a, instance_1) {
     return __awaiter(this, arguments, void 0, function* ({ index = 'index', pub, min, typeCheck, lintCheck }, instance) {
         const { releaseFolder, cssModules } = instance.params;
-        if (typeCheck) {
-            yield logger.start('Check TypeScript', () => __awaiter(this, void 0, void 0, function* () {
-                const { resolve, reject, promise } = Promise.withResolvers();
-                const params = ['--emitDeclarationOnly'];
-                if (instance.params.tsconfig) {
-                    params.push('-p', instance.params.tsconfig);
-                }
-                const process = spawn('tsc', params, {
-                    stdio: 'inherit',
-                    shell: true,
-                });
-                process.on('close', (code) => {
-                    if (code) {
-                        reject();
-                    }
-                    else {
-                        resolve(undefined);
-                    }
-                });
-                yield promise;
-            }));
-        }
         if (lintCheck) {
             yield logger.start('Check ESLint', () => __awaiter(this, void 0, void 0, function* () {
                 const { resolve, reject, promise } = Promise.withResolvers();
@@ -65,6 +43,28 @@ function release(_a, instance_1) {
             }));
         }
         yield logger.start('Remove previous release', () => fs.remove(releaseFolder));
+        if (typeCheck) {
+            yield logger.start('Check TypeScript', () => __awaiter(this, void 0, void 0, function* () {
+                const { resolve, reject, promise } = Promise.withResolvers();
+                const params = ['--emitDeclarationOnly', '--outDir', releaseFolder];
+                if (instance.params.tsconfig) {
+                    params.push('-p', instance.params.tsconfig);
+                }
+                const process = spawn('tsc', params, {
+                    stdio: 'inherit',
+                    shell: true,
+                });
+                process.on('close', (code) => {
+                    if (code) {
+                        reject();
+                    }
+                    else {
+                        resolve(undefined);
+                    }
+                });
+                yield promise;
+            }));
+        }
         const pkg = yield instance.getPackage();
         const build = (format) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b;

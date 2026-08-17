@@ -26,33 +26,6 @@ const execAsync = promisify(exec)
 export async function release ({ index = 'index', pub, min, typeCheck, lintCheck }: ReleaseOptions, instance: InnetJS) {
   const { releaseFolder, cssModules } = instance.params
 
-  if (typeCheck) {
-    await logger.start('Check TypeScript', async () => {
-      const { resolve, reject, promise } = Promise.withResolvers()
-
-      const params = ['--emitDeclarationOnly']
-
-      if (instance.params.tsconfig) {
-        params.push('-p', instance.params.tsconfig)
-      }
-
-      const process = spawn('tsc', params, {
-        stdio: 'inherit',
-        shell: true,
-      })
-
-      process.on('close', (code: number) => {
-        if (code) {
-          reject()
-        } else {
-          resolve(undefined)
-        }
-      })
-
-      await promise
-    })
-  }
-
   if (lintCheck) {
     await logger.start('Check ESLint', async () => {
       const { resolve, reject, promise } = Promise.withResolvers()
@@ -75,6 +48,33 @@ export async function release ({ index = 'index', pub, min, typeCheck, lintCheck
   }
 
   await logger.start('Remove previous release', () => fs.remove(releaseFolder))
+
+  if (typeCheck) {
+    await logger.start('Check TypeScript', async () => {
+      const { resolve, reject, promise } = Promise.withResolvers()
+
+      const params = ['--emitDeclarationOnly', '--outDir', releaseFolder]
+
+      if (instance.params.tsconfig) {
+        params.push('-p', instance.params.tsconfig)
+      }
+
+      const process = spawn('tsc', params, {
+        stdio: 'inherit',
+        shell: true,
+      })
+
+      process.on('close', (code: number) => {
+        if (code) {
+          reject()
+        } else {
+          resolve(undefined)
+        }
+      })
+
+      await promise
+    })
+  }
 
   const pkg = await instance.getPackage()
 

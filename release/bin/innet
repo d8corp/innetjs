@@ -448,28 +448,6 @@ const execAsync = node_util.promisify(node_child_process.exec);
 function release(_a, instance_1) {
     return tslib.__awaiter(this, arguments, void 0, function* ({ index = 'index', pub, min, typeCheck, lintCheck }, instance) {
         const { releaseFolder, cssModules } = instance.params;
-        if (typeCheck) {
-            yield logger.logger.start('Check TypeScript', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                const { resolve, reject, promise } = Promise.withResolvers();
-                const params = ['--emitDeclarationOnly'];
-                if (instance.params.tsconfig) {
-                    params.push('-p', instance.params.tsconfig);
-                }
-                const process = node_child_process.spawn('tsc', params, {
-                    stdio: 'inherit',
-                    shell: true,
-                });
-                process.on('close', (code) => {
-                    if (code) {
-                        reject();
-                    }
-                    else {
-                        resolve(undefined);
-                    }
-                });
-                yield promise;
-            }));
-        }
         if (lintCheck) {
             yield logger.logger.start('Check ESLint', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 const { resolve, reject, promise } = Promise.withResolvers();
@@ -489,6 +467,28 @@ function release(_a, instance_1) {
             }));
         }
         yield logger.logger.start('Remove previous release', () => fs__default["default"].remove(releaseFolder));
+        if (typeCheck) {
+            yield logger.logger.start('Check TypeScript', () => tslib.__awaiter(this, void 0, void 0, function* () {
+                const { resolve, reject, promise } = Promise.withResolvers();
+                const params = ['--emitDeclarationOnly', '--outDir', releaseFolder];
+                if (instance.params.tsconfig) {
+                    params.push('-p', instance.params.tsconfig);
+                }
+                const process = node_child_process.spawn('tsc', params, {
+                    stdio: 'inherit',
+                    shell: true,
+                });
+                process.on('close', (code) => {
+                    if (code) {
+                        reject();
+                    }
+                    else {
+                        resolve(undefined);
+                    }
+                });
+                yield promise;
+            }));
+        }
         const pkg = yield instance.getPackage();
         const build = (format) => tslib.__awaiter(this, void 0, void 0, function* () {
             var _a, _b;
@@ -960,7 +960,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"4.0.0-alpha.16"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"4.0.0-alpha.17"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {
