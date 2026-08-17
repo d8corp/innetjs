@@ -1,5 +1,5 @@
 import { __awaiter } from 'tslib';
-import logger from '@cantinc/logger';
+import { logger } from '@cantinc/logger';
 import Zip from 'adm-zip';
 import axios from 'axios';
 import chalk from 'chalk';

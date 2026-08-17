@@ -18,11 +18,9 @@ import {
 } from '../constants'
 import { convertIndexFile } from '../helpers'
 import { BuildOptions, InitOptions, InnetJSParams, ReleaseOptions, RunOptions, StartOptions } from '../types'
-import { getDefaultOptions, printErrorWithFrame, updateDotenv } from '../utils'
+import { getDefaultOptions, printErrorWithFrame } from '../utils'
 
 const { spawn } = require('child_process')
-
-updateDotenv()
 
 export class InnetJS {
   params: Required<InnetJSParams>

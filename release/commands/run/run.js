@@ -14,7 +14,6 @@ var helpers = require('../../helpers.js');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-var logger__default = /*#__PURE__*/_interopDefaultLegacy(logger);
 var commonjs__default = /*#__PURE__*/_interopDefaultLegacy(commonjs);
 var json__default = /*#__PURE__*/_interopDefaultLegacy(json);
 var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
@@ -24,7 +23,7 @@ var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
 const { spawn } = require('child_process');
 function run(file, { config = '', exposeGc = false } = {}) {
     return tslib.__awaiter(this, void 0, void 0, function* () {
-        const input = yield logger__default["default"].start('Check file', () => helpers.getFile(file));
+        const input = yield logger.logger.start('Check file', () => helpers.getFile(file));
         const folder = yield new Promise((resolve, reject) => {
             tmp__default["default"].dir((err, folder) => {
                 if (err) {
@@ -36,7 +35,7 @@ function run(file, { config = '', exposeGc = false } = {}) {
             });
         });
         const jsFilePath = `${folder}/index.js`;
-        yield logger__default["default"].start('Build bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
+        yield logger.logger.start('Build bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
             const inputOptions = {
                 input,
                 plugins: [
@@ -61,7 +60,7 @@ function run(file, { config = '', exposeGc = false } = {}) {
             yield bundle.write(outputOptions);
             yield bundle.close();
         }));
-        yield logger__default["default"].start('Running of the script', () => tslib.__awaiter(this, void 0, void 0, function* () {
+        yield logger.logger.start('Running of the script', () => tslib.__awaiter(this, void 0, void 0, function* () {
             const flags = [];
             if (exposeGc) {
                 flags.push('--expose-gc');

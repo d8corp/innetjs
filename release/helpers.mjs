@@ -1,5 +1,5 @@
 import { __awaiter } from 'tslib';
-import logger from '@cantinc/logger';
+import { logger } from '@cantinc/logger';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'node:path';

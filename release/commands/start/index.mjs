@@ -1,1 +1,1 @@
-export { start } from './start.mjs';
+export { start, typecheckWatchPlugin } from './start.mjs';

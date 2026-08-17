@@ -1,5 +1,5 @@
 import { __awaiter } from 'tslib';
-import logger from '@cantinc/logger';
+import { logger } from '@cantinc/logger';
 import eslint from '@rollup/plugin-eslint';
 import address from 'address';
 import chalk from 'chalk';
@@ -15,7 +15,6 @@ import '../commands/index.mjs';
 import { lintInclude } from '../constants.mjs';
 import { convertIndexFile } from '../helpers.mjs';
 import '../utils/index.mjs';
-import { updateDotenv } from '../utils/updateDotenv/updateDotenv.mjs';
 import { getDefaultOptions } from '../utils/getDefaultOptions/getDefaultOptions.mjs';
 import { init } from '../commands/init/init.mjs';
 import { build } from '../commands/build/build.mjs';
@@ -25,7 +24,6 @@ import { release } from '../commands/release/release.mjs';
 import { printErrorWithFrame } from '../utils/printErrorWithFrame/printErrorWithFrame.mjs';
 
 const { spawn } = require('child_process');
-updateDotenv();
 class InnetJS {
     constructor(options = {}) {
         this.params = getDefaultOptions(options);
@@ -153,7 +151,7 @@ class InnetJS {
                     let port = this.params.port;
                     const listener = () => {
                         const baseUrl = this.params.baseUrl === '/' ? '' : this.params.baseUrl;
-                        console.log(`${chalk.green('➤')} Started on http${httpsUsing ? 's' : ''}://localhost:${port}${baseUrl} and http${httpsUsing ? 's' : ''}://${address.ip()}:${port}${baseUrl}`);
+                        logger.log(`${chalk.green('➤')} Started on http${httpsUsing ? 's' : ''}://localhost:${port}${baseUrl} and http${httpsUsing ? 's' : ''}://${address.ip()}:${port}${baseUrl}`);
                     };
                     server.listen(port, listener);
                     server.on('error', (e) => __awaiter(this, void 0, void 0, function* () {

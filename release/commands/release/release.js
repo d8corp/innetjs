@@ -28,7 +28,6 @@ var getNpmTag = require('../../utils/getNpmTag/getNpmTag.js');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-var logger__default = /*#__PURE__*/_interopDefaultLegacy(logger);
 var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 var rollup__default = /*#__PURE__*/_interopDefaultLegacy(rollup);
 var glob__default = /*#__PURE__*/_interopDefaultLegacy(glob);
@@ -47,7 +46,7 @@ const execAsync = node_util.promisify(exec);
 function release({ index = 'index', pub, min }, instance) {
     return tslib.__awaiter(this, void 0, void 0, function* () {
         const { releaseFolder, cssModules } = instance.params;
-        yield logger__default["default"].start('Remove previous release', () => fs__default["default"].remove(releaseFolder));
+        yield logger.logger.start('Remove previous release', () => fs__default["default"].remove(releaseFolder));
         const pkg = yield instance.getPackage();
         const build = (format) => tslib.__awaiter(this, void 0, void 0, function* () {
             var _a, _b;
@@ -120,28 +119,28 @@ function release({ index = 'index', pub, min }, instance) {
             yield bundle.close();
         });
         if (!pkg.type || pkg.type === 'commonjs') {
-            yield logger__default["default"].start('Build cjs bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Build cjs bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 yield build('cjs');
             }));
         }
         if (!pkg.type || pkg.type === 'module') {
-            yield logger__default["default"].start('Build es6 bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Build es6 bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 yield build('es');
             }));
         }
         if (min) {
-            yield logger__default["default"].start('Build min bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Build min bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 yield build('iife');
             }));
         }
-        yield logger__default["default"].start('Copy package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
+        yield logger.logger.start('Copy package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
             const data = Object.assign({}, pkg);
             delete data.private;
             delete data.devDependencies;
             fs__default["default"].writeFile(path__default["default"].resolve(instance.params.releaseFolder, 'package.json'), JSON.stringify(data, undefined, 2), 'UTF-8');
         }));
         if (pkg.bin) {
-            yield logger__default["default"].start('Build bin', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Build bin', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 const { bin, type } = pkg;
                 for (const name in bin) {
                     const value = bin[name];
@@ -175,23 +174,23 @@ function release({ index = 'index', pub, min }, instance) {
             }));
         }
         if (fs__default["default"].existsSync(instance.params.licenseFile)) {
-            yield logger__default["default"].start('Copy license', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Copy license', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 yield node_fs.promises.copyFile(instance.params.licenseFile, instance.params.licenseReleaseFile);
             }));
         }
         if (fs__default["default"].existsSync(instance.params.readmeFile)) {
-            yield logger__default["default"].start('Copy readme', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Copy readme', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 yield node_fs.promises.copyFile(instance.params.readmeFile, instance.params.readmeReleaseFile);
             }));
         }
         if (fs__default["default"].existsSync(instance.params.declarationFile)) {
-            yield logger__default["default"].start('Copy declaration', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Copy declaration', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 yield node_fs.promises.copyFile(instance.params.declarationFile, instance.params.declarationReleaseFile);
             }));
         }
         if (pub) {
             const date = (Date.now() / 1000) | 0;
-            yield logger__default["default"].start(`publishing v${pkg.version} ${date}`, () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start(`publishing v${pkg.version} ${date}`, () => tslib.__awaiter(this, void 0, void 0, function* () {
                 yield execAsync(`npm publish ${instance.params.releaseFolder} --tag ${getNpmTag.getNpmTag(pkg.version)}`);
             }));
         }

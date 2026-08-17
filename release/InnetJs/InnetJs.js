@@ -19,7 +19,6 @@ require('../commands/index.js');
 var constants = require('../constants.js');
 var helpers = require('../helpers.js');
 require('../utils/index.js');
-var updateDotenv = require('../utils/updateDotenv/updateDotenv.js');
 var getDefaultOptions = require('../utils/getDefaultOptions/getDefaultOptions.js');
 var init = require('../commands/init/init.js');
 var build = require('../commands/build/build.js');
@@ -30,7 +29,6 @@ var printErrorWithFrame = require('../utils/printErrorWithFrame/printErrorWithFr
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-var logger__default = /*#__PURE__*/_interopDefaultLegacy(logger);
 var eslint__default = /*#__PURE__*/_interopDefaultLegacy(eslint);
 var address__default = /*#__PURE__*/_interopDefaultLegacy(address);
 var chalk__default = /*#__PURE__*/_interopDefaultLegacy(chalk);
@@ -44,7 +42,6 @@ var prompt__default = /*#__PURE__*/_interopDefaultLegacy(prompt);
 var env__default = /*#__PURE__*/_interopDefaultLegacy(env);
 
 const { spawn } = require('child_process');
-updateDotenv.updateDotenv();
 class InnetJS {
     constructor(options = {}) {
         this.params = getDefaultOptions.getDefaultOptions(options);
@@ -96,7 +93,7 @@ class InnetJS {
     increaseVersion(release) {
         return tslib.__awaiter(this, void 0, void 0, function* () {
             const pkg = yield this.getPackage();
-            yield logger__default["default"].start('Prepare package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Prepare package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 const version = pkg.version.split('.');
                 switch (release) {
                     case 'patch': {
@@ -127,7 +124,7 @@ class InnetJS {
                 return this.package;
             }
             const packageFolder = path__default["default"].resolve(this.params.projectFolder, 'package.json');
-            yield logger__default["default"].start('Check package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Check package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 if (fs__default["default"].existsSync(packageFolder)) {
                     this.package = yield fs__default["default"].readJson(packageFolder);
                 }
@@ -172,7 +169,7 @@ class InnetJS {
                     let port = this.params.port;
                     const listener = () => {
                         const baseUrl = this.params.baseUrl === '/' ? '' : this.params.baseUrl;
-                        console.log(`${chalk__default["default"].green('➤')} Started on http${httpsUsing ? 's' : ''}://localhost:${port}${baseUrl} and http${httpsUsing ? 's' : ''}://${address__default["default"].ip()}:${port}${baseUrl}`);
+                        logger.logger.log(`${chalk__default["default"].green('➤')} Started on http${httpsUsing ? 's' : ''}://localhost:${port}${baseUrl} and http${httpsUsing ? 's' : ''}://${address__default["default"].ip()}:${port}${baseUrl}`);
                     };
                     server.listen(port, listener);
                     server.on('error', (e) => tslib.__awaiter(this, void 0, void 0, function* () {

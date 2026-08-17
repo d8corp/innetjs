@@ -1,5 +1,5 @@
 import { __awaiter } from 'tslib';
-import logger from '@cantinc/logger';
+import { logger } from '@cantinc/logger';
 import fs from 'fs-extra';
 import rollup from 'rollup';
 import { string } from 'rollup-plugin-string';

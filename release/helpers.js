@@ -10,7 +10,6 @@ var path = require('node:path');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-var logger__default = /*#__PURE__*/_interopDefaultLegacy(logger);
 var chalk__default = /*#__PURE__*/_interopDefaultLegacy(chalk);
 var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
@@ -50,7 +49,7 @@ function convertIndexFile(data, version, baseUrl, index, inject) {
     });
 }
 const reporter = (options, outputOptions, info) => {
-    logger__default["default"].log(`${chalk__default["default"].yellow(info.fileName)} ${chalk__default["default"].green(info.bundleSize)} [ gzip: ${chalk__default["default"].green(info.gzipSize)} ]`);
+    logger.logger.log(`${chalk__default["default"].yellow(info.fileName)} ${chalk__default["default"].green(info.bundleSize)} [ gzip: ${chalk__default["default"].green(info.gzipSize)} ]`);
     return '';
 };
 

@@ -27,7 +27,6 @@ var helpers = require('../../helpers.js');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-var logger__default = /*#__PURE__*/_interopDefaultLegacy(logger);
 var commonjs__default = /*#__PURE__*/_interopDefaultLegacy(commonjs);
 var json__default = /*#__PURE__*/_interopDefaultLegacy(json);
 var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
@@ -50,15 +49,13 @@ function build({ node = false, inject = false, index = 'index' }, instance) {
         if (!input.length) {
             throw Error('index file is not detected');
         }
-        yield logger__default["default"].start('Remove build', () => fs__default["default"].remove(params.buildFolder));
+        yield logger.logger.start('Remove build', () => fs__default["default"].remove(params.buildFolder));
         const pkg = node && (yield instance.getPackage());
         const options = {
             input,
             preserveEntrySignatures: 'strict',
             plugins: [
-                commonjs__default["default"]({
-                    transformMixedEsModules: !node,
-                }),
+                commonjs__default["default"](),
                 json__default["default"](),
                 ts__default["default"]({
                     noEmitOnError: true,
@@ -119,7 +116,7 @@ function build({ node = false, inject = false, index = 'index' }, instance) {
             ];
         }
         instance.withEnv(options, true);
-        yield logger__default["default"].start('Build production bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
+        yield logger.logger.start('Build production bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
             const bundle = yield rollup__default["default"].rollup(options);
             yield bundle.write(outputOptions);
             yield bundle.close();
@@ -131,7 +128,7 @@ function build({ node = false, inject = false, index = 'index' }, instance) {
             }
         }));
         if (pkg) {
-            yield logger__default["default"].start('Copy package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Copy package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 const data = Object.assign({}, pkg);
                 delete data.private;
                 delete data.devDependencies;
@@ -139,7 +136,7 @@ function build({ node = false, inject = false, index = 'index' }, instance) {
             }));
             const pkgLockPath = path__default["default"].resolve(params.projectFolder, 'package-lock.json');
             if (fs__default["default"].existsSync(pkgLockPath)) {
-                yield logger__default["default"].start('Copy package-lock.json', () => {
+                yield logger.logger.start('Copy package-lock.json', () => {
                     return fs__default["default"].copy(pkgLockPath, path__default["default"].resolve(params.buildFolder, 'package-lock.json'));
                 });
             }

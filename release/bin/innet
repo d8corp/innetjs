@@ -38,7 +38,7 @@ var polyfill = require('rollup-plugin-polyfill-node');
 var rollupPluginString = require('rollup-plugin-string');
 var styles = require('rollup-plugin-styles');
 var rollupPluginTerser = require('rollup-plugin-terser');
-var linesAndColumns = require('lines-and-columns');
+var rolldown = require('rolldown');
 var livereload = require('rollup-plugin-livereload');
 var tmp = require('tmp');
 var externals = require('rollup-plugin-node-externals');
@@ -49,7 +49,6 @@ var codeFrame = require('@babel/code-frame');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-var logger__default = /*#__PURE__*/_interopDefaultLegacy(logger);
 var eslint__default = /*#__PURE__*/_interopDefaultLegacy(eslint);
 var address__default = /*#__PURE__*/_interopDefaultLegacy(address);
 var chalk__default = /*#__PURE__*/_interopDefaultLegacy(chalk);
@@ -88,28 +87,28 @@ const pipeline = node_util.promisify(stream__default["default"].pipeline);
 function init(appName, { template, force = false } = {}) {
     return tslib.__awaiter(this, void 0, void 0, function* () {
         const appPath = path__default["default"].resolve(appName);
-        const { data } = yield logger__default["default"].start('Get templates list', () => tslib.__awaiter(this, void 0, void 0, function* () { return yield axios__default["default"].get('https://api.github.com/repos/d8corp/innetjs-templates/branches'); }));
+        const { data } = yield logger.logger.start('Get templates list', () => tslib.__awaiter(this, void 0, void 0, function* () { return yield axios__default["default"].get('https://api.github.com/repos/d8corp/innetjs-templates/branches'); }));
         const templates = data.map(({ name }) => name).filter((name) => name !== 'main');
         if (!template || !templates.includes(template)) {
-            logger__default["default"].log(chalk__default["default"].green('Select one of those templates'));
+            logger.logger.log(chalk__default["default"].green('Select one of those templates'));
             const { value } = yield selector__default["default"]({
                 values: templates,
             });
             template = value;
             readline__default["default"].moveCursor(process.stdout, 0, -1);
             const text = `Selected template: ${chalk__default["default"].white(value)}`;
-            logger__default["default"].start(text);
-            logger__default["default"].end(text);
+            logger.logger.start(text);
+            logger.logger.end(text);
         }
         if (!force) {
-            yield logger__default["default"].start('Check if app folder is available', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Check if app folder is available', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 if (fs__default["default"].existsSync(appPath)) {
-                    logger__default["default"].log(chalk__default["default"].red(`'${appPath}' already exist, what do you want?`));
+                    logger.logger.log(chalk__default["default"].red(`'${appPath}' already exist, what do you want?`));
                     const { id: result, value } = yield selector__default["default"]({
                         values: ['Stop the process', 'Remove the folder', 'Merge with template'],
                     });
                     readline__default["default"].moveCursor(process.stdout, 0, -1);
-                    logger__default["default"].log(`Already exist, selected: ${value}`);
+                    logger.logger.log(`Already exist, selected: ${value}`);
                     if (!result) {
                         throw Error(`'${appPath}' already exist`);
                     }
@@ -119,7 +118,7 @@ function init(appName, { template, force = false } = {}) {
                 }
             }));
         }
-        yield logger__default["default"].start('Download template', () => tslib.__awaiter(this, void 0, void 0, function* () {
+        yield logger.logger.start('Download template', () => tslib.__awaiter(this, void 0, void 0, function* () {
             const tmpPath = node_os.tmpdir();
             const zipPath = path__default["default"].join(tmpPath, 'template.zip');
             const unzipPath = path__default["default"].join(tmpPath, `innetjs-templates-${template}`);
@@ -141,13 +140,11 @@ function init(appName, { template, force = false } = {}) {
             yield fs__default["default"].remove(zipPath);
             yield fs__default["default"].move(unzipPath, appPath, { overwrite: true });
         }));
-        yield logger__default["default"].start('Install packages', () => execAsync$1(`cd ${appPath} && npm i`));
+        yield logger.logger.start('Install packages', () => execAsync$1(`cd ${appPath} && npm i`));
     });
 }
 
 const SCRIPT_EXTENSIONS = ['ts', 'js', 'tsx', 'jsx'];
-const REG_CLEAR_TEXT = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
-const REG_RPT_ERROR_FILE = /(src[^:]+):(\d+):(\d+)/;
 const REG_TJSX = /\.[tj]sx?$/;
 const REG_EXT = /\.([^.]+)$/;
 const NPM_TAG = /-(.+?)(?:\.|$)/;
@@ -214,7 +211,7 @@ function convertIndexFile(data, version, baseUrl, index, inject) {
     });
 }
 const reporter = (options, outputOptions, info) => {
-    logger__default["default"].log(`${chalk__default["default"].yellow(info.fileName)} ${chalk__default["default"].green(info.bundleSize)} [ gzip: ${chalk__default["default"].green(info.gzipSize)} ]`);
+    logger.logger.log(`${chalk__default["default"].yellow(info.fileName)} ${chalk__default["default"].green(info.bundleSize)} [ gzip: ${chalk__default["default"].green(info.gzipSize)} ]`);
     return '';
 };
 
@@ -226,15 +223,13 @@ function build({ node = false, inject = false, index = 'index' }, instance) {
         if (!input.length) {
             throw Error('index file is not detected');
         }
-        yield logger__default["default"].start('Remove build', () => fs__default["default"].remove(params.buildFolder));
+        yield logger.logger.start('Remove build', () => fs__default["default"].remove(params.buildFolder));
         const pkg = node && (yield instance.getPackage());
         const options = {
             input,
             preserveEntrySignatures: 'strict',
             plugins: [
-                commonjs__default["default"]({
-                    transformMixedEsModules: !node,
-                }),
+                commonjs__default["default"](),
                 json__default["default"](),
                 ts__default["default"]({
                     noEmitOnError: true,
@@ -295,7 +290,7 @@ function build({ node = false, inject = false, index = 'index' }, instance) {
             ];
         }
         instance.withEnv(options, true);
-        yield logger__default["default"].start('Build production bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
+        yield logger.logger.start('Build production bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
             const bundle = yield rollup__default["default"].rollup(options);
             yield bundle.write(outputOptions);
             yield bundle.close();
@@ -307,7 +302,7 @@ function build({ node = false, inject = false, index = 'index' }, instance) {
             }
         }));
         if (pkg) {
-            yield logger__default["default"].start('Copy package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Copy package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 const data = Object.assign({}, pkg);
                 delete data.private;
                 delete data.devDependencies;
@@ -315,7 +310,7 @@ function build({ node = false, inject = false, index = 'index' }, instance) {
             }));
             const pkgLockPath = path__default["default"].resolve(params.projectFolder, 'package-lock.json');
             if (fs__default["default"].existsSync(pkgLockPath)) {
-                yield logger__default["default"].start('Copy package-lock.json', () => {
+                yield logger.logger.start('Copy package-lock.json', () => {
                     return fs__default["default"].copy(pkgLockPath, path__default["default"].resolve(params.buildFolder, 'package-lock.json'));
                 });
             }
@@ -323,6 +318,26 @@ function build({ node = false, inject = false, index = 'index' }, instance) {
     });
 }
 
+function typecheckWatchPlugin() {
+    let tscProcess = null;
+    return {
+        name: 'typecheck-watch',
+        buildEnd() {
+            if (tscProcess) {
+                logger.logger.end('Check TypeScript');
+                tscProcess.kill();
+            }
+            logger.logger.start('Check TypeScript');
+            tscProcess = node_child_process.spawn('tsc', ['--noEmit'], {
+                stdio: 'inherit',
+                shell: true,
+            });
+            tscProcess.on('close', () => {
+                logger.logger.end('Check TypeScript');
+            });
+        },
+    };
+}
 function start({ node = false, inject = false, error = false, usualConsoleOutput = false, index = 'index', }, instance) {
     return tslib.__awaiter(this, void 0, void 0, function* () {
         const params = instance.params;
@@ -331,7 +346,8 @@ function start({ node = false, inject = false, error = false, usualConsoleOutput
         if (!input.length) {
             throw Error('index file is not detected');
         }
-        yield logger__default["default"].start('Remove build', () => fs__default["default"].remove(params.devBuildFolder));
+        yield logger.logger.start('Remove build', () => fs__default["default"].remove(params.devBuildFolder));
+        const plugins = [];
         const options = {
             input,
             preserveEntrySignatures: 'strict',
@@ -339,34 +355,7 @@ function start({ node = false, inject = false, error = false, usualConsoleOutput
                 dir: params.devBuildFolder,
                 sourcemap: true,
             },
-            plugins: [
-                commonjs__default["default"]({
-                    transformMixedEsModules: !node,
-                }),
-                json__default["default"](),
-                ts__default["default"]({
-                    compilerOptions: {
-                        declaration: false,
-                        sourceMap: true,
-                    },
-                }),
-                jsx__default["default"](),
-            ],
-            onwarn(warning, warn) {
-                if (warning.code === 'THIS_IS_UNDEFINED' || warning.code === 'SOURCEMAP_ERROR')
-                    return;
-                if (warning.plugin === 'typescript') {
-                    const { loc, frame, message } = warning;
-                    if (loc) {
-                        const { line, column, file } = loc;
-                        console.log(`ERROR in ${file}:${line}:${column}`);
-                    }
-                    console.log(message);
-                    console.log(frame);
-                    return;
-                }
-                warn(warning);
-            },
+            plugins,
         };
         let preset;
         instance.withLint(options);
@@ -375,7 +364,7 @@ function start({ node = false, inject = false, error = false, usualConsoleOutput
             // @ts-expect-error
             options.output.format = 'cjs';
             options.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
-            options.plugins.push(pluginNodeResolve.nodeResolve(), rollupPluginString.string({
+            plugins.push(rollupPluginString.string({
                 include: '**/*.*',
                 exclude: stringExcludeNode,
             }), instance.createServer(input, error, usualConsoleOutput));
@@ -393,9 +382,7 @@ function start({ node = false, inject = false, error = false, usualConsoleOutput
                     : undefined;
             // @ts-expect-error
             options.output.format = 'es';
-            options.plugins.push(pluginNodeResolve.nodeResolve({
-                browser: true,
-            }), polyfill__default["default"](), importAssets__default["default"]({
+            plugins.push(polyfill__default["default"](), importAssets__default["default"]({
                 include: imageInclude.map(img => `src/${img}`),
                 publicPath: params.baseUrl,
             }), styles__default["default"]({
@@ -413,42 +400,19 @@ function start({ node = false, inject = false, error = false, usualConsoleOutput
             }), rollupPluginString.string({
                 include: '**/*.*',
                 exclude: stringExcludeDom,
-            }), instance.createClient(key, cert, pkg, path__default["default"].parse(input[0]).name, inject), livereload__default["default"](Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [params.devBuildFolder, params.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
+            }), instance.createClient(key, cert, pkg, path__default["default"].parse(input[0]).name, inject), typecheckWatchPlugin(), livereload__default["default"](Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [params.devBuildFolder, params.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
         }
         instance.withEnv(options, true, preset);
-        const watcher = rollup__default["default"].watch(options);
+        const watcher = rolldown.watch(options);
         watcher.on('event', (e) => tslib.__awaiter(this, void 0, void 0, function* () {
             if (e.code === 'ERROR') {
-                if (e.error.code === 'UNRESOLVED_IMPORT') {
-                    const [, importer, file] = e.error.message.match(/^Could not resolve '(.+)' from (.+)$/) || [];
-                    const text = (yield fs__default["default"].readFile(file)).toString();
-                    const lines = new linesAndColumns.LinesAndColumns(text);
-                    const { line, column } = lines.locationForIndex(text.indexOf(importer));
-                    logger__default["default"].end('Bundling', e.error.message);
-                    console.log(`ERROR in ${file}:${line + 1}:${column + 1}`);
-                }
-                else if (e.error.code === 'PLUGIN_ERROR' && ['rpt2', 'commonjs', 'typescript'].includes(e.error.plugin)) {
-                    const [, file, line, column] = e.error.message
-                        .replace(REG_CLEAR_TEXT, '')
-                        .match(REG_RPT_ERROR_FILE) || [];
-                    logger__default["default"].end('Bundling', e.error.message);
-                    if (file) {
-                        console.log(`ERROR in ${file}:${line}:${column}`);
-                    }
-                    else if (e.error.loc) {
-                        console.log(`ERROR in ${e.error.loc.file}:${e.error.loc.line}:${e.error.loc.column}`);
-                        console.log(e.error.frame);
-                    }
-                }
-                else {
-                    logger__default["default"].end('Bundling', error ? e.error.stack : e.error.message);
-                }
+                logger.logger.end('Bundling', error ? e.error.stack : e.error.message);
             }
             else if (e.code === 'BUNDLE_START') {
-                logger__default["default"].start('Bundling');
+                logger.logger.start('Bundling');
             }
             else if (e.code === 'BUNDLE_END') {
-                logger__default["default"].end('Bundling');
+                logger.logger.end('Bundling');
             }
         }));
     });
@@ -457,7 +421,7 @@ function start({ node = false, inject = false, error = false, usualConsoleOutput
 const { spawn: spawn$1 } = require('child_process');
 function run(file, { config = '', exposeGc = false } = {}) {
     return tslib.__awaiter(this, void 0, void 0, function* () {
-        const input = yield logger__default["default"].start('Check file', () => getFile(file));
+        const input = yield logger.logger.start('Check file', () => getFile(file));
         const folder = yield new Promise((resolve, reject) => {
             tmp__default["default"].dir((err, folder) => {
                 if (err) {
@@ -469,7 +433,7 @@ function run(file, { config = '', exposeGc = false } = {}) {
             });
         });
         const jsFilePath = `${folder}/index.js`;
-        yield logger__default["default"].start('Build bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
+        yield logger.logger.start('Build bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
             const inputOptions = {
                 input,
                 plugins: [
@@ -494,7 +458,7 @@ function run(file, { config = '', exposeGc = false } = {}) {
             yield bundle.write(outputOptions);
             yield bundle.close();
         }));
-        yield logger__default["default"].start('Running of the script', () => tslib.__awaiter(this, void 0, void 0, function* () {
+        yield logger.logger.start('Running of the script', () => tslib.__awaiter(this, void 0, void 0, function* () {
             const flags = [];
             if (exposeGc) {
                 flags.push('--expose-gc');
@@ -623,7 +587,7 @@ const execAsync = node_util.promisify(exec);
 function release({ index = 'index', pub, min }, instance) {
     return tslib.__awaiter(this, void 0, void 0, function* () {
         const { releaseFolder, cssModules } = instance.params;
-        yield logger__default["default"].start('Remove previous release', () => fs__default["default"].remove(releaseFolder));
+        yield logger.logger.start('Remove previous release', () => fs__default["default"].remove(releaseFolder));
         const pkg = yield instance.getPackage();
         const build = (format) => tslib.__awaiter(this, void 0, void 0, function* () {
             var _a, _b;
@@ -696,28 +660,28 @@ function release({ index = 'index', pub, min }, instance) {
             yield bundle.close();
         });
         if (!pkg.type || pkg.type === 'commonjs') {
-            yield logger__default["default"].start('Build cjs bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Build cjs bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 yield build('cjs');
             }));
         }
         if (!pkg.type || pkg.type === 'module') {
-            yield logger__default["default"].start('Build es6 bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Build es6 bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 yield build('es');
             }));
         }
         if (min) {
-            yield logger__default["default"].start('Build min bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Build min bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 yield build('iife');
             }));
         }
-        yield logger__default["default"].start('Copy package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
+        yield logger.logger.start('Copy package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
             const data = Object.assign({}, pkg);
             delete data.private;
             delete data.devDependencies;
             fs__default["default"].writeFile(path__default["default"].resolve(instance.params.releaseFolder, 'package.json'), JSON.stringify(data, undefined, 2), 'UTF-8');
         }));
         if (pkg.bin) {
-            yield logger__default["default"].start('Build bin', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Build bin', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 const { bin, type } = pkg;
                 for (const name in bin) {
                     const value = bin[name];
@@ -751,23 +715,23 @@ function release({ index = 'index', pub, min }, instance) {
             }));
         }
         if (fs__default["default"].existsSync(instance.params.licenseFile)) {
-            yield logger__default["default"].start('Copy license', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Copy license', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 yield node_fs.promises.copyFile(instance.params.licenseFile, instance.params.licenseReleaseFile);
             }));
         }
         if (fs__default["default"].existsSync(instance.params.readmeFile)) {
-            yield logger__default["default"].start('Copy readme', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Copy readme', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 yield node_fs.promises.copyFile(instance.params.readmeFile, instance.params.readmeReleaseFile);
             }));
         }
         if (fs__default["default"].existsSync(instance.params.declarationFile)) {
-            yield logger__default["default"].start('Copy declaration', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Copy declaration', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 yield node_fs.promises.copyFile(instance.params.declarationFile, instance.params.declarationReleaseFile);
             }));
         }
         if (pub) {
             const date = (Date.now() / 1000) | 0;
-            yield logger__default["default"].start(`publishing v${pkg.version} ${date}`, () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start(`publishing v${pkg.version} ${date}`, () => tslib.__awaiter(this, void 0, void 0, function* () {
                 yield execAsync(`npm publish ${instance.params.releaseFolder} --tag ${getNpmTag(pkg.version)}`);
             }));
         }
@@ -775,7 +739,6 @@ function release({ index = 'index', pub, min }, instance) {
 }
 
 const { spawn } = require('child_process');
-updateDotenv();
 class InnetJS {
     constructor(options = {}) {
         this.params = getDefaultOptions(options);
@@ -827,7 +790,7 @@ class InnetJS {
     increaseVersion(release) {
         return tslib.__awaiter(this, void 0, void 0, function* () {
             const pkg = yield this.getPackage();
-            yield logger__default["default"].start('Prepare package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Prepare package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 const version = pkg.version.split('.');
                 switch (release) {
                     case 'patch': {
@@ -858,7 +821,7 @@ class InnetJS {
                 return this.package;
             }
             const packageFolder = path__default["default"].resolve(this.params.projectFolder, 'package.json');
-            yield logger__default["default"].start('Check package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            yield logger.logger.start('Check package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
                 if (fs__default["default"].existsSync(packageFolder)) {
                     this.package = yield fs__default["default"].readJson(packageFolder);
                 }
@@ -903,7 +866,7 @@ class InnetJS {
                     let port = this.params.port;
                     const listener = () => {
                         const baseUrl = this.params.baseUrl === '/' ? '' : this.params.baseUrl;
-                        console.log(`${chalk__default["default"].green('➤')} Started on http${httpsUsing ? 's' : ''}://localhost:${port}${baseUrl} and http${httpsUsing ? 's' : ''}://${address__default["default"].ip()}:${port}${baseUrl}`);
+                        logger.logger.log(`${chalk__default["default"].green('➤')} Started on http${httpsUsing ? 's' : ''}://localhost:${port}${baseUrl} and http${httpsUsing ? 's' : ''}://${address__default["default"].ip()}:${port}${baseUrl}`);
                     };
                     server.listen(port, listener);
                     server.on('error', (e) => tslib.__awaiter(this, void 0, void 0, function* () {
@@ -962,7 +925,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"3.2.6"};
+  const env = {"__INNETJS__PACKAGE_VERSION":""};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {

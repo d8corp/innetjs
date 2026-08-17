@@ -1,5 +1,5 @@
 import { __awaiter } from 'tslib';
-import logger from '@cantinc/logger';
+import { logger } from '@cantinc/logger';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import { nodeResolve } from '@rollup/plugin-node-resolve';

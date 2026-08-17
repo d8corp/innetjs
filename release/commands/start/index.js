@@ -7,3 +7,4 @@ var start = require('./start.js');
 
 
 exports.start = start.start;
+exports.typecheckWatchPlugin = start.typecheckWatchPlugin;
