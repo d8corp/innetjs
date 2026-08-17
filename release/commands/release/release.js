@@ -7,6 +7,7 @@ var logger = require('@cantinc/logger');
 var image = require('@rollup/plugin-image');
 var json = require('@rollup/plugin-json');
 var pluginNodeResolve = require('@rollup/plugin-node-resolve');
+var terser = require('@rollup/plugin-terser');
 var ts = require('@rollup/plugin-typescript');
 var autoprefixer = require('autoprefixer');
 var node_fs = require('node:fs');
@@ -20,7 +21,6 @@ var rollupPluginNodeExternals = require('rollup-plugin-node-externals');
 var rollupPluginPreserveShebangs = require('rollup-plugin-preserve-shebangs');
 var rollupPluginString = require('rollup-plugin-string');
 var styles = require('rollup-plugin-styles');
-var rollupPluginTerser = require('rollup-plugin-terser');
 var node_util = require('node:util');
 var constants = require('../../constants.js');
 require('../../utils/index.js');
@@ -30,6 +30,7 @@ function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'defau
 
 var image__default = /*#__PURE__*/_interopDefaultLegacy(image);
 var json__default = /*#__PURE__*/_interopDefaultLegacy(json);
+var terser__default = /*#__PURE__*/_interopDefaultLegacy(terser);
 var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
 var autoprefixer__default = /*#__PURE__*/_interopDefaultLegacy(autoprefixer);
 var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
@@ -108,7 +109,7 @@ function release(_a, instance_1) {
                 ],
             };
             if (format === 'iife') {
-                options.plugins.push(rollupPluginTerser.terser());
+                options.plugins.push(terser__default["default"]());
             }
             instance.withLint(options);
             instance.withEnv(options, true);

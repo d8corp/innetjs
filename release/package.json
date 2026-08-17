@@ -1,6 +1,6 @@
 {
   "name": "innetjs",
-  "version": "4.0.0-alpha.7",
+  "version": "4.0.0-alpha.10",
   "description": "CLI for innet boilerplate",
   "homepage": "https://github.com/d8corp/innetjs",
   "author": "Mikhail Lysikov <d8corp@mail.ru>",
@@ -56,6 +56,7 @@
     "@rollup/plugin-image": "^3.0.1",
     "@rollup/plugin-json": "^5.0.1",
     "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-terser": "^1.0.0",
     "@rollup/plugin-typescript": "^12.3.0",
     "address": "^1.2.1",
     "adm-zip": "^0.5.10",
@@ -86,7 +87,6 @@
     "rollup-plugin-process-env": "^1.0.7",
     "rollup-plugin-string": "^3.0.0",
     "rollup-plugin-styles": "^4.0.0",
-    "rollup-plugin-terser": "^7.0.2",
     "sass": "^1.55.0",
     "tmp": "^0.2.1"
   }

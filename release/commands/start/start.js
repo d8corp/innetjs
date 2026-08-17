@@ -140,7 +140,9 @@ function start(_a, instance_1) {
         const watcher = rolldown.watch(options);
         watcher.on('event', (e) => tslib.__awaiter(this, void 0, void 0, function* () {
             if (e.code === 'ERROR') {
-                logger.logger.end('Bundling', error ? e.error.stack : e.error.message);
+                logger.logger.end('Bundling', 'Error');
+                // eslint-disable-next-line no-console
+                console.error(error ? e.error.stack : e.error.message);
             }
             else if (e.code === 'BUNDLE_START') {
                 logger.logger.start('Bundling');

@@ -1,22 +1,17 @@
 import { __awaiter } from 'tslib';
 import { logger } from '@cantinc/logger';
-import commonjs from '@rollup/plugin-commonjs';
-import json from '@rollup/plugin-json';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
-import ts from '@rollup/plugin-typescript';
+import terser from '@rollup/plugin-terser';
 import autoprefixer from 'autoprefixer';
 import { promises } from 'node:fs';
 import fs from 'fs-extra';
 import glob from 'glob';
 import path from 'node:path';
-import { rollup } from 'rollup';
+import { rolldown } from 'rolldown';
 import filesize from 'rollup-plugin-filesize';
 import importAssets from 'rollup-plugin-import-assets';
-import jsx from 'rollup-plugin-innet-jsx';
 import polyfill from 'rollup-plugin-polyfill-node';
 import { string } from 'rollup-plugin-string';
 import styles from 'rollup-plugin-styles';
-import { terser } from 'rollup-plugin-terser';
 import { promisify } from 'node:util';
 import { stringExcludeNode, imageInclude, stringExcludeDom } from '../../constants.mjs';
 import { reporter, convertIndexFile } from '../../helpers.mjs';
@@ -31,27 +26,12 @@ function build(_a, instance_1) {
         }
         yield logger.start('Remove build', () => fs.remove(params.buildFolder));
         const pkg = node && (yield instance.getPackage());
+        const plugins = [];
         const options = {
             input,
             preserveEntrySignatures: 'strict',
-            plugins: [
-                commonjs(),
-                json(),
-                ts({
-                    noEmitOnError: true,
-                    compilerOptions: {
-                        declaration: false,
-                    },
-                }),
-                jsx(),
-            ],
-            onwarn(warning, warn) {
-                if (warning.code === 'THIS_IS_UNDEFINED' || warning.code === 'SOURCEMAP_ERROR')
-                    return;
-                warn(warning);
-            },
+            plugins,
         };
-        instance.withLint(options, true);
         const outputOptions = {
             dir: params.buildFolder,
             sourcemap: params.sourcemap,
@@ -59,25 +39,24 @@ function build(_a, instance_1) {
         if (node) {
             outputOptions.format = 'cjs';
             options.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
-            options.plugins.push(nodeResolve(), string({
+            plugins.push(string({
                 include: '**/*.*',
                 exclude: stringExcludeNode,
             }));
         }
         else {
-            options.plugins.push(nodeResolve({
-                browser: true,
-            }), polyfill(), importAssets({
+            plugins.push(polyfill(), importAssets({
                 include: imageInclude.map(img => `src/${img}`),
                 publicPath: params.baseUrl,
             }), styles({
-                sass: {
-                    outputStyle: 'compressed',
-                },
                 mode: params.cssInJs ? 'inject' : 'extract',
                 url: {
                     inline: false,
                     publicPath: `${params.baseUrl}assets`,
+                },
+                sass: {
+                    outputStyle: 'compressed',
+                    silenceDeprecations: ['legacy-js-api'],
                 },
                 plugins: [autoprefixer()],
                 autoModules: params.cssModules ? (id) => !id.includes('.global.') : true,
@@ -97,7 +76,7 @@ function build(_a, instance_1) {
         }
         instance.withEnv(options, true);
         yield logger.start('Build production bundle', () => __awaiter(this, void 0, void 0, function* () {
-            const bundle = yield rollup(options);
+            const bundle = yield rolldown(options);
             yield bundle.write(outputOptions);
             yield bundle.close();
             if (!node) {

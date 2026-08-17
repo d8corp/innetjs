@@ -1,22 +1,17 @@
 import { logger } from '@cantinc/logger'
-import commonjs from '@rollup/plugin-commonjs'
-import json from '@rollup/plugin-json'
-import { nodeResolve } from '@rollup/plugin-node-resolve'
-import ts from '@rollup/plugin-typescript'
+import terser from '@rollup/plugin-terser'
 import autoprefixer from 'autoprefixer'
 import { promises as fsx } from 'fs'
 import fs from 'fs-extra'
 import glob from 'glob'
 import path from 'path'
-import type { RollupOptions } from 'rollup'
-import { rollup } from 'rollup'
+import type { OutputOptions, RolldownOptions, RolldownPluginOption } from 'rolldown'
+import { rolldown } from 'rolldown'
 import filesize from 'rollup-plugin-filesize'
 import importAssets from 'rollup-plugin-import-assets'
-import jsx from 'rollup-plugin-innet-jsx'
 import polyfill from 'rollup-plugin-polyfill-node'
 import { string } from 'rollup-plugin-string'
 import styles from 'rollup-plugin-styles'
-import { terser } from 'rollup-plugin-terser'
 import { promisify } from 'util'
 
 import { imageInclude, stringExcludeDom, stringExcludeNode } from '../../constants'
@@ -38,62 +33,45 @@ export async function build ({ node = false, inject = false, index = 'index' }: 
 
   const pkg = node && await instance.getPackage()
 
-  const options: RollupOptions = {
+  const plugins: RolldownPluginOption[] = []
+
+  const options: RolldownOptions = {
     input,
     preserveEntrySignatures: 'strict',
-    plugins: [
-      commonjs(),
-      json(),
-      ts({
-        noEmitOnError: true,
-        compilerOptions: {
-          declaration: false,
-        },
-      }),
-      jsx(),
-    ],
-    onwarn (warning, warn) {
-      if (warning.code === 'THIS_IS_UNDEFINED' || warning.code === 'SOURCEMAP_ERROR') return
-      warn(warning)
-    },
+    plugins,
   }
 
-  instance.withLint(options, true)
-
-  const outputOptions = {
+  const outputOptions: OutputOptions = {
     dir: params.buildFolder,
     sourcemap: params.sourcemap,
-  } as Record<string, any>
+  }
 
   if (node) {
     outputOptions.format = 'cjs'
     options.external = Object.keys(pkg?.dependencies || {})
 
-    options.plugins.push(
-      nodeResolve(),
+    plugins.push(
       string({
         include: '**/*.*',
         exclude: stringExcludeNode,
       }),
     )
   } else {
-    options.plugins.push(
-      nodeResolve({
-        browser: true,
-      }),
+    plugins.push(
       polyfill(),
       importAssets({
         include: imageInclude.map(img => `src/${img}`),
         publicPath: params.baseUrl,
       }),
       styles({
-        sass: {
-          outputStyle: 'compressed',
-        },
         mode: params.cssInJs ? 'inject' : 'extract',
         url: {
           inline: false,
           publicPath: `${params.baseUrl}assets`,
+        },
+        sass: {
+          outputStyle: 'compressed',
+          silenceDeprecations: ['legacy-js-api'],
         },
         plugins: [autoprefixer()],
         autoModules: params.cssModules ? (id: string) => !id.includes('.global.') : true,
@@ -116,10 +94,10 @@ export async function build ({ node = false, inject = false, index = 'index' }: 
     ]
   }
 
-  instance.withEnv(options, true)
+  instance.withEnv(options as any, true)
 
   await logger.start('Build production bundle', async () => {
-    const bundle = await rollup(options)
+    const bundle = await rolldown(options)
     await bundle.write(outputOptions)
     await bundle.close()
 
