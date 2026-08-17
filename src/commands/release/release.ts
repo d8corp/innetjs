@@ -30,7 +30,7 @@ export async function release ({ index = 'index', pub, min, typeCheck, lintCheck
     await logger.start('Check TypeScript', async () => {
       const { resolve, reject, promise } = Promise.withResolvers()
 
-      const params = ['--noEmit']
+      const params = ['--emitDeclarationOnly']
 
       if (instance.params.tsconfig) {
         params.push('-p', instance.params.tsconfig)

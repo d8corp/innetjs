@@ -27,7 +27,7 @@ function release(_a, instance_1) {
         if (typeCheck) {
             yield logger.start('Check TypeScript', () => __awaiter(this, void 0, void 0, function* () {
                 const { resolve, reject, promise } = Promise.withResolvers();
-                const params = ['--noEmit'];
+                const params = ['--emitDeclarationOnly'];
                 if (instance.params.tsconfig) {
                     params.push('-p', instance.params.tsconfig);
                 }
