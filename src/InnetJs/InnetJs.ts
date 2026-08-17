@@ -78,44 +78,6 @@ export class InnetJS {
     }))
   }
 
-  async increaseVersion (release: string) {
-    const pkg = await this.getPackage()
-
-    await logger.start('Prepare package.json', async () => {
-      const version = pkg.version.split('.')
-
-      switch (release) {
-        case 'patch': {
-          version[2]++
-          break
-        }
-
-        case 'minor': {
-          version[1]++
-          version[2] = 0
-          break
-        }
-
-        case 'major': {
-          version[1] = 0
-          version[2] = 0
-          version[0]++
-          break
-        }
-
-        default: return
-      }
-
-      pkg.version = version.join('.')
-
-      await fs.writeFile(
-        path.resolve(this.params.projectFolder, 'package.json'),
-        JSON.stringify(pkg, undefined, 2),
-        'UTF-8',
-      )
-    })
-  }
-
   async getPackage (): Promise<Record<string, any>> {
     if (this.package) {
       return this.package

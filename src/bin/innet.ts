@@ -78,28 +78,4 @@ program
   })
 
 program
-  .command('patch')
-  .description('Increase patch version of package')
-  .addOption(errorOption)
-  .action(({ error }) => {
-    innetJS.increaseVersion('patch').catch(checkError(error))
-  })
-
-program
-  .command('minor')
-  .description('Increase minor version of package')
-  .addOption(errorOption)
-  .action(({ error }) => {
-    innetJS.increaseVersion('minor').catch(checkError(error))
-  })
-
-program
-  .command('major')
-  .description('Increase major version of package')
-  .addOption(errorOption)
-  .action(({ error }) => {
-    innetJS.increaseVersion('major').catch(checkError(error))
-  })
-
-program
   .parse(process.argv)
