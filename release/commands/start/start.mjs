@@ -5,6 +5,7 @@ import { spawn } from 'node:child_process';
 import fs from 'fs-extra';
 import glob from 'glob';
 import path from 'node:path';
+import readline from 'node:readline';
 import { watch } from 'rolldown';
 import importAssets from 'rollup-plugin-import-assets';
 import livereload from 'rollup-plugin-livereload';
@@ -27,8 +28,15 @@ function typecheckWatchPlugin() {
                 stdio: 'inherit',
                 shell: true,
             });
-            tscProcess.on('close', () => {
-                logger.end('Check TypeScript');
+            const rl = readline.createInterface({
+                input: tscProcess.stdout,
+            });
+            rl.on('line', (line) => {
+                logger.log(line);
+            });
+            tscProcess.on('close', (code) => {
+                rl.close();
+                logger.end('Check TypeScript', code ? 'TypeScript has errors' : undefined);
             });
         },
     };
@@ -47,8 +55,15 @@ function lintCheckWatchPlugin() {
                 stdio: 'inherit',
                 shell: true,
             });
-            lintProcess.on('close', () => {
-                logger.end('Check ESLint');
+            const rl = readline.createInterface({
+                input: lintProcess.stdout,
+            });
+            rl.on('line', (line) => {
+                logger.log(line);
+            });
+            lintProcess.on('close', (code) => {
+                rl.close();
+                logger.end('Check ESLint', code ? 'ESLint has errors' : undefined);
             });
         },
     };

@@ -9,6 +9,7 @@ var node_child_process = require('node:child_process');
 var fs = require('fs-extra');
 var glob = require('glob');
 var path = require('node:path');
+var readline = require('node:readline');
 var rolldown = require('rolldown');
 var importAssets = require('rollup-plugin-import-assets');
 var livereload = require('rollup-plugin-livereload');
@@ -23,6 +24,7 @@ var autoprefixer__default = /*#__PURE__*/_interopDefaultLegacy(autoprefixer);
 var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 var glob__default = /*#__PURE__*/_interopDefaultLegacy(glob);
 var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
+var readline__default = /*#__PURE__*/_interopDefaultLegacy(readline);
 var importAssets__default = /*#__PURE__*/_interopDefaultLegacy(importAssets);
 var livereload__default = /*#__PURE__*/_interopDefaultLegacy(livereload);
 var polyfill__default = /*#__PURE__*/_interopDefaultLegacy(polyfill);
@@ -42,8 +44,15 @@ function typecheckWatchPlugin() {
                 stdio: 'inherit',
                 shell: true,
             });
-            tscProcess.on('close', () => {
-                logger.logger.end('Check TypeScript');
+            const rl = readline__default["default"].createInterface({
+                input: tscProcess.stdout,
+            });
+            rl.on('line', (line) => {
+                logger.logger.log(line);
+            });
+            tscProcess.on('close', (code) => {
+                rl.close();
+                logger.logger.end('Check TypeScript', code ? 'TypeScript has errors' : undefined);
             });
         },
     };
@@ -62,8 +71,15 @@ function lintCheckWatchPlugin() {
                 stdio: 'inherit',
                 shell: true,
             });
-            lintProcess.on('close', () => {
-                logger.logger.end('Check ESLint');
+            const rl = readline__default["default"].createInterface({
+                input: lintProcess.stdout,
+            });
+            rl.on('line', (line) => {
+                logger.logger.log(line);
+            });
+            lintProcess.on('close', (code) => {
+                rl.close();
+                logger.logger.end('Check ESLint', code ? 'ESLint has errors' : undefined);
             });
         },
     };
