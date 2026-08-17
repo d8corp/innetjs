@@ -1,5 +1,4 @@
 import { logger } from '@cantinc/logger'
-import eslint from '@rollup/plugin-eslint'
 import autoprefixer from 'autoprefixer'
 import { spawn } from 'child_process'
 import fs from 'fs-extra'
@@ -14,7 +13,7 @@ import type { EnvValues } from 'rollup-plugin-process-env'
 import { string } from 'rollup-plugin-string'
 import styles from 'rollup-plugin-styles'
 
-import { imageInclude, lintInclude, stringExcludeDom, stringExcludeNode } from '../../constants'
+import { imageInclude, stringExcludeDom, stringExcludeNode } from '../../constants'
 import type { InnetJS } from '../../InnetJs'
 import type { StartOptions } from '../../types'
 
@@ -39,6 +38,32 @@ export function typecheckWatchPlugin () {
 
       tscProcess.on('close', () => {
         logger.end('Check TypeScript')
+      })
+    },
+  }
+}
+
+export function lintCheckWatchPlugin () {
+  let lintProcess = null
+
+  return {
+    name: 'lintcheck-watch',
+
+    buildEnd () {
+      if (lintProcess) {
+        logger.end('Check ESLint')
+        lintProcess.kill()
+      }
+
+      logger.start('Check ESLint')
+
+      lintProcess = spawn('lint', ['src'], {
+        stdio: 'inherit',
+        shell: true,
+      })
+
+      lintProcess.on('close', () => {
+        logger.end('Check ESLint')
       })
     },
   }
@@ -78,13 +103,6 @@ export async function start ({
   }
 
   let preset: EnvValues
-
-  if (lintCheck) {
-    plugins.push(eslint({
-      include: lintInclude,
-      throwOnError: false,
-    }))
-  }
 
   if (node) {
     preset = { NODE_ENV: 'dev' }
@@ -148,6 +166,10 @@ export async function start ({
 
   if (typeCheck) {
     plugins.push(typecheckWatchPlugin())
+  }
+
+  if (lintCheck) {
+    plugins.push(lintCheckWatchPlugin())
   }
 
   instance.withEnv(options as any, true, preset)

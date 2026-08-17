@@ -1,6 +1,5 @@
 import { __awaiter } from 'tslib';
 import { logger } from '@cantinc/logger';
-import eslint from '@rollup/plugin-eslint';
 import autoprefixer from 'autoprefixer';
 import { spawn } from 'node:child_process';
 import fs from 'fs-extra';
@@ -12,7 +11,7 @@ import livereload from 'rollup-plugin-livereload';
 import polyfill from 'rollup-plugin-polyfill-node';
 import { string } from 'rollup-plugin-string';
 import styles from 'rollup-plugin-styles';
-import { lintInclude, stringExcludeNode, imageInclude, stringExcludeDom } from '../../constants.mjs';
+import { stringExcludeNode, imageInclude, stringExcludeDom } from '../../constants.mjs';
 
 function typecheckWatchPlugin() {
     let tscProcess = null;
@@ -30,6 +29,26 @@ function typecheckWatchPlugin() {
             });
             tscProcess.on('close', () => {
                 logger.end('Check TypeScript');
+            });
+        },
+    };
+}
+function lintCheckWatchPlugin() {
+    let lintProcess = null;
+    return {
+        name: 'lintcheck-watch',
+        buildEnd() {
+            if (lintProcess) {
+                logger.end('Check ESLint');
+                lintProcess.kill();
+            }
+            logger.start('Check ESLint');
+            lintProcess = spawn('lint', ['src'], {
+                stdio: 'inherit',
+                shell: true,
+            });
+            lintProcess.on('close', () => {
+                logger.end('Check ESLint');
             });
         },
     };
@@ -55,12 +74,6 @@ function start(_a, instance_1) {
             plugins,
         };
         let preset;
-        if (lintCheck) {
-            plugins.push(eslint({
-                include: lintInclude,
-                throwOnError: false,
-            }));
-        }
         if (node) {
             preset = { NODE_ENV: 'dev' };
             output.format = 'cjs';
@@ -105,6 +118,9 @@ function start(_a, instance_1) {
         if (typeCheck) {
             plugins.push(typecheckWatchPlugin());
         }
+        if (lintCheck) {
+            plugins.push(lintCheckWatchPlugin());
+        }
         instance.withEnv(options, true, preset);
         const watcher = watch(options);
         watcher.on('event', (e) => __awaiter(this, void 0, void 0, function* () {
@@ -121,4 +137,4 @@ function start(_a, instance_1) {
     });
 }
 
-export { start, typecheckWatchPlugin };
+export { lintCheckWatchPlugin, start, typecheckWatchPlugin };

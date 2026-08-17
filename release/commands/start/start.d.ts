@@ -4,4 +4,8 @@ export declare function typecheckWatchPlugin(): {
     name: string;
     buildEnd(): void;
 };
+export declare function lintCheckWatchPlugin(): {
+    name: string;
+    buildEnd(): void;
+};
 export declare function start({ node, inject, error, typeCheck, lintCheck, usualConsoleOutput, index, }: StartOptions, instance: InnetJS): Promise<void>;

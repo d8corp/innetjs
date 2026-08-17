@@ -657,6 +657,26 @@ function typecheckWatchPlugin() {
         },
     };
 }
+function lintCheckWatchPlugin() {
+    let lintProcess = null;
+    return {
+        name: 'lintcheck-watch',
+        buildEnd() {
+            if (lintProcess) {
+                logger.logger.end('Check ESLint');
+                lintProcess.kill();
+            }
+            logger.logger.start('Check ESLint');
+            lintProcess = node_child_process.spawn('lint', ['src'], {
+                stdio: 'inherit',
+                shell: true,
+            });
+            lintProcess.on('close', () => {
+                logger.logger.end('Check ESLint');
+            });
+        },
+    };
+}
 function start(_a, instance_1) {
     return tslib.__awaiter(this, arguments, void 0, function* ({ node = false, inject = false, error = false, typeCheck = false, lintCheck = false, usualConsoleOutput = false, index = 'index', }, instance) {
         const params = instance.params;
@@ -678,12 +698,6 @@ function start(_a, instance_1) {
             plugins,
         };
         let preset;
-        if (lintCheck) {
-            plugins.push(eslint__default["default"]({
-                include: lintInclude,
-                throwOnError: false,
-            }));
-        }
         if (node) {
             preset = { NODE_ENV: 'dev' };
             output.format = 'cjs';
@@ -727,6 +741,9 @@ function start(_a, instance_1) {
         }
         if (typeCheck) {
             plugins.push(typecheckWatchPlugin());
+        }
+        if (lintCheck) {
+            plugins.push(lintCheckWatchPlugin());
         }
         instance.withEnv(options, true, preset);
         const watcher = rolldown.watch(options);
@@ -932,7 +949,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"4.0.0-alpha.3"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"4.0.0-alpha.4"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {

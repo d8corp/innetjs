@@ -4,7 +4,6 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var tslib = require('tslib');
 var logger = require('@cantinc/logger');
-var eslint = require('@rollup/plugin-eslint');
 var autoprefixer = require('autoprefixer');
 var node_child_process = require('node:child_process');
 var fs = require('fs-extra');
@@ -20,7 +19,6 @@ var constants = require('../../constants.js');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-var eslint__default = /*#__PURE__*/_interopDefaultLegacy(eslint);
 var autoprefixer__default = /*#__PURE__*/_interopDefaultLegacy(autoprefixer);
 var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 var glob__default = /*#__PURE__*/_interopDefaultLegacy(glob);
@@ -50,6 +48,26 @@ function typecheckWatchPlugin() {
         },
     };
 }
+function lintCheckWatchPlugin() {
+    let lintProcess = null;
+    return {
+        name: 'lintcheck-watch',
+        buildEnd() {
+            if (lintProcess) {
+                logger.logger.end('Check ESLint');
+                lintProcess.kill();
+            }
+            logger.logger.start('Check ESLint');
+            lintProcess = node_child_process.spawn('lint', ['src'], {
+                stdio: 'inherit',
+                shell: true,
+            });
+            lintProcess.on('close', () => {
+                logger.logger.end('Check ESLint');
+            });
+        },
+    };
+}
 function start(_a, instance_1) {
     return tslib.__awaiter(this, arguments, void 0, function* ({ node = false, inject = false, error = false, typeCheck = false, lintCheck = false, usualConsoleOutput = false, index = 'index', }, instance) {
         const params = instance.params;
@@ -71,12 +89,6 @@ function start(_a, instance_1) {
             plugins,
         };
         let preset;
-        if (lintCheck) {
-            plugins.push(eslint__default["default"]({
-                include: constants.lintInclude,
-                throwOnError: false,
-            }));
-        }
         if (node) {
             preset = { NODE_ENV: 'dev' };
             output.format = 'cjs';
@@ -121,6 +133,9 @@ function start(_a, instance_1) {
         if (typeCheck) {
             plugins.push(typecheckWatchPlugin());
         }
+        if (lintCheck) {
+            plugins.push(lintCheckWatchPlugin());
+        }
         instance.withEnv(options, true, preset);
         const watcher = rolldown.watch(options);
         watcher.on('event', (e) => tslib.__awaiter(this, void 0, void 0, function* () {
@@ -137,5 +152,6 @@ function start(_a, instance_1) {
     });
 }
 
+exports.lintCheckWatchPlugin = lintCheckWatchPlugin;
 exports.start = start;
 exports.typecheckWatchPlugin = typecheckWatchPlugin;
