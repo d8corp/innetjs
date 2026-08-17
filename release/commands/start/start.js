@@ -58,7 +58,7 @@ function lintCheckWatchPlugin() {
                 lintProcess.kill();
             }
             logger.logger.start('Check ESLint');
-            lintProcess = node_child_process.spawn('lint', ['src'], {
+            lintProcess = node_child_process.spawn('eslint', ['src'], {
                 stdio: 'inherit',
                 shell: true,
             });

@@ -57,7 +57,7 @@ export function lintCheckWatchPlugin () {
 
       logger.start('Check ESLint')
 
-      lintProcess = spawn('lint', ['src'], {
+      lintProcess = spawn('eslint', ['src'], {
         stdio: 'inherit',
         shell: true,
       })
