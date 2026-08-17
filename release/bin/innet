@@ -651,14 +651,7 @@ function typecheckWatchPlugin() {
                 stdio: 'inherit',
                 shell: true,
             });
-            const rl = readline__default["default"].createInterface({
-                input: tscProcess.stdout,
-            });
-            rl.on('line', (line) => {
-                logger.logger.log(line);
-            });
             tscProcess.on('close', (code) => {
-                rl.close();
                 logger.logger.end('Check TypeScript', code ? 'TypeScript has errors' : undefined);
             });
         },
@@ -678,14 +671,7 @@ function lintCheckWatchPlugin() {
                 stdio: 'inherit',
                 shell: true,
             });
-            const rl = readline__default["default"].createInterface({
-                input: lintProcess.stdout,
-            });
-            rl.on('line', (line) => {
-                logger.logger.log(line);
-            });
             lintProcess.on('close', (code) => {
-                rl.close();
                 logger.logger.end('Check ESLint', code ? 'ESLint has errors' : undefined);
             });
         },
@@ -963,7 +949,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"4.0.0-alpha.6"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"4.0.0-alpha.7"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {

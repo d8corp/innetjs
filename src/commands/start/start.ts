@@ -4,7 +4,6 @@ import { spawn } from 'child_process'
 import fs from 'fs-extra'
 import glob from 'glob'
 import path from 'path'
-import readline from 'readline'
 import type { OutputOptions, RolldownPluginOption, WatchOptions } from 'rolldown'
 import { watch } from 'rolldown'
 import importAssets from 'rollup-plugin-import-assets'
@@ -37,16 +36,7 @@ export function typecheckWatchPlugin () {
         shell: true,
       })
 
-      const rl = readline.createInterface({
-        input: tscProcess.stdout,
-      })
-
-      rl.on('line', (line) => {
-        logger.log(line)
-      })
-
       tscProcess.on('close', (code: number) => {
-        rl.close()
         logger.end('Check TypeScript', code ? 'TypeScript has errors' : undefined)
       })
     },
@@ -72,16 +62,7 @@ export function lintCheckWatchPlugin () {
         shell: true,
       })
 
-      const rl = readline.createInterface({
-        input: lintProcess.stdout,
-      })
-
-      rl.on('line', (line) => {
-        logger.log(line)
-      })
-
       lintProcess.on('close', (code: number) => {
-        rl.close()
         logger.end('Check ESLint', code ? 'ESLint has errors' : undefined)
       })
     },
