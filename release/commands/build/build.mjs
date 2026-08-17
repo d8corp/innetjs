@@ -11,6 +11,7 @@ import { rolldown } from 'rolldown';
 import filesize from 'rollup-plugin-filesize';
 import importAssets from 'rollup-plugin-import-assets';
 import polyfill from 'rollup-plugin-polyfill-node';
+import env from 'rollup-plugin-process-env';
 import { string } from 'rollup-plugin-string';
 import styles from 'rollup-plugin-styles';
 import { promisify } from 'node:util';
@@ -63,7 +64,12 @@ function build(_a, instance_1) {
         }
         yield logger.start('Remove build', () => fs.remove(params.buildFolder));
         const pkg = node && (yield instance.getPackage());
-        const plugins = [];
+        const plugins = [
+            env(this.params.envPrefix, {
+                include: input,
+                virtual: true,
+            }),
+        ];
         const options = {
             input,
             preserveEntrySignatures: 'strict',
@@ -111,7 +117,6 @@ function build(_a, instance_1) {
                 }),
             ];
         }
-        instance.withEnv(options, true);
         yield logger.start('Build production bundle', () => __awaiter(this, void 0, void 0, function* () {
             const bundle = yield rolldown(options);
             yield bundle.write(outputOptions);

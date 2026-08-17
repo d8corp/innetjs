@@ -1,7 +1,7 @@
 import { logger } from '@cantinc/logger'
-import eslint from '@rollup/plugin-eslint'
 import address from 'address'
 import chalk from 'chalk'
+import { spawn } from 'child_process'
 import express from 'express'
 import proxy from 'express-http-proxy'
 import fs, { promises as fsx } from 'fs-extra'
@@ -9,20 +9,12 @@ import http from 'http'
 import https from 'https'
 import path from 'path'
 import prompt from 'prompts'
-// eslint-disable-next-line import/default
-import type rollup from 'rollup'
-import type { EnvValues } from 'rollup-plugin-process-env'
-import env from 'rollup-plugin-process-env'
+import type { Plugin } from 'rolldown'
 
 import { build, init, release, run, start } from '../commands'
-import {
-  lintInclude,
-} from '../constants'
 import { convertIndexFile } from '../helpers'
 import type { BuildOptions, InitOptions, InnetJSParams, ReleaseOptions, RunOptions, StartOptions } from '../types'
 import { getDefaultOptions, printErrorWithFrame } from '../utils'
-
-const { spawn } = require('child_process')
 
 export class InnetJS {
   params: Required<InnetJSParams>
@@ -56,28 +48,6 @@ export class InnetJS {
 
   // Helpers
 
-  private _lintUsage: boolean
-  withLint (options: rollup.RollupOptions, prod = false) {
-    if (this._lintUsage === undefined) {
-      this._lintUsage = fs.existsSync(path.join(this.params.projectFolder, '.eslintrc'))
-    }
-
-    if (this._lintUsage) {
-      options.plugins.push(eslint({
-        include: lintInclude,
-        throwOnError: prod,
-      }))
-    }
-  }
-
-  withEnv (options: rollup.RollupOptions, virtual?: boolean, preset?: EnvValues) {
-    options.plugins.push(env(this.params.envPrefix, {
-      include: options.input as string[],
-      virtual,
-      preset,
-    }))
-  }
-
   async getPackage (): Promise<Record<string, any>> {
     if (this.package) {
       return this.package
@@ -94,7 +64,7 @@ export class InnetJS {
     return this.package
   }
 
-  createClient (key, cert, pkg, index: string, inject: boolean): rollup.Plugin {
+  createClient (key, cert, pkg, index: string, inject: boolean): Plugin {
     let app
 
     return {
@@ -173,7 +143,7 @@ export class InnetJS {
     }
   }
 
-  createServer (input: string[], error = false, usualConsoleOutput = false): rollup.Plugin {
+  createServer (input: string[], error = false, usualConsoleOutput = false): Plugin {
     const apps: Record<string, any> = {}
 
     return {

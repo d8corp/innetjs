@@ -1,20 +1,18 @@
 import { logger } from '@cantinc/logger'
 import image from '@rollup/plugin-image'
-import json from '@rollup/plugin-json'
-import { nodeResolve } from '@rollup/plugin-node-resolve'
 import terser from '@rollup/plugin-terser'
-import ts from '@rollup/plugin-typescript'
 import autoprefixer from 'autoprefixer'
+import { exec, spawn } from 'child_process'
 import { promises as fsx } from 'fs'
 import fs from 'fs-extra'
 import glob from 'glob'
 import path from 'path'
-import type { ModuleFormat, OutputOptions, RollupOptions } from 'rollup'
-import { rollup } from 'rollup'
+import type { ModuleFormat, OutputOptions, RolldownOptions, RolldownPluginOption } from 'rolldown'
+import { rolldown } from 'rolldown'
 import external from 'rollup-plugin-external-node-modules'
-import jsx from 'rollup-plugin-innet-jsx'
 import { externals } from 'rollup-plugin-node-externals'
 import { preserveShebangs } from 'rollup-plugin-preserve-shebangs'
+import env from 'rollup-plugin-process-env'
 import { string } from 'rollup-plugin-string'
 import styles from 'rollup-plugin-styles'
 import { promisify } from 'util'
@@ -23,12 +21,59 @@ import { REG_EXT, REG_TJSX, stringExcludeDom } from '../../constants'
 import type { InnetJS } from '../../InnetJs'
 import type { ReleaseOptions } from '../../types'
 import { getNpmTag } from '../../utils'
-
-const { exec } = require('child_process')
 const execAsync = promisify(exec)
 
-export async function release ({ index = 'index', pub, min }: ReleaseOptions, instance: InnetJS) {
+export async function release ({ index = 'index', pub, min, typeCheck, lintCheck }: ReleaseOptions, instance: InnetJS) {
   const { releaseFolder, cssModules } = instance.params
+
+  if (typeCheck) {
+    await logger.start('Check TypeScript', async () => {
+      const { resolve, reject, promise } = Promise.withResolvers()
+
+      const params = ['--noEmit']
+
+      if (instance.params.tsconfig) {
+        params.push('-p', instance.params.tsconfig)
+      }
+
+      const process = spawn('tsc', params, {
+        stdio: 'inherit',
+        shell: true,
+      })
+
+      process.on('close', (code: number) => {
+        if (code) {
+          reject()
+        } else {
+          resolve(undefined)
+        }
+      })
+
+      await promise
+    })
+  }
+
+  if (lintCheck) {
+    await logger.start('Check ESLint', async () => {
+      const { resolve, reject, promise } = Promise.withResolvers()
+
+      const process = spawn('eslint', ['src'], {
+        stdio: 'inherit',
+        shell: true,
+      })
+
+      process.on('close', (code: number) => {
+        if (code) {
+          reject()
+        } else {
+          resolve(undefined)
+        }
+      })
+
+      await promise
+    })
+  }
+
   await logger.start('Remove previous release', () => fs.remove(releaseFolder))
 
   const pkg = await instance.getPackage()
@@ -47,7 +92,7 @@ export async function release ({ index = 'index', pub, min }: ReleaseOptions, in
     const output: OutputOptions = format === 'iife'
       ? {
           file: path.join(releaseFolder, pkg.browser || 'index.min.js'),
-          inlineDynamicImports: true,
+          codeSplitting: false,
           name: pkg.browserName || pkg.name
             .split('-')
             .map((part: string) => part.charAt(0).toUpperCase() + part.slice(1))
@@ -68,7 +113,27 @@ export async function release ({ index = 'index', pub, min }: ReleaseOptions, in
           },
         }
 
-    const options: RollupOptions = {
+    const plugins: RolldownPluginOption[] = [
+      externals(),
+      string({
+        include: '**/*.*',
+        exclude: stringExcludeDom,
+      }),
+      image(),
+      styles({
+        mode: instance.params.cssInJs ? 'inject' : 'extract',
+        plugins: [autoprefixer()],
+        autoModules: cssModules ? (id: string) => !id.includes('.global.') : true,
+        minimize: true,
+      }),
+      external(),
+      env(this.params.envPrefix, {
+        include: input,
+        virtual: true,
+      }),
+    ]
+
+    const options: RolldownOptions = {
       input,
       external: ['tslib'],
       treeshake: false,
@@ -76,41 +141,14 @@ export async function release ({ index = 'index', pub, min }: ReleaseOptions, in
         ...output,
         format,
       },
-      plugins: [
-        json(),
-        ts({
-          tsconfig: instance.params.tsconfig,
-          compilerOptions: {
-            sourceMap: false,
-            outDir: releaseFolder,
-          },
-        }),
-        jsx(),
-        externals(),
-        string({
-          include: '**/*.*',
-          exclude: stringExcludeDom,
-        }),
-        image(),
-        styles({
-          mode: instance.params.cssInJs ? 'inject' : 'extract',
-          plugins: [autoprefixer()],
-          autoModules: cssModules ? (id: string) => !id.includes('.global.') : true,
-          minimize: true,
-        }),
-        nodeResolve(),
-        external(),
-      ],
+      plugins,
     }
 
     if (format === 'iife') {
-      options.plugins.push(terser())
+      plugins.push(terser())
     }
 
-    instance.withLint(options)
-    instance.withEnv(options, true)
-
-    const bundle = await rollup(options)
+    const bundle = await rolldown(options)
     await bundle.write(options.output as OutputOptions)
     await bundle.close()
   }
@@ -155,30 +193,25 @@ export async function release ({ index = 'index', pub, min }: ReleaseOptions, in
         const input = glob.sync(`src/${value}.{${instance.params.indexExt}}`)
         const file = path.join(instance.params.releaseFolder, value)
 
-        const options: RollupOptions = {
+        const plugins: RolldownPluginOption[] = [
+          preserveShebangs(),
+          externals(),
+          env(this.params.envPrefix, {
+            include: input,
+          }),
+        ]
+
+        const options: RolldownOptions = {
           input,
           external: [...Object.keys(pkg.dependencies), 'tslib'],
           output: {
             file,
             format: type === 'module' ? 'es' : 'cjs',
           },
-          plugins: [
-            preserveShebangs(),
-            json(),
-            ts({
-              compilerOptions: {
-                declaration: false,
-              },
-            }),
-            externals(),
-            jsx(),
-          ],
+          plugins,
         }
 
-        instance.withLint(options)
-        instance.withEnv(options)
-
-        const bundle = await rollup(options)
+        const bundle = await rolldown(options)
         await bundle.write(options.output as OutputOptions)
         await bundle.close()
       }

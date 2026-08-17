@@ -9,6 +9,7 @@ import { watch } from 'rolldown';
 import importAssets from 'rollup-plugin-import-assets';
 import livereload from 'rollup-plugin-livereload';
 import polyfill from 'rollup-plugin-polyfill-node';
+import env from 'rollup-plugin-process-env';
 import { string } from 'rollup-plugin-string';
 import styles from 'rollup-plugin-styles';
 import { stringExcludeNode, imageInclude, stringExcludeDom } from '../../constants.mjs';
@@ -121,7 +122,11 @@ function start(_a, instance_1) {
         if (lintCheck) {
             plugins.push(lintCheckWatchPlugin());
         }
-        instance.withEnv(options, true, preset);
+        plugins.push(env(this.params.envPrefix, {
+            include: input,
+            virtual: true,
+            preset,
+        }));
         const watcher = watch(options);
         watcher.on('event', (e) => __awaiter(this, void 0, void 0, function* () {
             if (e.code === 'ERROR') {

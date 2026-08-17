@@ -10,6 +10,7 @@ import importAssets from 'rollup-plugin-import-assets'
 import livereload from 'rollup-plugin-livereload'
 import polyfill from 'rollup-plugin-polyfill-node'
 import type { EnvValues } from 'rollup-plugin-process-env'
+import env from 'rollup-plugin-process-env'
 import { string } from 'rollup-plugin-string'
 import styles from 'rollup-plugin-styles'
 
@@ -172,7 +173,12 @@ export async function start ({
     plugins.push(lintCheckWatchPlugin())
   }
 
-  instance.withEnv(options as any, true, preset)
+  plugins.push(env(this.params.envPrefix, {
+    include: input,
+    virtual: true,
+    preset,
+  }))
+
   const watcher = watch(options)
 
   watcher.on('event', async e => {

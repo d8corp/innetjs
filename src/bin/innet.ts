@@ -36,9 +36,10 @@ program
   .description('Run js, ts or tsx file')
   .option('-c, --config <file-path>', 'Config file for TypeScript')
   .option('--expose-gc', 'Run node with global.gc support')
+  .option('-tc, --type-check', 'Runes TypeScript errors checker')
   .addOption(errorOption)
-  .action((filePath: string, { error, config, exposeGc }) => {
-    innetJS.run(filePath, { config, exposeGc }).catch(checkError(error))
+  .action((filePath: string, params) => {
+    innetJS.run(filePath, params).catch(checkError(params.error))
   })
 
 program
@@ -74,9 +75,11 @@ program
   .option('-i, --index <index>', 'Root index file name', 'index')
   .option('-p, --public', 'Public the package')
   .option('-m, --min', 'Add minified version of your library')
+  .option('-tc, --type-check', 'Runes TypeScript errors checker')
+  .option('-lc, --lint-check', 'Runes ESLint errors checker')
   .addOption(errorOption)
-  .action(({ error, index, public: pub, min }) => {
-    innetJS.release({ index, pub, min }).catch(checkError(error))
+  .action(({ error, index, public: pub, min, lintCheck, typeCheck }) => {
+    innetJS.release({ index, pub, min, lintCheck, typeCheck }).catch(checkError(error))
   })
 
 program

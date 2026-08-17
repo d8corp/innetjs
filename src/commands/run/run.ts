@@ -1,17 +1,45 @@
 import { logger } from '@cantinc/logger'
-import commonjs from '@rollup/plugin-commonjs'
-import json from '@rollup/plugin-json'
-import { nodeResolve } from '@rollup/plugin-node-resolve'
-import ts from '@rollup/plugin-typescript'
-import { rollup } from 'rollup'
+import { spawn } from 'child_process'
+import type { InputOptions, OutputOptions } from 'rolldown'
+import { rolldown } from 'rolldown'
 import tmp from 'tmp'
 
 import { getFile } from '../../helpers'
 import type { RunOptions } from '../../types'
-const { spawn } = require('child_process')
 
-export async function run (file: string, { config = '', exposeGc = false }: RunOptions = {}) {
-  const input = await logger.start('Check file', () => getFile(file))
+export async function run (file: string, { config = '', exposeGc = false, typeCheck }: RunOptions = {}) {
+  const input: string = await logger.start('Check file', () => getFile(file))
+
+  if (!input.length) {
+    throw Error('index file is not detected')
+  }
+
+  if (typeCheck) {
+    await logger.start('Check TypeScript', async () => {
+      const { resolve, reject, promise } = Promise.withResolvers()
+
+      const params = ['--noEmit']
+
+      if (config) {
+        params.push('-p', config)
+      }
+
+      const process = spawn('tsc', params, {
+        stdio: 'inherit',
+        shell: true,
+      })
+
+      process.on('close', (code: number) => {
+        if (code) {
+          reject()
+        } else {
+          resolve(undefined)
+        }
+      })
+
+      await promise
+    })
+  }
 
   const folder = await new Promise<string>((resolve, reject) => {
     tmp.dir((err, folder) => {
@@ -26,29 +54,18 @@ export async function run (file: string, { config = '', exposeGc = false }: RunO
   const jsFilePath = `${folder}/index.js`
 
   await logger.start('Build bundle', async () => {
-    const inputOptions = {
+    const inputOptions: InputOptions = {
       input,
-      plugins: [
-        commonjs(),
-        nodeResolve(),
-        json(),
-        ts({
-          tsconfig: config || false,
-          compilerOptions: {
-            sourceMap: true,
-            declaration: false,
-          },
-        }),
-      ],
+      plugins: [],
     }
 
-    const outputOptions = {
+    const outputOptions: OutputOptions = {
       format: 'cjs' as 'commonjs',
       file: jsFilePath,
       sourcemap: true,
     }
 
-    const bundle = await rollup(inputOptions)
+    const bundle = await rolldown(inputOptions)
     await bundle.write(outputOptions)
     await bundle.close()
   })

@@ -55,6 +55,7 @@ export interface StartOptions {
 export interface RunOptions {
   config?: string
   exposeGc?: boolean
+  typeCheck?: boolean
 }
 
 export interface ReleaseOptions {
@@ -62,4 +63,6 @@ export interface ReleaseOptions {
   index?: string
   pub?: boolean
   min?: boolean
+  typeCheck?: boolean
+  lintCheck?: boolean
 }

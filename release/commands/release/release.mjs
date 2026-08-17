@@ -1,20 +1,18 @@
 import { __awaiter } from 'tslib';
 import { logger } from '@cantinc/logger';
 import image from '@rollup/plugin-image';
-import json from '@rollup/plugin-json';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
 import terser from '@rollup/plugin-terser';
-import ts from '@rollup/plugin-typescript';
 import autoprefixer from 'autoprefixer';
+import { exec, spawn } from 'node:child_process';
 import { promises } from 'node:fs';
 import fs from 'fs-extra';
 import glob from 'glob';
 import path from 'node:path';
-import { rollup } from 'rollup';
+import { rolldown } from 'rolldown';
 import external from 'rollup-plugin-external-node-modules';
-import jsx from 'rollup-plugin-innet-jsx';
 import { externals } from 'rollup-plugin-node-externals';
 import { preserveShebangs } from 'rollup-plugin-preserve-shebangs';
+import env from 'rollup-plugin-process-env';
 import { string } from 'rollup-plugin-string';
 import styles from 'rollup-plugin-styles';
 import { promisify } from 'node:util';
@@ -22,11 +20,50 @@ import { REG_TJSX, REG_EXT, stringExcludeDom } from '../../constants.mjs';
 import '../../utils/index.mjs';
 import { getNpmTag } from '../../utils/getNpmTag/getNpmTag.mjs';
 
-const { exec } = require('child_process');
 const execAsync = promisify(exec);
 function release(_a, instance_1) {
-    return __awaiter(this, arguments, void 0, function* ({ index = 'index', pub, min }, instance) {
+    return __awaiter(this, arguments, void 0, function* ({ index = 'index', pub, min, typeCheck, lintCheck }, instance) {
         const { releaseFolder, cssModules } = instance.params;
+        if (typeCheck) {
+            yield logger.start('Check TypeScript', () => __awaiter(this, void 0, void 0, function* () {
+                const { resolve, reject, promise } = Promise.withResolvers();
+                const params = ['--noEmit'];
+                if (instance.params.tsconfig) {
+                    params.push('-p', instance.params.tsconfig);
+                }
+                const process = spawn('tsc', params, {
+                    stdio: 'inherit',
+                    shell: true,
+                });
+                process.on('close', (code) => {
+                    if (code) {
+                        reject();
+                    }
+                    else {
+                        resolve(undefined);
+                    }
+                });
+                yield promise;
+            }));
+        }
+        if (lintCheck) {
+            yield logger.start('Check ESLint', () => __awaiter(this, void 0, void 0, function* () {
+                const { resolve, reject, promise } = Promise.withResolvers();
+                const process = spawn('eslint', ['src'], {
+                    stdio: 'inherit',
+                    shell: true,
+                });
+                process.on('close', (code) => {
+                    if (code) {
+                        reject();
+                    }
+                    else {
+                        resolve(undefined);
+                    }
+                });
+                yield promise;
+            }));
+        }
         yield logger.start('Remove previous release', () => fs.remove(releaseFolder));
         const pkg = yield instance.getPackage();
         const build = (format) => __awaiter(this, void 0, void 0, function* () {
@@ -41,7 +78,7 @@ function release(_a, instance_1) {
             const output = format === 'iife'
                 ? {
                     file: path.join(releaseFolder, pkg.browser || 'index.min.js'),
-                    inlineDynamicImports: true,
+                    codeSplitting: false,
                     name: pkg.browserName || pkg.name
                         .split('-')
                         .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
@@ -59,43 +96,36 @@ function release(_a, instance_1) {
                         return match ? `${name}${match[0]}${ext}` : `${name}${ext}`;
                     },
                 };
+            const plugins = [
+                externals(),
+                string({
+                    include: '**/*.*',
+                    exclude: stringExcludeDom,
+                }),
+                image(),
+                styles({
+                    mode: instance.params.cssInJs ? 'inject' : 'extract',
+                    plugins: [autoprefixer()],
+                    autoModules: cssModules ? (id) => !id.includes('.global.') : true,
+                    minimize: true,
+                }),
+                external(),
+                env(this.params.envPrefix, {
+                    include: input,
+                    virtual: true,
+                }),
+            ];
             const options = {
                 input,
                 external: ['tslib'],
                 treeshake: false,
                 output: Object.assign(Object.assign({}, output), { format }),
-                plugins: [
-                    json(),
-                    ts({
-                        tsconfig: instance.params.tsconfig,
-                        compilerOptions: {
-                            sourceMap: false,
-                            outDir: releaseFolder,
-                        },
-                    }),
-                    jsx(),
-                    externals(),
-                    string({
-                        include: '**/*.*',
-                        exclude: stringExcludeDom,
-                    }),
-                    image(),
-                    styles({
-                        mode: instance.params.cssInJs ? 'inject' : 'extract',
-                        plugins: [autoprefixer()],
-                        autoModules: cssModules ? (id) => !id.includes('.global.') : true,
-                        minimize: true,
-                    }),
-                    nodeResolve(),
-                    external(),
-                ],
+                plugins,
             };
             if (format === 'iife') {
-                options.plugins.push(terser());
+                plugins.push(terser());
             }
-            instance.withLint(options);
-            instance.withEnv(options, true);
-            const bundle = yield rollup(options);
+            const bundle = yield rolldown(options);
             yield bundle.write(options.output);
             yield bundle.close();
         });
@@ -127,6 +157,13 @@ function release(_a, instance_1) {
                     const value = bin[name];
                     const input = glob.sync(`src/${value}.{${instance.params.indexExt}}`);
                     const file = path.join(instance.params.releaseFolder, value);
+                    const plugins = [
+                        preserveShebangs(),
+                        externals(),
+                        env(this.params.envPrefix, {
+                            include: input,
+                        }),
+                    ];
                     const options = {
                         input,
                         external: [...Object.keys(pkg.dependencies), 'tslib'],
@@ -134,21 +171,9 @@ function release(_a, instance_1) {
                             file,
                             format: type === 'module' ? 'es' : 'cjs',
                         },
-                        plugins: [
-                            preserveShebangs(),
-                            json(),
-                            ts({
-                                compilerOptions: {
-                                    declaration: false,
-                                },
-                            }),
-                            externals(),
-                            jsx(),
-                        ],
+                        plugins,
                     };
-                    instance.withLint(options);
-                    instance.withEnv(options);
-                    const bundle = yield rollup(options);
+                    const bundle = yield rolldown(options);
                     yield bundle.write(options.output);
                     yield bundle.close();
                 }

@@ -11,6 +11,7 @@ import { rolldown } from 'rolldown'
 import filesize from 'rollup-plugin-filesize'
 import importAssets from 'rollup-plugin-import-assets'
 import polyfill from 'rollup-plugin-polyfill-node'
+import env from 'rollup-plugin-process-env'
 import { string } from 'rollup-plugin-string'
 import styles from 'rollup-plugin-styles'
 import { promisify } from 'util'
@@ -76,7 +77,12 @@ export async function build ({ node = false, inject = false, index = 'index', ty
 
   const pkg = node && await instance.getPackage()
 
-  const plugins: RolldownPluginOption[] = []
+  const plugins: RolldownPluginOption[] = [
+    env(this.params.envPrefix, {
+      include: input,
+      virtual: true,
+    }),
+  ]
 
   const options: RolldownOptions = {
     input,
@@ -136,8 +142,6 @@ export async function build ({ node = false, inject = false, index = 'index', ty
       }),
     ]
   }
-
-  instance.withEnv(options as any, true)
 
   await logger.start('Build production bundle', async () => {
     const bundle = await rolldown(options)

@@ -1,8 +1,8 @@
 import { __awaiter } from 'tslib';
 import { logger } from '@cantinc/logger';
-import eslint from '@rollup/plugin-eslint';
 import address from 'address';
 import chalk from 'chalk';
+import { spawn } from 'node:child_process';
 import express from 'express';
 import proxy from 'express-http-proxy';
 import fs, { promises } from 'fs-extra';
@@ -10,9 +10,7 @@ import http from 'node:http';
 import https from 'node:https';
 import path from 'node:path';
 import prompt from 'prompts';
-import env from 'rollup-plugin-process-env';
 import '../commands/index.mjs';
-import { lintInclude } from '../constants.mjs';
 import { convertIndexFile } from '../helpers.mjs';
 import '../utils/index.mjs';
 import { getDefaultOptions } from '../utils/getDefaultOptions/getDefaultOptions.mjs';
@@ -23,7 +21,6 @@ import { run } from '../commands/run/run.mjs';
 import { release } from '../commands/release/release.mjs';
 import { printErrorWithFrame } from '../utils/printErrorWithFrame/printErrorWithFrame.mjs';
 
-const { spawn } = require('child_process');
 class InnetJS {
     constructor(options = {}) {
         this.params = getDefaultOptions(options);
@@ -54,24 +51,7 @@ class InnetJS {
             yield release(options, this);
         });
     }
-    withLint(options, prod = false) {
-        if (this._lintUsage === undefined) {
-            this._lintUsage = fs.existsSync(path.join(this.params.projectFolder, '.eslintrc'));
-        }
-        if (this._lintUsage) {
-            options.plugins.push(eslint({
-                include: lintInclude,
-                throwOnError: prod,
-            }));
-        }
-    }
-    withEnv(options, virtual, preset) {
-        options.plugins.push(env(this.params.envPrefix, {
-            include: options.input,
-            virtual,
-            preset,
-        }));
-    }
+    // Helpers
     getPackage() {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.package) {

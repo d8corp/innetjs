@@ -13,6 +13,7 @@ var rolldown = require('rolldown');
 var importAssets = require('rollup-plugin-import-assets');
 var livereload = require('rollup-plugin-livereload');
 var polyfill = require('rollup-plugin-polyfill-node');
+var env = require('rollup-plugin-process-env');
 var rollupPluginString = require('rollup-plugin-string');
 var styles = require('rollup-plugin-styles');
 var constants = require('../../constants.js');
@@ -26,6 +27,7 @@ var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 var importAssets__default = /*#__PURE__*/_interopDefaultLegacy(importAssets);
 var livereload__default = /*#__PURE__*/_interopDefaultLegacy(livereload);
 var polyfill__default = /*#__PURE__*/_interopDefaultLegacy(polyfill);
+var env__default = /*#__PURE__*/_interopDefaultLegacy(env);
 var styles__default = /*#__PURE__*/_interopDefaultLegacy(styles);
 
 function typecheckWatchPlugin() {
@@ -136,7 +138,11 @@ function start(_a, instance_1) {
         if (lintCheck) {
             plugins.push(lintCheckWatchPlugin());
         }
-        instance.withEnv(options, true, preset);
+        plugins.push(env__default["default"](this.params.envPrefix, {
+            include: input,
+            virtual: true,
+            preset,
+        }));
         const watcher = rolldown.watch(options);
         watcher.on('event', (e) => tslib.__awaiter(this, void 0, void 0, function* () {
             if (e.code === 'ERROR') {

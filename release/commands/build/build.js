@@ -15,6 +15,7 @@ var rolldown = require('rolldown');
 var filesize = require('rollup-plugin-filesize');
 var importAssets = require('rollup-plugin-import-assets');
 var polyfill = require('rollup-plugin-polyfill-node');
+var env = require('rollup-plugin-process-env');
 var rollupPluginString = require('rollup-plugin-string');
 var styles = require('rollup-plugin-styles');
 var node_util = require('node:util');
@@ -31,6 +32,7 @@ var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 var filesize__default = /*#__PURE__*/_interopDefaultLegacy(filesize);
 var importAssets__default = /*#__PURE__*/_interopDefaultLegacy(importAssets);
 var polyfill__default = /*#__PURE__*/_interopDefaultLegacy(polyfill);
+var env__default = /*#__PURE__*/_interopDefaultLegacy(env);
 var styles__default = /*#__PURE__*/_interopDefaultLegacy(styles);
 
 const copyFiles = node_util.promisify(fs__default["default"].copy);
@@ -79,7 +81,12 @@ function build(_a, instance_1) {
         }
         yield logger.logger.start('Remove build', () => fs__default["default"].remove(params.buildFolder));
         const pkg = node && (yield instance.getPackage());
-        const plugins = [];
+        const plugins = [
+            env__default["default"](this.params.envPrefix, {
+                include: input,
+                virtual: true,
+            }),
+        ];
         const options = {
             input,
             preserveEntrySignatures: 'strict',
@@ -127,7 +134,6 @@ function build(_a, instance_1) {
                 }),
             ];
         }
-        instance.withEnv(options, true);
         yield logger.logger.start('Build production bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
             const bundle = yield rolldown.rolldown(options);
             yield bundle.write(outputOptions);

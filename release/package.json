@@ -1,6 +1,6 @@
 {
   "name": "innetjs",
-  "version": "4.0.0-alpha.11",
+  "version": "4.0.0-alpha.13",
   "description": "CLI for innet boilerplate",
   "homepage": "https://github.com/d8corp/innetjs",
   "author": "Mikhail Lysikov <d8corp@mail.ru>",
@@ -51,13 +51,8 @@
   "dependencies": {
     "@babel/code-frame": "^7.29.0",
     "@cantinc/logger": "^1.2.0",
-    "@rollup/plugin-commonjs": "^24.0.1",
-    "@rollup/plugin-eslint": "^9.2.0",
-    "@rollup/plugin-image": "^3.0.1",
-    "@rollup/plugin-json": "^5.0.1",
-    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-image": "^3.0.3",
     "@rollup/plugin-terser": "^1.0.0",
-    "@rollup/plugin-typescript": "^12.3.0",
     "address": "^1.2.1",
     "adm-zip": "^0.5.10",
     "autoprefixer": "^10.5.4",
@@ -67,19 +62,17 @@
     "commander": "^9.4.1",
     "dotenv": "^17.4.2",
     "dotenv-expand": "^13.0.0",
-    "express": "^4.18.2",
+    "express": "^5.2.1",
     "express-http-proxy": "^1.6.3",
     "fs-extra": "^10.1.0",
     "glob": "^8.0.3",
     "lines-and-columns": "^2.0.3",
-    "postcss": "^8.4.18",
+    "postcss": "^8.5.26",
     "prompts": "^2.4.2",
     "rolldown": "^1.2.4",
-    "rollup": "^2.79.1",
     "rollup-plugin-external-node-modules": "^1.0.1",
     "rollup-plugin-filesize": "^9.1.2",
     "rollup-plugin-import-assets": "^1.1.1",
-    "rollup-plugin-innet-jsx": "^2.0.1",
     "rollup-plugin-livereload": "^2.0.5",
     "rollup-plugin-node-externals": "^5.0.2",
     "rollup-plugin-polyfill-node": "^0.11.0",
@@ -88,6 +81,6 @@
     "rollup-plugin-string": "^3.0.0",
     "rollup-plugin-styles": "^4.0.0",
     "sass": "^1.55.0",
-    "tmp": "^0.2.1"
+    "tmp": "^0.2.7"
   }
 }

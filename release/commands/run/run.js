@@ -4,25 +4,43 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var tslib = require('tslib');
 var logger = require('@cantinc/logger');
-var commonjs = require('@rollup/plugin-commonjs');
-var json = require('@rollup/plugin-json');
-var pluginNodeResolve = require('@rollup/plugin-node-resolve');
-var ts = require('@rollup/plugin-typescript');
-var rollup = require('rollup');
+var node_child_process = require('node:child_process');
+var rolldown = require('rolldown');
 var tmp = require('tmp');
 var helpers = require('../../helpers.js');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-var commonjs__default = /*#__PURE__*/_interopDefaultLegacy(commonjs);
-var json__default = /*#__PURE__*/_interopDefaultLegacy(json);
-var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
 var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
 
-const { spawn } = require('child_process');
 function run(file_1) {
-    return tslib.__awaiter(this, arguments, void 0, function* (file, { config = '', exposeGc = false } = {}) {
+    return tslib.__awaiter(this, arguments, void 0, function* (file, { config = '', exposeGc = false, typeCheck } = {}) {
         const input = yield logger.logger.start('Check file', () => helpers.getFile(file));
+        if (!input.length) {
+            throw Error('index file is not detected');
+        }
+        if (typeCheck) {
+            yield logger.logger.start('Check TypeScript', () => tslib.__awaiter(this, void 0, void 0, function* () {
+                const { resolve, reject, promise } = Promise.withResolvers();
+                const params = ['--noEmit'];
+                if (config) {
+                    params.push('-p', config);
+                }
+                const process = node_child_process.spawn('tsc', params, {
+                    stdio: 'inherit',
+                    shell: true,
+                });
+                process.on('close', (code) => {
+                    if (code) {
+                        reject();
+                    }
+                    else {
+                        resolve(undefined);
+                    }
+                });
+                yield promise;
+            }));
+        }
         const folder = yield new Promise((resolve, reject) => {
             tmp__default["default"].dir((err, folder) => {
                 if (err) {
@@ -37,25 +55,14 @@ function run(file_1) {
         yield logger.logger.start('Build bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
             const inputOptions = {
                 input,
-                plugins: [
-                    commonjs__default["default"](),
-                    pluginNodeResolve.nodeResolve(),
-                    json__default["default"](),
-                    ts__default["default"]({
-                        tsconfig: config || false,
-                        compilerOptions: {
-                            sourceMap: true,
-                            declaration: false,
-                        },
-                    }),
-                ],
+                plugins: [],
             };
             const outputOptions = {
                 format: 'cjs',
                 file: jsFilePath,
                 sourcemap: true,
             };
-            const bundle = yield rollup.rollup(inputOptions);
+            const bundle = yield rolldown.rolldown(inputOptions);
             yield bundle.write(outputOptions);
             yield bundle.close();
         }));
@@ -64,7 +71,7 @@ function run(file_1) {
             if (exposeGc) {
                 flags.push('--expose-gc');
             }
-            spawn('node', [...flags, '-r', 'source-map-support/register', jsFilePath], { stdio: 'inherit' });
+            node_child_process.spawn('node', [...flags, '-r', 'source-map-support/register', jsFilePath], { stdio: 'inherit' });
         }));
     });
 }

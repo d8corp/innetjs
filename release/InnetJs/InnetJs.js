@@ -4,9 +4,9 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var tslib = require('tslib');
 var logger = require('@cantinc/logger');
-var eslint = require('@rollup/plugin-eslint');
 var address = require('address');
 var chalk = require('chalk');
+var node_child_process = require('node:child_process');
 var express = require('express');
 var proxy = require('express-http-proxy');
 var fs = require('fs-extra');
@@ -14,9 +14,7 @@ var http = require('node:http');
 var https = require('node:https');
 var path = require('node:path');
 var prompt = require('prompts');
-var env = require('rollup-plugin-process-env');
 require('../commands/index.js');
-var constants = require('../constants.js');
 var helpers = require('../helpers.js');
 require('../utils/index.js');
 var getDefaultOptions = require('../utils/getDefaultOptions/getDefaultOptions.js');
@@ -29,7 +27,6 @@ var printErrorWithFrame = require('../utils/printErrorWithFrame/printErrorWithFr
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-var eslint__default = /*#__PURE__*/_interopDefaultLegacy(eslint);
 var address__default = /*#__PURE__*/_interopDefaultLegacy(address);
 var chalk__default = /*#__PURE__*/_interopDefaultLegacy(chalk);
 var express__default = /*#__PURE__*/_interopDefaultLegacy(express);
@@ -39,9 +36,7 @@ var http__default = /*#__PURE__*/_interopDefaultLegacy(http);
 var https__default = /*#__PURE__*/_interopDefaultLegacy(https);
 var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 var prompt__default = /*#__PURE__*/_interopDefaultLegacy(prompt);
-var env__default = /*#__PURE__*/_interopDefaultLegacy(env);
 
-const { spawn } = require('child_process');
 class InnetJS {
     constructor(options = {}) {
         this.params = getDefaultOptions.getDefaultOptions(options);
@@ -72,24 +67,7 @@ class InnetJS {
             yield release.release(options, this);
         });
     }
-    withLint(options, prod = false) {
-        if (this._lintUsage === undefined) {
-            this._lintUsage = fs__default["default"].existsSync(path__default["default"].join(this.params.projectFolder, '.eslintrc'));
-        }
-        if (this._lintUsage) {
-            options.plugins.push(eslint__default["default"]({
-                include: constants.lintInclude,
-                throwOnError: prod,
-            }));
-        }
-    }
-    withEnv(options, virtual, preset) {
-        options.plugins.push(env__default["default"](this.params.envPrefix, {
-            include: options.input,
-            virtual,
-            preset,
-        }));
-    }
+    // Helpers
     getPackage() {
         return tslib.__awaiter(this, void 0, void 0, function* () {
             if (this.package) {
@@ -177,10 +155,10 @@ class InnetJS {
                     (_a = apps[name]) === null || _a === void 0 ? void 0 : _a.kill();
                     const filePath = path__default["default"].resolve(this.params.devBuildFolder, `${name}.js`);
                     if (usualConsoleOutput) {
-                        apps[name] = spawn('node', ['-r', 'source-map-support/register', filePath], { stdio: 'inherit' });
+                        apps[name] = node_child_process.spawn('node', ['-r', 'source-map-support/register', filePath], { stdio: 'inherit' });
                         return;
                     }
-                    const child = spawn('node', ['-r', 'source-map-support/register', filePath], {
+                    const child = node_child_process.spawn('node', ['-r', 'source-map-support/register', filePath], {
                         stdio: ['inherit', 'inherit'],
                     });
                     apps[name] = child;
