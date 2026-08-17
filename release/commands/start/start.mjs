@@ -33,7 +33,7 @@ function typecheckWatchPlugin() {
         },
     };
 }
-function start({ node = false, inject = false, error = false, usualConsoleOutput = false, index = 'index', }, instance) {
+function start({ node = false, inject = false, error = false, typeCheck = false, usualConsoleOutput = false, index = 'index', }, instance) {
     return __awaiter(this, void 0, void 0, function* () {
         const params = instance.params;
         const pkg = yield instance.getPackage();
@@ -95,7 +95,10 @@ function start({ node = false, inject = false, error = false, usualConsoleOutput
             }), string({
                 include: '**/*.*',
                 exclude: stringExcludeDom,
-            }), instance.createClient(key, cert, pkg, path.parse(input[0]).name, inject), typecheckWatchPlugin(), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [params.devBuildFolder, params.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
+            }), instance.createClient(key, cert, pkg, path.parse(input[0]).name, inject), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [params.devBuildFolder, params.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
+            if (typeCheck) {
+                plugins.push(typecheckWatchPlugin());
+            }
         }
         instance.withEnv(options, true, preset);
         const watcher = watch(options);

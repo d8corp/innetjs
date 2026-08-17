@@ -338,7 +338,7 @@ function typecheckWatchPlugin() {
         },
     };
 }
-function start({ node = false, inject = false, error = false, usualConsoleOutput = false, index = 'index', }, instance) {
+function start({ node = false, inject = false, error = false, typeCheck = false, usualConsoleOutput = false, index = 'index', }, instance) {
     return tslib.__awaiter(this, void 0, void 0, function* () {
         const params = instance.params;
         const pkg = yield instance.getPackage();
@@ -400,7 +400,10 @@ function start({ node = false, inject = false, error = false, usualConsoleOutput
             }), rollupPluginString.string({
                 include: '**/*.*',
                 exclude: stringExcludeDom,
-            }), instance.createClient(key, cert, pkg, path__default["default"].parse(input[0]).name, inject), typecheckWatchPlugin(), livereload__default["default"](Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [params.devBuildFolder, params.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
+            }), instance.createClient(key, cert, pkg, path__default["default"].parse(input[0]).name, inject), livereload__default["default"](Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [params.devBuildFolder, params.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
+            if (typeCheck) {
+                plugins.push(typecheckWatchPlugin());
+            }
         }
         instance.withEnv(options, true, preset);
         const watcher = rolldown.watch(options);
@@ -925,7 +928,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":""};
+  const env = {"__INNETJS__PACKAGE_VERSION":"4.0.0-alpha.2"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {
@@ -972,10 +975,11 @@ commander.program
     .option('-n, --node', 'Start development for Node.js')
     .option('-uco, --usual-console-output', 'Removes custom error output (code-frame, colors...)')
     .option('-in, --inject', 'Injects script element into index.html')
+    .option('-tc, --type-check', 'Runes TypeScript errors checker')
     .option('-i, --index <index>', 'Root index file name', 'index')
     .addOption(errorOption)
-    .action(({ error, node, index, inject, usualConsoleOutput }) => {
-    innetJS.start({ node, error, index, inject, usualConsoleOutput }).catch(e => {
+    .action(({ error, node, index, inject, usualConsoleOutput, typeCheck }) => {
+    innetJS.start({ node, error, index, inject, usualConsoleOutput, typeCheck }).catch(e => {
         if (error) {
             console.error(e);
             process.exit(1);

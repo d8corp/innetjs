@@ -45,6 +45,7 @@ export async function start ({
   node = false,
   inject = false,
   error = false,
+  typeCheck = false,
   usualConsoleOutput = false,
   index = 'index',
 }: StartOptions, instance: InnetJS) {
@@ -124,7 +125,6 @@ export async function start ({
         exclude: stringExcludeDom,
       }),
       instance.createClient(key, cert, pkg, path.parse(input[0]).name, inject),
-      typecheckWatchPlugin(),
       livereload({
         exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'],
         watch: [params.devBuildFolder, params.publicFolder],
@@ -132,6 +132,10 @@ export async function start ({
         ...(key && cert ? { https: { key, cert } } : {}),
       }),
     )
+
+    if (typeCheck) {
+      plugins.push(typecheckWatchPlugin())
+    }
   }
 
   instance.withEnv(options as any, true, preset)

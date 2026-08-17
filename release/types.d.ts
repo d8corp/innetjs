@@ -43,6 +43,7 @@ export interface StartOptions {
     error?: boolean;
     usualConsoleOutput?: boolean;
     index?: string;
+    typeCheck?: boolean;
 }
 export interface RunOptions {
     config?: string;
