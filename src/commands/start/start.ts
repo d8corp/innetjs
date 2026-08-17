@@ -4,7 +4,7 @@ import { spawn } from 'child_process'
 import fs from 'fs-extra'
 import glob from 'glob'
 import path from 'path'
-import type { OutputOptions, RolldownPluginOption, WatchOptions } from 'rolldown'
+import type { OutputOptions, Plugin, RolldownPluginOption, WatchOptions } from 'rolldown'
 import { watch } from 'rolldown'
 import importAssets from 'rollup-plugin-import-assets'
 import livereload from 'rollup-plugin-livereload'
@@ -17,13 +17,13 @@ import { imageInclude, stringExcludeDom, stringExcludeNode } from '../../constan
 import type { InnetJS } from '../../InnetJs'
 import type { StartOptions } from '../../types'
 
-export function typecheckWatchPlugin () {
+export function typecheckWatchPlugin (): Plugin {
   let tscProcess = null
 
   return {
-    name: 'typecheck-watch',
+    name: 'type-check',
 
-    buildEnd () {
+    buildStart () {
       if (tscProcess) {
         logger.end('Check TypeScript')
         tscProcess.kill()
@@ -43,13 +43,13 @@ export function typecheckWatchPlugin () {
   }
 }
 
-export function lintCheckWatchPlugin () {
+export function lintCheckWatchPlugin (): Plugin {
   let lintProcess = null
 
   return {
-    name: 'lintcheck-watch',
+    name: 'lint-check',
 
-    buildEnd () {
+    buildStart () {
       if (lintProcess) {
         logger.end('Check ESLint')
         lintProcess.kill()
@@ -177,9 +177,7 @@ export async function start ({
 
   watcher.on('event', async e => {
     if (e.code === 'ERROR') {
-      logger.end('Bundling', 'Error')
-      // eslint-disable-next-line no-console
-      console.error(error ? e.error.stack : e.error.message)
+      logger.end('Bundling', error ? e.error.stack : e.error.message)
     } else if (e.code === 'BUNDLE_START') {
       logger.start('Bundling')
     } else if (e.code === 'BUNDLE_END') {

@@ -36,6 +36,8 @@ export interface BuildOptions {
     node?: boolean;
     inject?: boolean;
     index?: string;
+    typeCheck?: boolean;
+    lintCheck?: boolean;
 }
 export interface StartOptions {
     node?: boolean;

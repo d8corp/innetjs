@@ -1,6 +1,7 @@
 import { logger } from '@cantinc/logger'
 import terser from '@rollup/plugin-terser'
 import autoprefixer from 'autoprefixer'
+import { spawn } from 'child_process'
 import { promises as fsx } from 'fs'
 import fs from 'fs-extra'
 import glob from 'glob'
@@ -21,12 +22,54 @@ import type { BuildOptions } from '../../types'
 
 const copyFiles = promisify(fs.copy)
 
-export async function build ({ node = false, inject = false, index = 'index' }: BuildOptions, instance: InnetJS) {
+export async function build ({ node = false, inject = false, index = 'index', typeCheck, lintCheck }: BuildOptions, instance: InnetJS) {
   const params = instance.params
   const input = glob.sync(`src/${index}.{${params.indexExt}}`)
 
   if (!input.length) {
     throw Error('index file is not detected')
+  }
+
+  if (typeCheck) {
+    await logger.start('Check TypeScript', async () => {
+      const { resolve, reject, promise } = Promise.withResolvers()
+
+      const process = spawn('tsc', ['--noEmit'], {
+        stdio: 'inherit',
+        shell: true,
+      })
+
+      process.on('close', (code: number) => {
+        if (code) {
+          reject()
+        } else {
+          resolve(undefined)
+        }
+      })
+
+      await promise
+    })
+  }
+
+  if (lintCheck) {
+    await logger.start('Check ESLint', async () => {
+      const { resolve, reject, promise } = Promise.withResolvers()
+
+      const process = spawn('eslint', ['src'], {
+        stdio: 'inherit',
+        shell: true,
+      })
+
+      process.on('close', (code: number) => {
+        if (code) {
+          reject()
+        } else {
+          resolve(undefined)
+        }
+      })
+
+      await promise
+    })
   }
 
   await logger.start('Remove build', () => fs.remove(params.buildFolder))

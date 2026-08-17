@@ -2,6 +2,7 @@ import { __awaiter } from 'tslib';
 import { logger } from '@cantinc/logger';
 import terser from '@rollup/plugin-terser';
 import autoprefixer from 'autoprefixer';
+import { spawn } from 'node:child_process';
 import { promises } from 'node:fs';
 import fs from 'fs-extra';
 import glob from 'glob';
@@ -18,11 +19,47 @@ import { reporter, convertIndexFile } from '../../helpers.mjs';
 
 const copyFiles = promisify(fs.copy);
 function build(_a, instance_1) {
-    return __awaiter(this, arguments, void 0, function* ({ node = false, inject = false, index = 'index' }, instance) {
+    return __awaiter(this, arguments, void 0, function* ({ node = false, inject = false, index = 'index', typeCheck, lintCheck }, instance) {
         const params = instance.params;
         const input = glob.sync(`src/${index}.{${params.indexExt}}`);
         if (!input.length) {
             throw Error('index file is not detected');
+        }
+        if (typeCheck) {
+            yield logger.start('Check TypeScript', () => __awaiter(this, void 0, void 0, function* () {
+                const { resolve, reject, promise } = Promise.withResolvers();
+                const process = spawn('tsc', ['--noEmit'], {
+                    stdio: 'inherit',
+                    shell: true,
+                });
+                process.on('close', (code) => {
+                    if (code) {
+                        reject();
+                    }
+                    else {
+                        resolve(undefined);
+                    }
+                });
+                yield promise;
+            }));
+        }
+        if (lintCheck) {
+            yield logger.start('Check ESLint', () => __awaiter(this, void 0, void 0, function* () {
+                const { resolve, reject, promise } = Promise.withResolvers();
+                const process = spawn('eslint', ['src'], {
+                    stdio: 'inherit',
+                    shell: true,
+                });
+                process.on('close', (code) => {
+                    if (code) {
+                        reject();
+                    }
+                    else {
+                        resolve(undefined);
+                    }
+                });
+                yield promise;
+            }));
         }
         yield logger.start('Remove build', () => fs.remove(params.buildFolder));
         const pkg = node && (yield instance.getPackage());

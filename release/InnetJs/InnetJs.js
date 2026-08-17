@@ -90,34 +90,6 @@ class InnetJS {
             preset,
         }));
     }
-    increaseVersion(release) {
-        return tslib.__awaiter(this, void 0, void 0, function* () {
-            const pkg = yield this.getPackage();
-            yield logger.logger.start('Prepare package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                const version = pkg.version.split('.');
-                switch (release) {
-                    case 'patch': {
-                        version[2]++;
-                        break;
-                    }
-                    case 'minor': {
-                        version[1]++;
-                        version[2] = 0;
-                        break;
-                    }
-                    case 'major': {
-                        version[1] = 0;
-                        version[2] = 0;
-                        version[0]++;
-                        break;
-                    }
-                    default: return;
-                }
-                pkg.version = version.join('.');
-                yield fs__default["default"].writeFile(path__default["default"].resolve(this.params.projectFolder, 'package.json'), JSON.stringify(pkg, undefined, 2), 'UTF-8');
-            }));
-        });
-    }
     getPackage() {
         return tslib.__awaiter(this, void 0, void 0, function* () {
             if (this.package) {

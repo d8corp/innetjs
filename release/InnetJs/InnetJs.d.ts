@@ -13,7 +13,6 @@ export declare class InnetJS {
     private _lintUsage;
     withLint(options: rollup.RollupOptions, prod?: boolean): void;
     withEnv(options: rollup.RollupOptions, virtual?: boolean, preset?: EnvValues): void;
-    increaseVersion(release: string): Promise<void>;
     getPackage(): Promise<Record<string, any>>;
     createClient(key: any, cert: any, pkg: any, index: string, inject: boolean): rollup.Plugin;
     createServer(input: string[], error?: boolean, usualConsoleOutput?: boolean): rollup.Plugin;

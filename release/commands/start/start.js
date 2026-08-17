@@ -31,8 +31,8 @@ var styles__default = /*#__PURE__*/_interopDefaultLegacy(styles);
 function typecheckWatchPlugin() {
     let tscProcess = null;
     return {
-        name: 'typecheck-watch',
-        buildEnd() {
+        name: 'type-check',
+        buildStart() {
             if (tscProcess) {
                 logger.logger.end('Check TypeScript');
                 tscProcess.kill();
@@ -51,8 +51,8 @@ function typecheckWatchPlugin() {
 function lintCheckWatchPlugin() {
     let lintProcess = null;
     return {
-        name: 'lintcheck-watch',
-        buildEnd() {
+        name: 'lint-check',
+        buildStart() {
             if (lintProcess) {
                 logger.logger.end('Check ESLint');
                 lintProcess.kill();
@@ -140,9 +140,7 @@ function start(_a, instance_1) {
         const watcher = rolldown.watch(options);
         watcher.on('event', (e) => tslib.__awaiter(this, void 0, void 0, function* () {
             if (e.code === 'ERROR') {
-                logger.logger.end('Bundling', 'Error');
-                // eslint-disable-next-line no-console
-                console.error(error ? e.error.stack : e.error.message);
+                logger.logger.end('Bundling', error ? e.error.stack : e.error.message);
             }
             else if (e.code === 'BUNDLE_START') {
                 logger.logger.start('Bundling');

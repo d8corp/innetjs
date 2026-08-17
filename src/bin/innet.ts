@@ -62,8 +62,10 @@ program
   .option('-n, --node', 'Build for node.js')
   .option('-in, --inject', 'Injects script element into index.html')
   .option('-i, --index <index>', 'Root index file name', 'index')
-  .action(({ error, node, index, inject }) => {
-    innetJS.build({ node, index, inject }).catch(checkError(error))
+  .option('-tc, --type-check', 'Runes TypeScript errors checker')
+  .option('-lc, --lint-check', 'Runes ESLint errors checker')
+  .action((params) => {
+    innetJS.build(params).catch(checkError(params.error))
   })
 
 program

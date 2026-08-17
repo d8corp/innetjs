@@ -6,6 +6,7 @@ var tslib = require('tslib');
 var logger = require('@cantinc/logger');
 var terser = require('@rollup/plugin-terser');
 var autoprefixer = require('autoprefixer');
+var node_child_process = require('node:child_process');
 var node_fs = require('node:fs');
 var fs = require('fs-extra');
 var glob = require('glob');
@@ -34,11 +35,47 @@ var styles__default = /*#__PURE__*/_interopDefaultLegacy(styles);
 
 const copyFiles = node_util.promisify(fs__default["default"].copy);
 function build(_a, instance_1) {
-    return tslib.__awaiter(this, arguments, void 0, function* ({ node = false, inject = false, index = 'index' }, instance) {
+    return tslib.__awaiter(this, arguments, void 0, function* ({ node = false, inject = false, index = 'index', typeCheck, lintCheck }, instance) {
         const params = instance.params;
         const input = glob__default["default"].sync(`src/${index}.{${params.indexExt}}`);
         if (!input.length) {
             throw Error('index file is not detected');
+        }
+        if (typeCheck) {
+            yield logger.logger.start('Check TypeScript', () => tslib.__awaiter(this, void 0, void 0, function* () {
+                const { resolve, reject, promise } = Promise.withResolvers();
+                const process = node_child_process.spawn('tsc', ['--noEmit'], {
+                    stdio: 'inherit',
+                    shell: true,
+                });
+                process.on('close', (code) => {
+                    if (code) {
+                        reject();
+                    }
+                    else {
+                        resolve(undefined);
+                    }
+                });
+                yield promise;
+            }));
+        }
+        if (lintCheck) {
+            yield logger.logger.start('Check ESLint', () => tslib.__awaiter(this, void 0, void 0, function* () {
+                const { resolve, reject, promise } = Promise.withResolvers();
+                const process = node_child_process.spawn('eslint', ['src'], {
+                    stdio: 'inherit',
+                    shell: true,
+                });
+                process.on('close', (code) => {
+                    if (code) {
+                        reject();
+                    }
+                    else {
+                        resolve(undefined);
+                    }
+                });
+                yield promise;
+            }));
         }
         yield logger.logger.start('Remove build', () => fs__default["default"].remove(params.buildFolder));
         const pkg = node && (yield instance.getPackage());

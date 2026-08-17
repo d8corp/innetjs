@@ -18,6 +18,7 @@ var prompt = require('prompts');
 var env = require('rollup-plugin-process-env');
 var terser = require('@rollup/plugin-terser');
 var autoprefixer = require('autoprefixer');
+var node_child_process = require('node:child_process');
 var node_fs = require('node:fs');
 var glob = require('glob');
 var rolldown = require('rolldown');
@@ -29,7 +30,6 @@ var styles = require('rollup-plugin-styles');
 var node_util = require('node:util');
 var Zip = require('adm-zip');
 var axios = require('axios');
-var node_child_process = require('node:child_process');
 var selector = require('cli-select');
 var node_os = require('node:os');
 var readline = require('node:readline');
@@ -269,11 +269,47 @@ const reporter = (options, outputOptions, info) => {
 
 const copyFiles = node_util.promisify(fs__default["default"].copy);
 function build(_a, instance_1) {
-    return tslib.__awaiter(this, arguments, void 0, function* ({ node = false, inject = false, index = 'index' }, instance) {
+    return tslib.__awaiter(this, arguments, void 0, function* ({ node = false, inject = false, index = 'index', typeCheck, lintCheck }, instance) {
         const params = instance.params;
         const input = glob__default["default"].sync(`src/${index}.{${params.indexExt}}`);
         if (!input.length) {
             throw Error('index file is not detected');
+        }
+        if (typeCheck) {
+            yield logger.logger.start('Check TypeScript', () => tslib.__awaiter(this, void 0, void 0, function* () {
+                const { resolve, reject, promise } = Promise.withResolvers();
+                const process = node_child_process.spawn('tsc', ['--noEmit'], {
+                    stdio: 'inherit',
+                    shell: true,
+                });
+                process.on('close', (code) => {
+                    if (code) {
+                        reject();
+                    }
+                    else {
+                        resolve(undefined);
+                    }
+                });
+                yield promise;
+            }));
+        }
+        if (lintCheck) {
+            yield logger.logger.start('Check ESLint', () => tslib.__awaiter(this, void 0, void 0, function* () {
+                const { resolve, reject, promise } = Promise.withResolvers();
+                const process = node_child_process.spawn('eslint', ['src'], {
+                    stdio: 'inherit',
+                    shell: true,
+                });
+                process.on('close', (code) => {
+                    if (code) {
+                        reject();
+                    }
+                    else {
+                        resolve(undefined);
+                    }
+                });
+                yield promise;
+            }));
         }
         yield logger.logger.start('Remove build', () => fs__default["default"].remove(params.buildFolder));
         const pkg = node && (yield instance.getPackage());
@@ -625,8 +661,8 @@ function run(file_1) {
 function typecheckWatchPlugin() {
     let tscProcess = null;
     return {
-        name: 'typecheck-watch',
-        buildEnd() {
+        name: 'type-check',
+        buildStart() {
             if (tscProcess) {
                 logger.logger.end('Check TypeScript');
                 tscProcess.kill();
@@ -645,8 +681,8 @@ function typecheckWatchPlugin() {
 function lintCheckWatchPlugin() {
     let lintProcess = null;
     return {
-        name: 'lintcheck-watch',
-        buildEnd() {
+        name: 'lint-check',
+        buildStart() {
             if (lintProcess) {
                 logger.logger.end('Check ESLint');
                 lintProcess.kill();
@@ -734,9 +770,7 @@ function start(_a, instance_1) {
         const watcher = rolldown.watch(options);
         watcher.on('event', (e) => tslib.__awaiter(this, void 0, void 0, function* () {
             if (e.code === 'ERROR') {
-                logger.logger.end('Bundling', 'Error');
-                // eslint-disable-next-line no-console
-                console.error(error ? e.error.stack : e.error.message);
+                logger.logger.end('Bundling', error ? e.error.stack : e.error.message);
             }
             else if (e.code === 'BUNDLE_START') {
                 logger.logger.start('Bundling');
@@ -796,34 +830,6 @@ class InnetJS {
             virtual,
             preset,
         }));
-    }
-    increaseVersion(release) {
-        return tslib.__awaiter(this, void 0, void 0, function* () {
-            const pkg = yield this.getPackage();
-            yield logger.logger.start('Prepare package.json', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                const version = pkg.version.split('.');
-                switch (release) {
-                    case 'patch': {
-                        version[2]++;
-                        break;
-                    }
-                    case 'minor': {
-                        version[1]++;
-                        version[2] = 0;
-                        break;
-                    }
-                    case 'major': {
-                        version[1] = 0;
-                        version[2] = 0;
-                        version[0]++;
-                        break;
-                    }
-                    default: return;
-                }
-                pkg.version = version.join('.');
-                yield fs__default["default"].writeFile(path__default["default"].resolve(this.params.projectFolder, 'package.json'), JSON.stringify(pkg, undefined, 2), 'UTF-8');
-            }));
-        });
     }
     getPackage() {
         return tslib.__awaiter(this, void 0, void 0, function* () {
@@ -936,7 +942,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"4.0.0-alpha.10"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"4.0.0-alpha.11"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {
@@ -994,8 +1000,10 @@ commander.program
     .option('-n, --node', 'Build for node.js')
     .option('-in, --inject', 'Injects script element into index.html')
     .option('-i, --index <index>', 'Root index file name', 'index')
-    .action(({ error, node, index, inject }) => {
-    innetJS.build({ node, index, inject }).catch(checkError(error));
+    .option('-tc, --type-check', 'Runes TypeScript errors checker')
+    .option('-lc, --lint-check', 'Runes ESLint errors checker')
+    .action((params) => {
+    innetJS.build(params).catch(checkError(params.error));
 });
 commander.program
     .command('release')
@@ -1006,27 +1014,6 @@ commander.program
     .addOption(errorOption)
     .action(({ error, index, public: pub, min }) => {
     innetJS.release({ index, pub, min }).catch(checkError(error));
-});
-commander.program
-    .command('patch')
-    .description('Increase patch version of package')
-    .addOption(errorOption)
-    .action(({ error }) => {
-    innetJS.increaseVersion('patch').catch(checkError(error));
-});
-commander.program
-    .command('minor')
-    .description('Increase minor version of package')
-    .addOption(errorOption)
-    .action(({ error }) => {
-    innetJS.increaseVersion('minor').catch(checkError(error));
-});
-commander.program
-    .command('major')
-    .description('Increase major version of package')
-    .addOption(errorOption)
-    .action(({ error }) => {
-    innetJS.increaseVersion('major').catch(checkError(error));
 });
 commander.program
     .parse(process.argv);
