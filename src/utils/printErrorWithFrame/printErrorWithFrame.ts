@@ -31,11 +31,13 @@ export function printErrorWithFrame (output: string, deep = 0, hide = false): st
   if (filePath && !filePath.includes('node_modules')) {
     try {
       const source = fs.readFileSync(filePath, 'utf8')
+
       frame = codeFrameColumns(
         source,
         { start: { line, column } },
         { highlightCode: true },
       )
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {}
   } else {
     frame = inputFrame.join('\n')
@@ -53,6 +55,7 @@ export function printErrorWithFrame (output: string, deep = 0, hide = false): st
       if (line.includes('node_modules')) {
         if (cur.at(-1) === collapse) {
           collapse = collapse.replace(`${hiddenCount} more`, `${++hiddenCount} more`)
+
           return [
             ...cur.slice(0, -1),
             collapse,

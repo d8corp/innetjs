@@ -1,14 +1,23 @@
 #!/usr/bin/env node
 import { Option, program } from 'commander'
 
-import { InnetJS } from '..'
 import { updateDotenv } from '../utils'
+
+import { InnetJS } from '..'
 
 updateDotenv()
 
 const innetJS = new InnetJS()
 
 const errorOption = new Option('-e, --error', 'Show error details')
+
+const checkError = (flag: boolean) => (error: any) => {
+  if (flag) {
+    // eslint-disable-next-line no-console
+    console.error(error)
+    process.exit(1)
+  }
+}
 
 program
   .version(process.env.__INNETJS__PACKAGE_VERSION, '-v, --version')
@@ -19,12 +28,7 @@ program
   .option('-t, --template <template>', 'Select template fe or be')
   .addOption(errorOption)
   .action((appName, { error, template }) => {
-    innetJS.init(appName, { template }).catch(e => {
-      if (error) {
-        console.error(e)
-        process.exit(1)
-      }
-    })
+    innetJS.init(appName, { template }).catch(checkError(error))
   })
 
 program
@@ -34,12 +38,7 @@ program
   .option('--expose-gc', 'Run node with global.gc support')
   .addOption(errorOption)
   .action((filePath: string, { error, config, exposeGc }) => {
-    innetJS.run(filePath, { config, exposeGc }).catch(e => {
-      if (error) {
-        console.error(e)
-        process.exit(1)
-      }
-    })
+    innetJS.run(filePath, { config, exposeGc }).catch(checkError(error))
   })
 
 program
@@ -49,15 +48,11 @@ program
   .option('-uco, --usual-console-output', 'Removes custom error output (code-frame, colors...)')
   .option('-in, --inject', 'Injects script element into index.html')
   .option('-tc, --type-check', 'Runes TypeScript errors checker')
+  .option('-lc, --lint-check', 'Runes ESLint errors checker')
   .option('-i, --index <index>', 'Root index file name', 'index')
   .addOption(errorOption)
-  .action(({ error, node, index, inject, usualConsoleOutput, typeCheck }) => {
-    innetJS.start({ node, error, index, inject, usualConsoleOutput, typeCheck }).catch(e => {
-      if (error) {
-        console.error(e)
-        process.exit(1)
-      }
-    })
+  .action((params) => {
+    innetJS.start(params).catch(checkError(params.error))
   })
 
 program
@@ -68,12 +63,7 @@ program
   .option('-in, --inject', 'Injects script element into index.html')
   .option('-i, --index <index>', 'Root index file name', 'index')
   .action(({ error, node, index, inject }) => {
-    innetJS.build({ node, index, inject }).catch(e => {
-      if (error) {
-        console.error(e)
-        process.exit(1)
-      }
-    })
+    innetJS.build({ node, index, inject }).catch(checkError(error))
   })
 
 program
@@ -84,12 +74,7 @@ program
   .option('-m, --min', 'Add minified version of your library')
   .addOption(errorOption)
   .action(({ error, index, public: pub, min }) => {
-    innetJS.release({ index, pub, min }).catch(e => {
-      if (error) {
-        console.error(e)
-        process.exit(1)
-      }
-    })
+    innetJS.release({ index, pub, min }).catch(checkError(error))
   })
 
 program
@@ -97,12 +82,7 @@ program
   .description('Increase patch version of package')
   .addOption(errorOption)
   .action(({ error }) => {
-    innetJS.increaseVersion('patch').catch(e => {
-      if (error) {
-        console.error(e)
-        process.exit(1)
-      }
-    })
+    innetJS.increaseVersion('patch').catch(checkError(error))
   })
 
 program
@@ -110,12 +90,7 @@ program
   .description('Increase minor version of package')
   .addOption(errorOption)
   .action(({ error }) => {
-    innetJS.increaseVersion('minor').catch(e => {
-      if (error) {
-        console.error(e)
-        process.exit(1)
-      }
-    })
+    innetJS.increaseVersion('minor').catch(checkError(error))
   })
 
 program
@@ -123,12 +98,7 @@ program
   .description('Increase major version of package')
   .addOption(errorOption)
   .action(({ error }) => {
-    innetJS.increaseVersion('major').catch(e => {
-      if (error) {
-        console.error(e)
-        process.exit(1)
-      }
-    })
+    innetJS.increaseVersion('major').catch(checkError(error))
   })
 
 program

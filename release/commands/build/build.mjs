@@ -9,7 +9,7 @@ import { promises } from 'node:fs';
 import fs from 'fs-extra';
 import glob from 'glob';
 import path from 'node:path';
-import rollup from 'rollup';
+import { rollup } from 'rollup';
 import filesize from 'rollup-plugin-filesize';
 import importAssets from 'rollup-plugin-import-assets';
 import jsx from 'rollup-plugin-innet-jsx';
@@ -22,8 +22,8 @@ import { stringExcludeNode, imageInclude, stringExcludeDom } from '../../constan
 import { reporter, convertIndexFile } from '../../helpers.mjs';
 
 const copyFiles = promisify(fs.copy);
-function build({ node = false, inject = false, index = 'index' }, instance) {
-    return __awaiter(this, void 0, void 0, function* () {
+function build(_a, instance_1) {
+    return __awaiter(this, arguments, void 0, function* ({ node = false, inject = false, index = 'index' }, instance) {
         const params = instance.params;
         const input = glob.sync(`src/${index}.{${params.indexExt}}`);
         if (!input.length) {
@@ -97,7 +97,7 @@ function build({ node = false, inject = false, index = 'index' }, instance) {
         }
         instance.withEnv(options, true);
         yield logger.start('Build production bundle', () => __awaiter(this, void 0, void 0, function* () {
-            const bundle = yield rollup.rollup(options);
+            const bundle = yield rollup(options);
             yield bundle.write(outputOptions);
             yield bundle.close();
             if (!node) {

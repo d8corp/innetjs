@@ -11,13 +11,14 @@ import readline from 'readline'
 import stream from 'stream'
 import { promisify } from 'util'
 
-import { InitOptions } from '../../types'
+import type { InitOptions } from '../../types'
 
 const execAsync = promisify(exec)
 const pipeline = promisify(stream.pipeline)
 
 export async function init (appName: string, { template, force = false }: InitOptions = {}) {
   const appPath = path.resolve(appName)
+
   const { data } = await logger.start('Get templates list', async () =>
     await axios.get('https://api.github.com/repos/d8corp/innetjs-templates/branches'))
 
@@ -67,6 +68,7 @@ export async function init (appName: string, { template, force = false }: InitOp
     const tmpPath = tmpdir()
     const zipPath = path.join(tmpPath, 'template.zip')
     const unzipPath = path.join(tmpPath, `innetjs-templates-${template}`)
+
     const { data } = await axios.get(`https://github.com/d8corp/innetjs-templates/archive/refs/heads/${template}.zip`, {
       responseType: 'stream',
     })

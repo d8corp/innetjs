@@ -29,8 +29,8 @@ var stream__default = /*#__PURE__*/_interopDefaultLegacy(stream);
 
 const execAsync = node_util.promisify(node_child_process.exec);
 const pipeline = node_util.promisify(stream__default["default"].pipeline);
-function init(appName, { template, force = false } = {}) {
-    return tslib.__awaiter(this, void 0, void 0, function* () {
+function init(appName_1) {
+    return tslib.__awaiter(this, arguments, void 0, function* (appName, { template, force = false } = {}) {
         const appPath = path__default["default"].resolve(appName);
         const { data } = yield logger.logger.start('Get templates list', () => tslib.__awaiter(this, void 0, void 0, function* () { return yield axios__default["default"].get('https://api.github.com/repos/d8corp/innetjs-templates/branches'); }));
         const templates = data.map(({ name }) => name).filter((name) => name !== 'main');

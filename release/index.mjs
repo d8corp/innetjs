@@ -1,10 +1,10 @@
 import './_virtual/_rollup-plugin-process-env.mjs';
+export { NPM_TAG, REG_EXT, REG_TJSX, SCRIPT_EXTENSIONS, imageInclude, lintInclude, stringExcludeDom, stringExcludeNode } from './constants.mjs';
 import './InnetJs/index.mjs';
 import './types.mjs';
-export { NPM_TAG, REG_CLEAR_TEXT, REG_EXT, REG_RPT_ERROR_FILE, REG_TJSX, SCRIPT_EXTENSIONS, imageInclude, lintInclude, stringExcludeDom, stringExcludeNode } from './constants.mjs';
 import './utils/index.mjs';
 export { InnetJS } from './InnetJs/InnetJs.mjs';
+export { getDefaultOptions } from './utils/getDefaultOptions/getDefaultOptions.mjs';
+export { getNpmTag } from './utils/getNpmTag/getNpmTag.mjs';
 export { printErrorWithFrame } from './utils/printErrorWithFrame/printErrorWithFrame.mjs';
 export { updateDotenv } from './utils/updateDotenv/updateDotenv.mjs';
-export { getNpmTag } from './utils/getNpmTag/getNpmTag.mjs';
-export { getDefaultOptions } from './utils/getDefaultOptions/getDefaultOptions.mjs';

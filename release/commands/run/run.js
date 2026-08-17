@@ -17,12 +17,11 @@ function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'defau
 var commonjs__default = /*#__PURE__*/_interopDefaultLegacy(commonjs);
 var json__default = /*#__PURE__*/_interopDefaultLegacy(json);
 var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
-var rollup__default = /*#__PURE__*/_interopDefaultLegacy(rollup);
 var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
 
 const { spawn } = require('child_process');
-function run(file, { config = '', exposeGc = false } = {}) {
-    return tslib.__awaiter(this, void 0, void 0, function* () {
+function run(file_1) {
+    return tslib.__awaiter(this, arguments, void 0, function* (file, { config = '', exposeGc = false } = {}) {
         const input = yield logger.logger.start('Check file', () => helpers.getFile(file));
         const folder = yield new Promise((resolve, reject) => {
             tmp__default["default"].dir((err, folder) => {
@@ -56,7 +55,7 @@ function run(file, { config = '', exposeGc = false } = {}) {
                 file: jsFilePath,
                 sourcemap: true,
             };
-            const bundle = yield rollup__default["default"].rollup(inputOptions);
+            const bundle = yield rollup.rollup(inputOptions);
             yield bundle.write(outputOptions);
             yield bundle.close();
         }));

@@ -14,8 +14,8 @@ import { promisify } from 'node:util';
 
 const execAsync = promisify(exec);
 const pipeline = promisify(stream.pipeline);
-function init(appName, { template, force = false } = {}) {
-    return __awaiter(this, void 0, void 0, function* () {
+function init(appName_1) {
+    return __awaiter(this, arguments, void 0, function* (appName, { template, force = false } = {}) {
         const appPath = path.resolve(appName);
         const { data } = yield logger.start('Get templates list', () => __awaiter(this, void 0, void 0, function* () { return yield axios.get('https://api.github.com/repos/d8corp/innetjs-templates/branches'); }));
         const templates = data.map(({ name }) => name).filter((name) => name !== 'main');

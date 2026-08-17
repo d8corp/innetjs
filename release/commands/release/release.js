@@ -4,47 +4,45 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var tslib = require('tslib');
 var logger = require('@cantinc/logger');
+var image = require('@rollup/plugin-image');
+var json = require('@rollup/plugin-json');
+var pluginNodeResolve = require('@rollup/plugin-node-resolve');
+var ts = require('@rollup/plugin-typescript');
+var autoprefixer = require('autoprefixer');
+var node_fs = require('node:fs');
 var fs = require('fs-extra');
-var rollup = require('rollup');
-var rollupPluginString = require('rollup-plugin-string');
 var glob = require('glob');
 var path = require('node:path');
-var constants = require('../../constants.js');
-var json = require('@rollup/plugin-json');
-var ts = require('@rollup/plugin-typescript');
-var jsx = require('rollup-plugin-innet-jsx');
-var externals = require('rollup-plugin-node-externals');
-var image = require('@rollup/plugin-image');
-var styles = require('rollup-plugin-styles');
-var autoprefixer = require('autoprefixer');
-var pluginNodeResolve = require('@rollup/plugin-node-resolve');
+var rollup = require('rollup');
 var external = require('rollup-plugin-external-node-modules');
-var rollupPluginTerser = require('rollup-plugin-terser');
+var jsx = require('rollup-plugin-innet-jsx');
+var rollupPluginNodeExternals = require('rollup-plugin-node-externals');
 var rollupPluginPreserveShebangs = require('rollup-plugin-preserve-shebangs');
-var node_fs = require('node:fs');
-require('../../utils/index.js');
+var rollupPluginString = require('rollup-plugin-string');
+var styles = require('rollup-plugin-styles');
+var rollupPluginTerser = require('rollup-plugin-terser');
 var node_util = require('node:util');
+var constants = require('../../constants.js');
+require('../../utils/index.js');
 var getNpmTag = require('../../utils/getNpmTag/getNpmTag.js');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
-var rollup__default = /*#__PURE__*/_interopDefaultLegacy(rollup);
-var glob__default = /*#__PURE__*/_interopDefaultLegacy(glob);
-var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
+var image__default = /*#__PURE__*/_interopDefaultLegacy(image);
 var json__default = /*#__PURE__*/_interopDefaultLegacy(json);
 var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
-var jsx__default = /*#__PURE__*/_interopDefaultLegacy(jsx);
-var externals__default = /*#__PURE__*/_interopDefaultLegacy(externals);
-var image__default = /*#__PURE__*/_interopDefaultLegacy(image);
-var styles__default = /*#__PURE__*/_interopDefaultLegacy(styles);
 var autoprefixer__default = /*#__PURE__*/_interopDefaultLegacy(autoprefixer);
+var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
+var glob__default = /*#__PURE__*/_interopDefaultLegacy(glob);
+var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 var external__default = /*#__PURE__*/_interopDefaultLegacy(external);
+var jsx__default = /*#__PURE__*/_interopDefaultLegacy(jsx);
+var styles__default = /*#__PURE__*/_interopDefaultLegacy(styles);
 
 const { exec } = require('child_process');
 const execAsync = node_util.promisify(exec);
-function release({ index = 'index', pub, min }, instance) {
-    return tslib.__awaiter(this, void 0, void 0, function* () {
+function release(_a, instance_1) {
+    return tslib.__awaiter(this, arguments, void 0, function* ({ index = 'index', pub, min }, instance) {
         const { releaseFolder, cssModules } = instance.params;
         yield logger.logger.start('Remove previous release', () => fs__default["default"].remove(releaseFolder));
         const pkg = yield instance.getPackage();
@@ -93,7 +91,7 @@ function release({ index = 'index', pub, min }, instance) {
                         },
                     }),
                     jsx__default["default"](),
-                    externals__default["default"](),
+                    rollupPluginNodeExternals.externals(),
                     rollupPluginString.string({
                         include: '**/*.*',
                         exclude: constants.stringExcludeDom,
@@ -114,7 +112,7 @@ function release({ index = 'index', pub, min }, instance) {
             }
             instance.withLint(options);
             instance.withEnv(options, true);
-            const bundle = yield rollup__default["default"].rollup(options);
+            const bundle = yield rollup.rollup(options);
             yield bundle.write(options.output);
             yield bundle.close();
         });
@@ -161,13 +159,13 @@ function release({ index = 'index', pub, min }, instance) {
                                     declaration: false,
                                 },
                             }),
-                            externals__default["default"](),
+                            rollupPluginNodeExternals.externals(),
                             jsx__default["default"](),
                         ],
                     };
                     instance.withLint(options);
                     instance.withEnv(options);
-                    const bundle = yield rollup__default["default"].rollup(options);
+                    const bundle = yield rollup.rollup(options);
                     yield bundle.write(options.output);
                     yield bundle.close();
                 }

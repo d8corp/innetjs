@@ -34,7 +34,6 @@ var autoprefixer__default = /*#__PURE__*/_interopDefaultLegacy(autoprefixer);
 var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 var glob__default = /*#__PURE__*/_interopDefaultLegacy(glob);
 var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
-var rollup__default = /*#__PURE__*/_interopDefaultLegacy(rollup);
 var filesize__default = /*#__PURE__*/_interopDefaultLegacy(filesize);
 var importAssets__default = /*#__PURE__*/_interopDefaultLegacy(importAssets);
 var jsx__default = /*#__PURE__*/_interopDefaultLegacy(jsx);
@@ -42,8 +41,8 @@ var polyfill__default = /*#__PURE__*/_interopDefaultLegacy(polyfill);
 var styles__default = /*#__PURE__*/_interopDefaultLegacy(styles);
 
 const copyFiles = node_util.promisify(fs__default["default"].copy);
-function build({ node = false, inject = false, index = 'index' }, instance) {
-    return tslib.__awaiter(this, void 0, void 0, function* () {
+function build(_a, instance_1) {
+    return tslib.__awaiter(this, arguments, void 0, function* ({ node = false, inject = false, index = 'index' }, instance) {
         const params = instance.params;
         const input = glob__default["default"].sync(`src/${index}.{${params.indexExt}}`);
         if (!input.length) {
@@ -117,7 +116,7 @@ function build({ node = false, inject = false, index = 'index' }, instance) {
         }
         instance.withEnv(options, true);
         yield logger.logger.start('Build production bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
-            const bundle = yield rollup__default["default"].rollup(options);
+            const bundle = yield rollup.rollup(options);
             yield bundle.write(outputOptions);
             yield bundle.close();
             if (!node) {

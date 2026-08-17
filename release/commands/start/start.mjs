@@ -1,5 +1,6 @@
 import { __awaiter } from 'tslib';
 import { logger } from '@cantinc/logger';
+import eslint from '@rollup/plugin-eslint';
 import autoprefixer from 'autoprefixer';
 import { spawn } from 'node:child_process';
 import fs from 'fs-extra';
@@ -11,7 +12,7 @@ import livereload from 'rollup-plugin-livereload';
 import polyfill from 'rollup-plugin-polyfill-node';
 import { string } from 'rollup-plugin-string';
 import styles from 'rollup-plugin-styles';
-import { stringExcludeNode, imageInclude, stringExcludeDom } from '../../constants.mjs';
+import { lintInclude, stringExcludeNode, imageInclude, stringExcludeDom } from '../../constants.mjs';
 
 function typecheckWatchPlugin() {
     let tscProcess = null;
@@ -33,8 +34,8 @@ function typecheckWatchPlugin() {
         },
     };
 }
-function start({ node = false, inject = false, error = false, typeCheck = false, usualConsoleOutput = false, index = 'index', }, instance) {
-    return __awaiter(this, void 0, void 0, function* () {
+function start(_a, instance_1) {
+    return __awaiter(this, arguments, void 0, function* ({ node = false, inject = false, error = false, typeCheck = false, lintCheck = false, usualConsoleOutput = false, index = 'index', }, instance) {
         const params = instance.params;
         const pkg = yield instance.getPackage();
         const input = glob.sync(`src/${index}.{${params.indexExt}}`);
@@ -43,21 +44,26 @@ function start({ node = false, inject = false, error = false, typeCheck = false,
         }
         yield logger.start('Remove build', () => fs.remove(params.devBuildFolder));
         const plugins = [];
+        const output = {
+            dir: params.devBuildFolder,
+            sourcemap: true,
+        };
         const options = {
             input,
             preserveEntrySignatures: 'strict',
-            output: {
-                dir: params.devBuildFolder,
-                sourcemap: true,
-            },
+            output,
             plugins,
         };
         let preset;
-        instance.withLint(options);
+        if (lintCheck) {
+            plugins.push(eslint({
+                include: lintInclude,
+                throwOnError: false,
+            }));
+        }
         if (node) {
             preset = { NODE_ENV: 'dev' };
-            // @ts-expect-error
-            options.output.format = 'cjs';
+            output.format = 'cjs';
             options.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
             plugins.push(string({
                 include: '**/*.*',
@@ -75,8 +81,7 @@ function start({ node = false, inject = false, error = false, typeCheck = false,
                 : fs.existsSync(params.sslCrt)
                     ? fs.readFileSync(params.sslCrt)
                     : undefined;
-            // @ts-expect-error
-            options.output.format = 'es';
+            output.format = 'es';
             plugins.push(polyfill(), importAssets({
                 include: imageInclude.map(img => `src/${img}`),
                 publicPath: params.baseUrl,
@@ -96,9 +101,9 @@ function start({ node = false, inject = false, error = false, typeCheck = false,
                 include: '**/*.*',
                 exclude: stringExcludeDom,
             }), instance.createClient(key, cert, pkg, path.parse(input[0]).name, inject), livereload(Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [params.devBuildFolder, params.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
-            if (typeCheck) {
-                plugins.push(typecheckWatchPlugin());
-            }
+        }
+        if (typeCheck) {
+            plugins.push(typecheckWatchPlugin());
         }
         instance.withEnv(options, true, preset);
         const watcher = watch(options);

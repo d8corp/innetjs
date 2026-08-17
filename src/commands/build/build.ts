@@ -8,7 +8,8 @@ import { promises as fsx } from 'fs'
 import fs from 'fs-extra'
 import glob from 'glob'
 import path from 'path'
-import rollup from 'rollup'
+import type { RollupOptions } from 'rollup'
+import { rollup } from 'rollup'
 import filesize from 'rollup-plugin-filesize'
 import importAssets from 'rollup-plugin-import-assets'
 import jsx from 'rollup-plugin-innet-jsx'
@@ -21,7 +22,7 @@ import { promisify } from 'util'
 import { imageInclude, stringExcludeDom, stringExcludeNode } from '../../constants'
 import { convertIndexFile, reporter } from '../../helpers'
 import type { InnetJS } from '../../InnetJs'
-import { BuildOptions } from '../../types'
+import type { BuildOptions } from '../../types'
 
 const copyFiles = promisify(fs.copy)
 
@@ -36,7 +37,8 @@ export async function build ({ node = false, inject = false, index = 'index' }: 
   await logger.start('Remove build', () => fs.remove(params.buildFolder))
 
   const pkg = node && await instance.getPackage()
-  const options: rollup.RollupOptions = {
+
+  const options: RollupOptions = {
     input,
     preserveEntrySignatures: 'strict',
     plugins: [
@@ -66,6 +68,7 @@ export async function build ({ node = false, inject = false, index = 'index' }: 
   if (node) {
     outputOptions.format = 'cjs'
     options.external = Object.keys(pkg?.dependencies || {})
+
     options.plugins.push(
       nodeResolve(),
       string({
@@ -102,7 +105,9 @@ export async function build ({ node = false, inject = false, index = 'index' }: 
         exclude: stringExcludeDom,
       }),
     )
+
     outputOptions.format = 'es'
+
     outputOptions.plugins = [
       terser(),
       filesize({
@@ -114,13 +119,15 @@ export async function build ({ node = false, inject = false, index = 'index' }: 
   instance.withEnv(options, true)
 
   await logger.start('Build production bundle', async () => {
-    const bundle = await rollup.rollup(options)
+    const bundle = await rollup(options)
     await bundle.write(outputOptions)
     await bundle.close()
+
     if (!node) {
       await copyFiles(params.publicFolder, params.buildFolder)
       const data = await fsx.readFile(params.publicIndexFile)
       const pkg = await instance.getPackage()
+
       await fsx.writeFile(
         params.buildIndexFile,
         await convertIndexFile(data, pkg.version, params.baseUrl, path.parse(input[0]).name, inject),
@@ -140,7 +147,9 @@ export async function build ({ node = false, inject = false, index = 'index' }: 
         'UTF-8',
       )
     })
+
     const pkgLockPath = path.resolve(params.projectFolder, 'package-lock.json')
+
     if (fs.existsSync(pkgLockPath)) {
       await logger.start('Copy package-lock.json', () => {
         return fs.copy(pkgLockPath, path.resolve(params.buildFolder, 'package-lock.json'))

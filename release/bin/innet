@@ -2,27 +2,20 @@
 'use strict';
 
 var commander = require('commander');
+var codeFrame = require('@babel/code-frame');
+var chalk = require('chalk');
+var fs = require('fs-extra');
 var tslib = require('tslib');
 var logger = require('@cantinc/logger');
 var eslint = require('@rollup/plugin-eslint');
 var address = require('address');
-var chalk = require('chalk');
 var express = require('express');
 var proxy = require('express-http-proxy');
-var fs = require('fs-extra');
 var http = require('node:http');
 var https = require('node:https');
 var path = require('node:path');
 var prompt = require('prompts');
 var env = require('rollup-plugin-process-env');
-var Zip = require('adm-zip');
-var axios = require('axios');
-var node_child_process = require('node:child_process');
-var selector = require('cli-select');
-var node_os = require('node:os');
-var readline = require('node:readline');
-var stream = require('node:stream');
-var node_util = require('node:util');
 var commonjs = require('@rollup/plugin-commonjs');
 var json = require('@rollup/plugin-json');
 var pluginNodeResolve = require('@rollup/plugin-node-resolve');
@@ -38,111 +31,54 @@ var polyfill = require('rollup-plugin-polyfill-node');
 var rollupPluginString = require('rollup-plugin-string');
 var styles = require('rollup-plugin-styles');
 var rollupPluginTerser = require('rollup-plugin-terser');
-var rolldown = require('rolldown');
-var livereload = require('rollup-plugin-livereload');
-var tmp = require('tmp');
-var externals = require('rollup-plugin-node-externals');
+var node_util = require('node:util');
+var Zip = require('adm-zip');
+var axios = require('axios');
+var node_child_process = require('node:child_process');
+var selector = require('cli-select');
+var node_os = require('node:os');
+var readline = require('node:readline');
+var stream = require('node:stream');
 var image = require('@rollup/plugin-image');
 var external = require('rollup-plugin-external-node-modules');
+var rollupPluginNodeExternals = require('rollup-plugin-node-externals');
 var rollupPluginPreserveShebangs = require('rollup-plugin-preserve-shebangs');
-var codeFrame = require('@babel/code-frame');
+var tmp = require('tmp');
+var rolldown = require('rolldown');
+var livereload = require('rollup-plugin-livereload');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
+var chalk__default = /*#__PURE__*/_interopDefaultLegacy(chalk);
+var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 var eslint__default = /*#__PURE__*/_interopDefaultLegacy(eslint);
 var address__default = /*#__PURE__*/_interopDefaultLegacy(address);
-var chalk__default = /*#__PURE__*/_interopDefaultLegacy(chalk);
 var express__default = /*#__PURE__*/_interopDefaultLegacy(express);
 var proxy__default = /*#__PURE__*/_interopDefaultLegacy(proxy);
-var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 var http__default = /*#__PURE__*/_interopDefaultLegacy(http);
 var https__default = /*#__PURE__*/_interopDefaultLegacy(https);
 var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 var prompt__default = /*#__PURE__*/_interopDefaultLegacy(prompt);
 var env__default = /*#__PURE__*/_interopDefaultLegacy(env);
-var Zip__default = /*#__PURE__*/_interopDefaultLegacy(Zip);
-var axios__default = /*#__PURE__*/_interopDefaultLegacy(axios);
-var selector__default = /*#__PURE__*/_interopDefaultLegacy(selector);
-var readline__default = /*#__PURE__*/_interopDefaultLegacy(readline);
-var stream__default = /*#__PURE__*/_interopDefaultLegacy(stream);
 var commonjs__default = /*#__PURE__*/_interopDefaultLegacy(commonjs);
 var json__default = /*#__PURE__*/_interopDefaultLegacy(json);
 var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
 var autoprefixer__default = /*#__PURE__*/_interopDefaultLegacy(autoprefixer);
 var glob__default = /*#__PURE__*/_interopDefaultLegacy(glob);
-var rollup__default = /*#__PURE__*/_interopDefaultLegacy(rollup);
 var filesize__default = /*#__PURE__*/_interopDefaultLegacy(filesize);
 var importAssets__default = /*#__PURE__*/_interopDefaultLegacy(importAssets);
 var jsx__default = /*#__PURE__*/_interopDefaultLegacy(jsx);
 var polyfill__default = /*#__PURE__*/_interopDefaultLegacy(polyfill);
 var styles__default = /*#__PURE__*/_interopDefaultLegacy(styles);
-var livereload__default = /*#__PURE__*/_interopDefaultLegacy(livereload);
-var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
-var externals__default = /*#__PURE__*/_interopDefaultLegacy(externals);
+var Zip__default = /*#__PURE__*/_interopDefaultLegacy(Zip);
+var axios__default = /*#__PURE__*/_interopDefaultLegacy(axios);
+var selector__default = /*#__PURE__*/_interopDefaultLegacy(selector);
+var readline__default = /*#__PURE__*/_interopDefaultLegacy(readline);
+var stream__default = /*#__PURE__*/_interopDefaultLegacy(stream);
 var image__default = /*#__PURE__*/_interopDefaultLegacy(image);
 var external__default = /*#__PURE__*/_interopDefaultLegacy(external);
-
-const execAsync$1 = node_util.promisify(node_child_process.exec);
-const pipeline = node_util.promisify(stream__default["default"].pipeline);
-function init(appName, { template, force = false } = {}) {
-    return tslib.__awaiter(this, void 0, void 0, function* () {
-        const appPath = path__default["default"].resolve(appName);
-        const { data } = yield logger.logger.start('Get templates list', () => tslib.__awaiter(this, void 0, void 0, function* () { return yield axios__default["default"].get('https://api.github.com/repos/d8corp/innetjs-templates/branches'); }));
-        const templates = data.map(({ name }) => name).filter((name) => name !== 'main');
-        if (!template || !templates.includes(template)) {
-            logger.logger.log(chalk__default["default"].green('Select one of those templates'));
-            const { value } = yield selector__default["default"]({
-                values: templates,
-            });
-            template = value;
-            readline__default["default"].moveCursor(process.stdout, 0, -1);
-            const text = `Selected template: ${chalk__default["default"].white(value)}`;
-            logger.logger.start(text);
-            logger.logger.end(text);
-        }
-        if (!force) {
-            yield logger.logger.start('Check if app folder is available', () => tslib.__awaiter(this, void 0, void 0, function* () {
-                if (fs__default["default"].existsSync(appPath)) {
-                    logger.logger.log(chalk__default["default"].red(`'${appPath}' already exist, what do you want?`));
-                    const { id: result, value } = yield selector__default["default"]({
-                        values: ['Stop the process', 'Remove the folder', 'Merge with template'],
-                    });
-                    readline__default["default"].moveCursor(process.stdout, 0, -1);
-                    logger.logger.log(`Already exist, selected: ${value}`);
-                    if (!result) {
-                        throw Error(`'${appPath}' already exist`);
-                    }
-                    if (result === 1) {
-                        yield fs__default["default"].remove(appPath);
-                    }
-                }
-            }));
-        }
-        yield logger.logger.start('Download template', () => tslib.__awaiter(this, void 0, void 0, function* () {
-            const tmpPath = node_os.tmpdir();
-            const zipPath = path__default["default"].join(tmpPath, 'template.zip');
-            const unzipPath = path__default["default"].join(tmpPath, `innetjs-templates-${template}`);
-            const { data } = yield axios__default["default"].get(`https://github.com/d8corp/innetjs-templates/archive/refs/heads/${template}.zip`, {
-                responseType: 'stream',
-            });
-            yield pipeline(data, fs__default["default"].createWriteStream(zipPath));
-            const zip = new Zip__default["default"](zipPath);
-            yield new Promise((resolve, reject) => {
-                zip.extractAllToAsync(tmpPath, false, false, (error) => {
-                    if (error) {
-                        reject(error);
-                    }
-                    else {
-                        resolve(undefined);
-                    }
-                });
-            });
-            yield fs__default["default"].remove(zipPath);
-            yield fs__default["default"].move(unzipPath, appPath, { overwrite: true });
-        }));
-        yield logger.logger.start('Install packages', () => execAsync$1(`cd ${appPath} && npm i`));
-    });
-}
+var tmp__default = /*#__PURE__*/_interopDefaultLegacy(tmp);
+var livereload__default = /*#__PURE__*/_interopDefaultLegacy(livereload);
 
 const SCRIPT_EXTENSIONS = ['ts', 'js', 'tsx', 'jsx'];
 const REG_TJSX = /\.[tj]sx?$/;
@@ -175,6 +111,121 @@ const stringExcludeNode = [
     ...lintInclude,
     '**/*.json',
 ];
+
+function getDefaultOptions({ envPrefix = process.env.INNETJS_ENV_PREFIX || 'INNETJS_', projectFolder = process.env.PROJECT_FOLDER || '', baseUrl = process.env.BASE_URL || '', publicFolder = process.env.PUBLIC_FOLDER || 'public', releaseFolder = process.env.RELEASE_FOLDER || 'release', buildFolder = process.env.BUILD_FOLDER || 'build', srcFolder = process.env.SRC_FOLDER || 'src', sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === 'true' : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === 'true' : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === 'true' : true, sslKey = process.env.SSL_KEY || 'localhost.key', sslCrt = process.env.SSL_CRT || 'localhost.crt', proxy = process.env.PROXY || '', simulateIP = process.env.IP, port = process.env.PORT ? +process.env.PORT : 3000, api = process.env.API || '/api/?*', tsconfig = process.env.TSCONFIG, indexExt = SCRIPT_EXTENSIONS.join(','), }) {
+    const devBuildFolder = path__default["default"].resolve(projectFolder, 'node_modules', '.cache', 'innetjs', 'build');
+    return {
+        projectFolder: path__default["default"].resolve(projectFolder),
+        publicFolder: path__default["default"].resolve(publicFolder),
+        releaseFolder: path__default["default"].resolve(releaseFolder),
+        buildFolder: path__default["default"].resolve(buildFolder),
+        srcFolder: path__default["default"].resolve(srcFolder),
+        licenseFile: path__default["default"].join(projectFolder, 'LICENSE'),
+        licenseReleaseFile: path__default["default"].join(releaseFolder, 'LICENSE'),
+        readmeFile: path__default["default"].join(projectFolder, 'README.md'),
+        readmeReleaseFile: path__default["default"].join(releaseFolder, 'README.md'),
+        declarationFile: path__default["default"].join(srcFolder, 'declaration.d.ts'),
+        declarationReleaseFile: path__default["default"].join(releaseFolder, 'declaration.d.ts'),
+        publicIndexFile: path__default["default"].join(publicFolder, 'index.html'),
+        buildIndexFile: path__default["default"].join(buildFolder, 'index.html'),
+        devBuildFolder,
+        devBuildIndexFile: path__default["default"].join(devBuildFolder, 'index.html'),
+        sourcemap,
+        cssModules,
+        cssInJs,
+        sslKey,
+        sslCrt,
+        port,
+        proxy,
+        api,
+        baseUrl: baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`,
+        envPrefix,
+        simulateIP,
+        tsconfig,
+        indexExt,
+    };
+}
+
+function getNpmTag(version) {
+    const match = version.match(NPM_TAG);
+    return match ? match[1] : 'latest';
+}
+
+function printErrorWithFrame(output, deep = 0, hide = false) {
+    var _a, _b, _c, _d, _e;
+    if (!output)
+        return '';
+    const input = output.split('\n');
+    const start = input.findIndex(line => line.trim().startsWith(deep ? '[cause]: Error:' : 'Error:'));
+    if (!~start)
+        return output;
+    const inputFrame = input.slice(0, start);
+    const end = input.slice(start + 1).findIndex(line => line.trim().startsWith('[cause]: Error:'));
+    const inputBody = input.slice(start, ~end ? start + end - 1 : undefined);
+    const inputCauses = ~end ? input.slice(start + end - 1) : [];
+    const bodyStackStart = inputBody.findIndex(line => line.trim().startsWith('at '));
+    const bodyText = ~bodyStackStart ? inputBody.slice(0, bodyStackStart).join('\n') : inputBody.join('\n');
+    const bodyStack = ~bodyStackStart ? inputBody.slice(bodyStackStart) : [];
+    const filePathWithNumber = bodyStack.length ? (_a = bodyStack[0].match(/\(([^(]+)\)$/)) === null || _a === void 0 ? void 0 : _a[1] : undefined;
+    const splitFilePath = (_b = filePathWithNumber === null || filePathWithNumber === void 0 ? void 0 : filePathWithNumber.split(':')) !== null && _b !== void 0 ? _b : [];
+    const filePath = (_c = splitFilePath[0]) === null || _c === void 0 ? void 0 : _c.trim();
+    const line = Number((_d = splitFilePath[1]) !== null && _d !== void 0 ? _d : 1);
+    const column = Number((_e = splitFilePath[2]) !== null && _e !== void 0 ? _e : 1);
+    let frame = '';
+    if (filePath && !filePath.includes('node_modules')) {
+        try {
+            const source = fs__default["default"].readFileSync(filePath, 'utf8');
+            frame = codeFrame.codeFrameColumns(source, { start: { line, column } }, { highlightCode: true });
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        }
+        catch (e) { }
+    }
+    else {
+        frame = inputFrame.join('\n');
+    }
+    const title = bodyText.trim();
+    const baseOffset = ' '.repeat(2);
+    const offset = baseOffset.repeat(deep);
+    const titleOffset = offset + baseOffset + baseOffset;
+    let hiddenCount = 0;
+    let collapse = titleOffset + 'at ... (0 more node_modules calls)';
+    const stack = hide
+        ? bodyStack.slice(1).reduce((cur, line) => {
+            if (line.includes('node_modules')) {
+                if (cur.at(-1) === collapse) {
+                    collapse = collapse.replace(`${hiddenCount} more`, `${++hiddenCount} more`);
+                    return [
+                        ...cur.slice(0, -1),
+                        collapse,
+                    ];
+                }
+                collapse = collapse.replace(`${hiddenCount} more`, `${++hiddenCount} more`);
+                return [...cur, collapse];
+            }
+            hiddenCount = 0;
+            collapse = titleOffset + 'at ... (0 more node_modules calls)';
+            return [...cur, line];
+        }, [])
+        : bodyStack.slice(1);
+    return [
+        chalk__default["default"].red(`${titleOffset}${title}`),
+        bodyStack[0],
+        frame && `${offset}${frame.replaceAll('\n', `\n${offset}`)}`,
+        ...stack
+            .filter(line => line.trim() !== '}')
+            .map(line => line.includes('node_modules') ? chalk__default["default"].gray(line) : line),
+        printErrorWithFrame(inputCauses.join('\n'), deep + 1, hide),
+    ].filter(Boolean).join('\n');
+}
+
+function updateDotenv() {
+    const { __INNETJS__PACKAGE_VERSION: before } = process.env;
+    delete process.env.__INNETJS__PACKAGE_VERSION;
+    require('dotenv-expand').expand(require('dotenv').config());
+    if (!('__INNETJS__PACKAGE_VERSION' in process.env)) {
+        process.env.__INNETJS__PACKAGE_VERSION = before;
+    }
+}
 
 function getFile(file) {
     file = path__default["default"].resolve(file);
@@ -216,8 +267,8 @@ const reporter = (options, outputOptions, info) => {
 };
 
 const copyFiles = node_util.promisify(fs__default["default"].copy);
-function build({ node = false, inject = false, index = 'index' }, instance) {
-    return tslib.__awaiter(this, void 0, void 0, function* () {
+function build(_a, instance_1) {
+    return tslib.__awaiter(this, arguments, void 0, function* ({ node = false, inject = false, index = 'index' }, instance) {
         const params = instance.params;
         const input = glob__default["default"].sync(`src/${index}.{${params.indexExt}}`);
         if (!input.length) {
@@ -291,7 +342,7 @@ function build({ node = false, inject = false, index = 'index' }, instance) {
         }
         instance.withEnv(options, true);
         yield logger.logger.start('Build production bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
-            const bundle = yield rollup__default["default"].rollup(options);
+            const bundle = yield rollup.rollup(options);
             yield bundle.write(outputOptions);
             yield bundle.close();
             if (!node) {
@@ -318,277 +369,72 @@ function build({ node = false, inject = false, index = 'index' }, instance) {
     });
 }
 
-function typecheckWatchPlugin() {
-    let tscProcess = null;
-    return {
-        name: 'typecheck-watch',
-        buildEnd() {
-            if (tscProcess) {
-                logger.logger.end('Check TypeScript');
-                tscProcess.kill();
-            }
-            logger.logger.start('Check TypeScript');
-            tscProcess = node_child_process.spawn('tsc', ['--noEmit'], {
-                stdio: 'inherit',
-                shell: true,
+const execAsync$1 = node_util.promisify(node_child_process.exec);
+const pipeline = node_util.promisify(stream__default["default"].pipeline);
+function init(appName_1) {
+    return tslib.__awaiter(this, arguments, void 0, function* (appName, { template, force = false } = {}) {
+        const appPath = path__default["default"].resolve(appName);
+        const { data } = yield logger.logger.start('Get templates list', () => tslib.__awaiter(this, void 0, void 0, function* () { return yield axios__default["default"].get('https://api.github.com/repos/d8corp/innetjs-templates/branches'); }));
+        const templates = data.map(({ name }) => name).filter((name) => name !== 'main');
+        if (!template || !templates.includes(template)) {
+            logger.logger.log(chalk__default["default"].green('Select one of those templates'));
+            const { value } = yield selector__default["default"]({
+                values: templates,
             });
-            tscProcess.on('close', () => {
-                logger.logger.end('Check TypeScript');
+            template = value;
+            readline__default["default"].moveCursor(process.stdout, 0, -1);
+            const text = `Selected template: ${chalk__default["default"].white(value)}`;
+            logger.logger.start(text);
+            logger.logger.end(text);
+        }
+        if (!force) {
+            yield logger.logger.start('Check if app folder is available', () => tslib.__awaiter(this, void 0, void 0, function* () {
+                if (fs__default["default"].existsSync(appPath)) {
+                    logger.logger.log(chalk__default["default"].red(`'${appPath}' already exist, what do you want?`));
+                    const { id: result, value } = yield selector__default["default"]({
+                        values: ['Stop the process', 'Remove the folder', 'Merge with template'],
+                    });
+                    readline__default["default"].moveCursor(process.stdout, 0, -1);
+                    logger.logger.log(`Already exist, selected: ${value}`);
+                    if (!result) {
+                        throw Error(`'${appPath}' already exist`);
+                    }
+                    if (result === 1) {
+                        yield fs__default["default"].remove(appPath);
+                    }
+                }
+            }));
+        }
+        yield logger.logger.start('Download template', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            const tmpPath = node_os.tmpdir();
+            const zipPath = path__default["default"].join(tmpPath, 'template.zip');
+            const unzipPath = path__default["default"].join(tmpPath, `innetjs-templates-${template}`);
+            const { data } = yield axios__default["default"].get(`https://github.com/d8corp/innetjs-templates/archive/refs/heads/${template}.zip`, {
+                responseType: 'stream',
             });
-        },
-    };
-}
-function start({ node = false, inject = false, error = false, typeCheck = false, usualConsoleOutput = false, index = 'index', }, instance) {
-    return tslib.__awaiter(this, void 0, void 0, function* () {
-        const params = instance.params;
-        const pkg = yield instance.getPackage();
-        const input = glob__default["default"].sync(`src/${index}.{${params.indexExt}}`);
-        if (!input.length) {
-            throw Error('index file is not detected');
-        }
-        yield logger.logger.start('Remove build', () => fs__default["default"].remove(params.devBuildFolder));
-        const plugins = [];
-        const options = {
-            input,
-            preserveEntrySignatures: 'strict',
-            output: {
-                dir: params.devBuildFolder,
-                sourcemap: true,
-            },
-            plugins,
-        };
-        let preset;
-        instance.withLint(options);
-        if (node) {
-            preset = { NODE_ENV: 'dev' };
-            // @ts-expect-error
-            options.output.format = 'cjs';
-            options.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
-            plugins.push(rollupPluginString.string({
-                include: '**/*.*',
-                exclude: stringExcludeNode,
-            }), instance.createServer(input, error, usualConsoleOutput));
-        }
-        else {
-            const key = path__default["default"].basename(params.sslKey) !== params.sslKey
-                ? params.sslKey
-                : fs__default["default"].existsSync(params.sslKey)
-                    ? fs__default["default"].readFileSync(params.sslKey)
-                    : undefined;
-            const cert = path__default["default"].basename(params.sslCrt) !== params.sslCrt
-                ? params.sslCrt
-                : fs__default["default"].existsSync(params.sslCrt)
-                    ? fs__default["default"].readFileSync(params.sslCrt)
-                    : undefined;
-            // @ts-expect-error
-            options.output.format = 'es';
-            plugins.push(polyfill__default["default"](), importAssets__default["default"]({
-                include: imageInclude.map(img => `src/${img}`),
-                publicPath: params.baseUrl,
-            }), styles__default["default"]({
-                mode: params.cssInJs ? 'inject' : 'extract',
-                url: {
-                    inline: false,
-                    publicPath: `${params.baseUrl}assets`,
-                },
-                sass: {
-                    silenceDeprecations: ['legacy-js-api'],
-                },
-                plugins: [autoprefixer__default["default"]()],
-                autoModules: params.cssModules ? (id) => !id.includes('.global.') : true,
-                sourceMap: true,
-            }), rollupPluginString.string({
-                include: '**/*.*',
-                exclude: stringExcludeDom,
-            }), instance.createClient(key, cert, pkg, path__default["default"].parse(input[0]).name, inject), livereload__default["default"](Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [params.devBuildFolder, params.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
-            if (typeCheck) {
-                plugins.push(typecheckWatchPlugin());
-            }
-        }
-        instance.withEnv(options, true, preset);
-        const watcher = rolldown.watch(options);
-        watcher.on('event', (e) => tslib.__awaiter(this, void 0, void 0, function* () {
-            if (e.code === 'ERROR') {
-                logger.logger.end('Bundling', error ? e.error.stack : e.error.message);
-            }
-            else if (e.code === 'BUNDLE_START') {
-                logger.logger.start('Bundling');
-            }
-            else if (e.code === 'BUNDLE_END') {
-                logger.logger.end('Bundling');
-            }
+            yield pipeline(data, fs__default["default"].createWriteStream(zipPath));
+            const zip = new Zip__default["default"](zipPath);
+            yield new Promise((resolve, reject) => {
+                zip.extractAllToAsync(tmpPath, false, false, (error) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(undefined);
+                    }
+                });
+            });
+            yield fs__default["default"].remove(zipPath);
+            yield fs__default["default"].move(unzipPath, appPath, { overwrite: true });
         }));
+        yield logger.logger.start('Install packages', () => execAsync$1(`cd ${appPath} && npm i`));
     });
-}
-
-const { spawn: spawn$1 } = require('child_process');
-function run(file, { config = '', exposeGc = false } = {}) {
-    return tslib.__awaiter(this, void 0, void 0, function* () {
-        const input = yield logger.logger.start('Check file', () => getFile(file));
-        const folder = yield new Promise((resolve, reject) => {
-            tmp__default["default"].dir((err, folder) => {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve(folder);
-                }
-            });
-        });
-        const jsFilePath = `${folder}/index.js`;
-        yield logger.logger.start('Build bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
-            const inputOptions = {
-                input,
-                plugins: [
-                    commonjs__default["default"](),
-                    pluginNodeResolve.nodeResolve(),
-                    json__default["default"](),
-                    ts__default["default"]({
-                        tsconfig: config || false,
-                        compilerOptions: {
-                            sourceMap: true,
-                            declaration: false,
-                        },
-                    }),
-                ],
-            };
-            const outputOptions = {
-                format: 'cjs',
-                file: jsFilePath,
-                sourcemap: true,
-            };
-            const bundle = yield rollup__default["default"].rollup(inputOptions);
-            yield bundle.write(outputOptions);
-            yield bundle.close();
-        }));
-        yield logger.logger.start('Running of the script', () => tslib.__awaiter(this, void 0, void 0, function* () {
-            const flags = [];
-            if (exposeGc) {
-                flags.push('--expose-gc');
-            }
-            spawn$1('node', [...flags, '-r', 'source-map-support/register', jsFilePath], { stdio: 'inherit' });
-        }));
-    });
-}
-
-function printErrorWithFrame(output, deep = 0, hide = false) {
-    var _a, _b, _c, _d, _e;
-    if (!output)
-        return '';
-    const input = output.split('\n');
-    const start = input.findIndex(line => line.trim().startsWith(deep ? '[cause]: Error:' : 'Error:'));
-    if (!~start)
-        return output;
-    const inputFrame = input.slice(0, start);
-    const end = input.slice(start + 1).findIndex(line => line.trim().startsWith('[cause]: Error:'));
-    const inputBody = input.slice(start, ~end ? start + end - 1 : undefined);
-    const inputCauses = ~end ? input.slice(start + end - 1) : [];
-    const bodyStackStart = inputBody.findIndex(line => line.trim().startsWith('at '));
-    const bodyText = ~bodyStackStart ? inputBody.slice(0, bodyStackStart).join('\n') : inputBody.join('\n');
-    const bodyStack = ~bodyStackStart ? inputBody.slice(bodyStackStart) : [];
-    const filePathWithNumber = bodyStack.length ? (_a = bodyStack[0].match(/\(([^(]+)\)$/)) === null || _a === void 0 ? void 0 : _a[1] : undefined;
-    const splitFilePath = (_b = filePathWithNumber === null || filePathWithNumber === void 0 ? void 0 : filePathWithNumber.split(':')) !== null && _b !== void 0 ? _b : [];
-    const filePath = (_c = splitFilePath[0]) === null || _c === void 0 ? void 0 : _c.trim();
-    const line = Number((_d = splitFilePath[1]) !== null && _d !== void 0 ? _d : 1);
-    const column = Number((_e = splitFilePath[2]) !== null && _e !== void 0 ? _e : 1);
-    let frame = '';
-    if (filePath && !filePath.includes('node_modules')) {
-        try {
-            const source = fs__default["default"].readFileSync(filePath, 'utf8');
-            frame = codeFrame.codeFrameColumns(source, { start: { line, column } }, { highlightCode: true });
-        }
-        catch (e) { }
-    }
-    else {
-        frame = inputFrame.join('\n');
-    }
-    const title = bodyText.trim();
-    const baseOffset = ' '.repeat(2);
-    const offset = baseOffset.repeat(deep);
-    const titleOffset = offset + baseOffset + baseOffset;
-    let hiddenCount = 0;
-    let collapse = titleOffset + 'at ... (0 more node_modules calls)';
-    const stack = hide
-        ? bodyStack.slice(1).reduce((cur, line) => {
-            if (line.includes('node_modules')) {
-                if (cur.at(-1) === collapse) {
-                    collapse = collapse.replace(`${hiddenCount} more`, `${++hiddenCount} more`);
-                    return [
-                        ...cur.slice(0, -1),
-                        collapse,
-                    ];
-                }
-                collapse = collapse.replace(`${hiddenCount} more`, `${++hiddenCount} more`);
-                return [...cur, collapse];
-            }
-            hiddenCount = 0;
-            collapse = titleOffset + 'at ... (0 more node_modules calls)';
-            return [...cur, line];
-        }, [])
-        : bodyStack.slice(1);
-    return [
-        chalk__default["default"].red(`${titleOffset}${title}`),
-        bodyStack[0],
-        frame && `${offset}${frame.replaceAll('\n', `\n${offset}`)}`,
-        ...stack
-            .filter(line => line.trim() !== '}')
-            .map(line => line.includes('node_modules') ? chalk__default["default"].gray(line) : line),
-        printErrorWithFrame(inputCauses.join('\n'), deep + 1, hide),
-    ].filter(Boolean).join('\n');
-}
-
-function updateDotenv() {
-    const { __INNETJS__PACKAGE_VERSION: before } = process.env;
-    delete process.env.__INNETJS__PACKAGE_VERSION;
-    require('dotenv-expand').expand(require('dotenv').config());
-    if (!('__INNETJS__PACKAGE_VERSION' in process.env)) {
-        process.env.__INNETJS__PACKAGE_VERSION = before;
-    }
-}
-
-function getNpmTag(version) {
-    const match = version.match(NPM_TAG);
-    return match ? match[1] : 'latest';
-}
-
-function getDefaultOptions({ envPrefix = process.env.INNETJS_ENV_PREFIX || 'INNETJS_', projectFolder = process.env.PROJECT_FOLDER || '', baseUrl = process.env.BASE_URL || '', publicFolder = process.env.PUBLIC_FOLDER || 'public', releaseFolder = process.env.RELEASE_FOLDER || 'release', buildFolder = process.env.BUILD_FOLDER || 'build', srcFolder = process.env.SRC_FOLDER || 'src', sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === 'true' : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === 'true' : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === 'true' : true, sslKey = process.env.SSL_KEY || 'localhost.key', sslCrt = process.env.SSL_CRT || 'localhost.crt', proxy = process.env.PROXY || '', simulateIP = process.env.IP, port = process.env.PORT ? +process.env.PORT : 3000, api = process.env.API || '/api/?*', tsconfig = process.env.TSCONFIG, indexExt = SCRIPT_EXTENSIONS.join(','), }) {
-    const devBuildFolder = path__default["default"].resolve(projectFolder, 'node_modules', '.cache', 'innetjs', 'build');
-    return {
-        projectFolder: path__default["default"].resolve(projectFolder),
-        publicFolder: path__default["default"].resolve(publicFolder),
-        releaseFolder: path__default["default"].resolve(releaseFolder),
-        buildFolder: path__default["default"].resolve(buildFolder),
-        srcFolder: path__default["default"].resolve(srcFolder),
-        licenseFile: path__default["default"].join(projectFolder, 'LICENSE'),
-        licenseReleaseFile: path__default["default"].join(releaseFolder, 'LICENSE'),
-        readmeFile: path__default["default"].join(projectFolder, 'README.md'),
-        readmeReleaseFile: path__default["default"].join(releaseFolder, 'README.md'),
-        declarationFile: path__default["default"].join(srcFolder, 'declaration.d.ts'),
-        declarationReleaseFile: path__default["default"].join(releaseFolder, 'declaration.d.ts'),
-        publicIndexFile: path__default["default"].join(publicFolder, 'index.html'),
-        buildIndexFile: path__default["default"].join(buildFolder, 'index.html'),
-        devBuildFolder,
-        devBuildIndexFile: path__default["default"].join(devBuildFolder, 'index.html'),
-        sourcemap,
-        cssModules,
-        cssInJs,
-        sslKey,
-        sslCrt,
-        port,
-        proxy,
-        api,
-        baseUrl: baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`,
-        envPrefix,
-        simulateIP,
-        tsconfig,
-        indexExt,
-    };
 }
 
 const { exec } = require('child_process');
 const execAsync = node_util.promisify(exec);
-function release({ index = 'index', pub, min }, instance) {
-    return tslib.__awaiter(this, void 0, void 0, function* () {
+function release(_a, instance_1) {
+    return tslib.__awaiter(this, arguments, void 0, function* ({ index = 'index', pub, min }, instance) {
         const { releaseFolder, cssModules } = instance.params;
         yield logger.logger.start('Remove previous release', () => fs__default["default"].remove(releaseFolder));
         const pkg = yield instance.getPackage();
@@ -637,7 +483,7 @@ function release({ index = 'index', pub, min }, instance) {
                         },
                     }),
                     jsx__default["default"](),
-                    externals__default["default"](),
+                    rollupPluginNodeExternals.externals(),
                     rollupPluginString.string({
                         include: '**/*.*',
                         exclude: stringExcludeDom,
@@ -658,7 +504,7 @@ function release({ index = 'index', pub, min }, instance) {
             }
             instance.withLint(options);
             instance.withEnv(options, true);
-            const bundle = yield rollup__default["default"].rollup(options);
+            const bundle = yield rollup.rollup(options);
             yield bundle.write(options.output);
             yield bundle.close();
         });
@@ -705,13 +551,13 @@ function release({ index = 'index', pub, min }, instance) {
                                     declaration: false,
                                 },
                             }),
-                            externals__default["default"](),
+                            rollupPluginNodeExternals.externals(),
                             jsx__default["default"](),
                         ],
                     };
                     instance.withLint(options);
                     instance.withEnv(options);
-                    const bundle = yield rollup__default["default"].rollup(options);
+                    const bundle = yield rollup.rollup(options);
                     yield bundle.write(options.output);
                     yield bundle.close();
                 }
@@ -741,6 +587,163 @@ function release({ index = 'index', pub, min }, instance) {
     });
 }
 
+const { spawn: spawn$1 } = require('child_process');
+function run(file_1) {
+    return tslib.__awaiter(this, arguments, void 0, function* (file, { config = '', exposeGc = false } = {}) {
+        const input = yield logger.logger.start('Check file', () => getFile(file));
+        const folder = yield new Promise((resolve, reject) => {
+            tmp__default["default"].dir((err, folder) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(folder);
+                }
+            });
+        });
+        const jsFilePath = `${folder}/index.js`;
+        yield logger.logger.start('Build bundle', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            const inputOptions = {
+                input,
+                plugins: [
+                    commonjs__default["default"](),
+                    pluginNodeResolve.nodeResolve(),
+                    json__default["default"](),
+                    ts__default["default"]({
+                        tsconfig: config || false,
+                        compilerOptions: {
+                            sourceMap: true,
+                            declaration: false,
+                        },
+                    }),
+                ],
+            };
+            const outputOptions = {
+                format: 'cjs',
+                file: jsFilePath,
+                sourcemap: true,
+            };
+            const bundle = yield rollup.rollup(inputOptions);
+            yield bundle.write(outputOptions);
+            yield bundle.close();
+        }));
+        yield logger.logger.start('Running of the script', () => tslib.__awaiter(this, void 0, void 0, function* () {
+            const flags = [];
+            if (exposeGc) {
+                flags.push('--expose-gc');
+            }
+            spawn$1('node', [...flags, '-r', 'source-map-support/register', jsFilePath], { stdio: 'inherit' });
+        }));
+    });
+}
+
+function typecheckWatchPlugin() {
+    let tscProcess = null;
+    return {
+        name: 'typecheck-watch',
+        buildEnd() {
+            if (tscProcess) {
+                logger.logger.end('Check TypeScript');
+                tscProcess.kill();
+            }
+            logger.logger.start('Check TypeScript');
+            tscProcess = node_child_process.spawn('tsc', ['--noEmit'], {
+                stdio: 'inherit',
+                shell: true,
+            });
+            tscProcess.on('close', () => {
+                logger.logger.end('Check TypeScript');
+            });
+        },
+    };
+}
+function start(_a, instance_1) {
+    return tslib.__awaiter(this, arguments, void 0, function* ({ node = false, inject = false, error = false, typeCheck = false, lintCheck = false, usualConsoleOutput = false, index = 'index', }, instance) {
+        const params = instance.params;
+        const pkg = yield instance.getPackage();
+        const input = glob__default["default"].sync(`src/${index}.{${params.indexExt}}`);
+        if (!input.length) {
+            throw Error('index file is not detected');
+        }
+        yield logger.logger.start('Remove build', () => fs__default["default"].remove(params.devBuildFolder));
+        const plugins = [];
+        const output = {
+            dir: params.devBuildFolder,
+            sourcemap: true,
+        };
+        const options = {
+            input,
+            preserveEntrySignatures: 'strict',
+            output,
+            plugins,
+        };
+        let preset;
+        if (lintCheck) {
+            plugins.push(eslint__default["default"]({
+                include: lintInclude,
+                throwOnError: false,
+            }));
+        }
+        if (node) {
+            preset = { NODE_ENV: 'dev' };
+            output.format = 'cjs';
+            options.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
+            plugins.push(rollupPluginString.string({
+                include: '**/*.*',
+                exclude: stringExcludeNode,
+            }), instance.createServer(input, error, usualConsoleOutput));
+        }
+        else {
+            const key = path__default["default"].basename(params.sslKey) !== params.sslKey
+                ? params.sslKey
+                : fs__default["default"].existsSync(params.sslKey)
+                    ? fs__default["default"].readFileSync(params.sslKey)
+                    : undefined;
+            const cert = path__default["default"].basename(params.sslCrt) !== params.sslCrt
+                ? params.sslCrt
+                : fs__default["default"].existsSync(params.sslCrt)
+                    ? fs__default["default"].readFileSync(params.sslCrt)
+                    : undefined;
+            output.format = 'es';
+            plugins.push(polyfill__default["default"](), importAssets__default["default"]({
+                include: imageInclude.map(img => `src/${img}`),
+                publicPath: params.baseUrl,
+            }), styles__default["default"]({
+                mode: params.cssInJs ? 'inject' : 'extract',
+                url: {
+                    inline: false,
+                    publicPath: `${params.baseUrl}assets`,
+                },
+                sass: {
+                    silenceDeprecations: ['legacy-js-api'],
+                },
+                plugins: [autoprefixer__default["default"]()],
+                autoModules: params.cssModules ? (id) => !id.includes('.global.') : true,
+                sourceMap: true,
+            }), rollupPluginString.string({
+                include: '**/*.*',
+                exclude: stringExcludeDom,
+            }), instance.createClient(key, cert, pkg, path__default["default"].parse(input[0]).name, inject), livereload__default["default"](Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [params.devBuildFolder, params.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
+        }
+        if (typeCheck) {
+            plugins.push(typecheckWatchPlugin());
+        }
+        instance.withEnv(options, true, preset);
+        const watcher = rolldown.watch(options);
+        watcher.on('event', (e) => tslib.__awaiter(this, void 0, void 0, function* () {
+            if (e.code === 'ERROR') {
+                logger.logger.end('Bundling', error ? e.error.stack : e.error.message);
+            }
+            else if (e.code === 'BUNDLE_START') {
+                logger.logger.start('Bundling');
+            }
+            else if (e.code === 'BUNDLE_END') {
+                logger.logger.end('Bundling');
+            }
+        }));
+    });
+}
+
 const { spawn } = require('child_process');
 class InnetJS {
     constructor(options = {}) {
@@ -752,23 +755,23 @@ class InnetJS {
             yield init(appName, options);
         });
     }
-    build(options = {}) {
-        return tslib.__awaiter(this, void 0, void 0, function* () {
+    build() {
+        return tslib.__awaiter(this, arguments, void 0, function* (options = {}) {
             yield build(options, this);
         });
     }
-    start(options = {}) {
-        return tslib.__awaiter(this, void 0, void 0, function* () {
+    start() {
+        return tslib.__awaiter(this, arguments, void 0, function* (options = {}) {
             yield start(options, this);
         });
     }
-    run(file, options = {}) {
-        return tslib.__awaiter(this, void 0, void 0, function* () {
+    run(file_1) {
+        return tslib.__awaiter(this, arguments, void 0, function* (file, options = {}) {
             yield run(file, options);
         });
     }
-    release(options = {}) {
-        return tslib.__awaiter(this, void 0, void 0, function* () {
+    release() {
+        return tslib.__awaiter(this, arguments, void 0, function* (options = {}) {
             yield release(options, this);
         });
     }
@@ -917,6 +920,7 @@ class InnetJS {
                     });
                     child.on('close', (code) => {
                         if (code !== 0 && stderrBuffer) {
+                            // eslint-disable-next-line no-console
                             console.error(printErrorWithFrame(stderrBuffer, 0, !error));
                             stderrBuffer = '';
                         }
@@ -928,7 +932,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"4.0.0-alpha.2"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"4.0.0-alpha.3"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {
@@ -940,6 +944,13 @@ class InnetJS {
 updateDotenv();
 const innetJS = new InnetJS();
 const errorOption = new commander.Option('-e, --error', 'Show error details');
+const checkError = (flag) => (error) => {
+    if (flag) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+        process.exit(1);
+    }
+};
 commander.program
     .version(process.env.__INNETJS__PACKAGE_VERSION, '-v, --version');
 commander.program
@@ -948,12 +959,7 @@ commander.program
     .option('-t, --template <template>', 'Select template fe or be')
     .addOption(errorOption)
     .action((appName, { error, template }) => {
-    innetJS.init(appName, { template }).catch(e => {
-        if (error) {
-            console.error(e);
-            process.exit(1);
-        }
-    });
+    innetJS.init(appName, { template }).catch(checkError(error));
 });
 commander.program
     .command('run <file-path>')
@@ -962,12 +968,7 @@ commander.program
     .option('--expose-gc', 'Run node with global.gc support')
     .addOption(errorOption)
     .action((filePath, { error, config, exposeGc }) => {
-    innetJS.run(filePath, { config, exposeGc }).catch(e => {
-        if (error) {
-            console.error(e);
-            process.exit(1);
-        }
-    });
+    innetJS.run(filePath, { config, exposeGc }).catch(checkError(error));
 });
 commander.program
     .command('start')
@@ -976,15 +977,11 @@ commander.program
     .option('-uco, --usual-console-output', 'Removes custom error output (code-frame, colors...)')
     .option('-in, --inject', 'Injects script element into index.html')
     .option('-tc, --type-check', 'Runes TypeScript errors checker')
+    .option('-lc, --lint-check', 'Runes ESLint errors checker')
     .option('-i, --index <index>', 'Root index file name', 'index')
     .addOption(errorOption)
-    .action(({ error, node, index, inject, usualConsoleOutput, typeCheck }) => {
-    innetJS.start({ node, error, index, inject, usualConsoleOutput, typeCheck }).catch(e => {
-        if (error) {
-            console.error(e);
-            process.exit(1);
-        }
-    });
+    .action((params) => {
+    innetJS.start(params).catch(checkError(params.error));
 });
 commander.program
     .command('build')
@@ -994,12 +991,7 @@ commander.program
     .option('-in, --inject', 'Injects script element into index.html')
     .option('-i, --index <index>', 'Root index file name', 'index')
     .action(({ error, node, index, inject }) => {
-    innetJS.build({ node, index, inject }).catch(e => {
-        if (error) {
-            console.error(e);
-            process.exit(1);
-        }
-    });
+    innetJS.build({ node, index, inject }).catch(checkError(error));
 });
 commander.program
     .command('release')
@@ -1009,48 +1001,28 @@ commander.program
     .option('-m, --min', 'Add minified version of your library')
     .addOption(errorOption)
     .action(({ error, index, public: pub, min }) => {
-    innetJS.release({ index, pub, min }).catch(e => {
-        if (error) {
-            console.error(e);
-            process.exit(1);
-        }
-    });
+    innetJS.release({ index, pub, min }).catch(checkError(error));
 });
 commander.program
     .command('patch')
     .description('Increase patch version of package')
     .addOption(errorOption)
     .action(({ error }) => {
-    innetJS.increaseVersion('patch').catch(e => {
-        if (error) {
-            console.error(e);
-            process.exit(1);
-        }
-    });
+    innetJS.increaseVersion('patch').catch(checkError(error));
 });
 commander.program
     .command('minor')
     .description('Increase minor version of package')
     .addOption(errorOption)
     .action(({ error }) => {
-    innetJS.increaseVersion('minor').catch(e => {
-        if (error) {
-            console.error(e);
-            process.exit(1);
-        }
-    });
+    innetJS.increaseVersion('minor').catch(checkError(error));
 });
 commander.program
     .command('major')
     .description('Increase major version of package')
     .addOption(errorOption)
     .action(({ error }) => {
-    innetJS.increaseVersion('major').catch(e => {
-        if (error) {
-            console.error(e);
-            process.exit(1);
-        }
-    });
+    innetJS.increaseVersion('major').catch(checkError(error));
 });
 commander.program
     .parse(process.argv);

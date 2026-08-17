@@ -2,7 +2,7 @@ import { logger } from '@cantinc/logger'
 import chalk from 'chalk'
 import fs from 'fs-extra'
 import path from 'path'
-import { FileSizeRender } from 'rollup-plugin-filesize'
+import type { FileSizeRender } from 'rollup-plugin-filesize'
 
 export function getFile (file: string) {
   file = path.resolve(file)
@@ -13,6 +13,7 @@ export function getFile (file: string) {
 
   if (fs.lstatSync(file).isDirectory()) {
     let tmpFile = file
+
     if (
       !fs.existsSync(tmpFile = path.join(file, 'index.ts')) &&
       !fs.existsSync(tmpFile = path.join(file, 'index.tsx')) &&
@@ -54,5 +55,6 @@ export async function convertIndexFile (data: Buffer, version: string, baseUrl: 
 
 export const reporter: FileSizeRender<string | Promise<string>> = (options, outputOptions, info) => {
   logger.log(`${chalk.yellow(info.fileName)} ${chalk.green(info.bundleSize)} [ gzip: ${chalk.green(info.gzipSize)} ]`)
+
   return ''
 }

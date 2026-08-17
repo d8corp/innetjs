@@ -4,6 +4,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var tslib = require('tslib');
 var logger = require('@cantinc/logger');
+var eslint = require('@rollup/plugin-eslint');
 var autoprefixer = require('autoprefixer');
 var node_child_process = require('node:child_process');
 var fs = require('fs-extra');
@@ -19,6 +20,7 @@ var constants = require('../../constants.js');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
+var eslint__default = /*#__PURE__*/_interopDefaultLegacy(eslint);
 var autoprefixer__default = /*#__PURE__*/_interopDefaultLegacy(autoprefixer);
 var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 var glob__default = /*#__PURE__*/_interopDefaultLegacy(glob);
@@ -48,8 +50,8 @@ function typecheckWatchPlugin() {
         },
     };
 }
-function start({ node = false, inject = false, error = false, typeCheck = false, usualConsoleOutput = false, index = 'index', }, instance) {
-    return tslib.__awaiter(this, void 0, void 0, function* () {
+function start(_a, instance_1) {
+    return tslib.__awaiter(this, arguments, void 0, function* ({ node = false, inject = false, error = false, typeCheck = false, lintCheck = false, usualConsoleOutput = false, index = 'index', }, instance) {
         const params = instance.params;
         const pkg = yield instance.getPackage();
         const input = glob__default["default"].sync(`src/${index}.{${params.indexExt}}`);
@@ -58,21 +60,26 @@ function start({ node = false, inject = false, error = false, typeCheck = false,
         }
         yield logger.logger.start('Remove build', () => fs__default["default"].remove(params.devBuildFolder));
         const plugins = [];
+        const output = {
+            dir: params.devBuildFolder,
+            sourcemap: true,
+        };
         const options = {
             input,
             preserveEntrySignatures: 'strict',
-            output: {
-                dir: params.devBuildFolder,
-                sourcemap: true,
-            },
+            output,
             plugins,
         };
         let preset;
-        instance.withLint(options);
+        if (lintCheck) {
+            plugins.push(eslint__default["default"]({
+                include: constants.lintInclude,
+                throwOnError: false,
+            }));
+        }
         if (node) {
             preset = { NODE_ENV: 'dev' };
-            // @ts-expect-error
-            options.output.format = 'cjs';
+            output.format = 'cjs';
             options.external = Object.keys((pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) || {});
             plugins.push(rollupPluginString.string({
                 include: '**/*.*',
@@ -90,8 +97,7 @@ function start({ node = false, inject = false, error = false, typeCheck = false,
                 : fs__default["default"].existsSync(params.sslCrt)
                     ? fs__default["default"].readFileSync(params.sslCrt)
                     : undefined;
-            // @ts-expect-error
-            options.output.format = 'es';
+            output.format = 'es';
             plugins.push(polyfill__default["default"](), importAssets__default["default"]({
                 include: constants.imageInclude.map(img => `src/${img}`),
                 publicPath: params.baseUrl,
@@ -111,9 +117,9 @@ function start({ node = false, inject = false, error = false, typeCheck = false,
                 include: '**/*.*',
                 exclude: constants.stringExcludeDom,
             }), instance.createClient(key, cert, pkg, path__default["default"].parse(input[0]).name, inject), livereload__default["default"](Object.assign({ exts: ['html', 'css', 'js', 'png', 'svg', 'webp', 'gif', 'jpg', 'json'], watch: [params.devBuildFolder, params.publicFolder], verbose: false }, (key && cert ? { https: { key, cert } } : {}))));
-            if (typeCheck) {
-                plugins.push(typecheckWatchPlugin());
-            }
+        }
+        if (typeCheck) {
+            plugins.push(typecheckWatchPlugin());
         }
         instance.withEnv(options, true, preset);
         const watcher = rolldown.watch(options);

@@ -44,6 +44,7 @@ export interface StartOptions {
     usualConsoleOutput?: boolean;
     index?: string;
     typeCheck?: boolean;
+    lintCheck?: boolean;
 }
 export interface RunOptions {
     config?: string;

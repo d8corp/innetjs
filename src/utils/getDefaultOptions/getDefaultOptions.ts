@@ -1,7 +1,7 @@
 import path from 'path'
 
 import { SCRIPT_EXTENSIONS } from '../../constants'
-import { InnetJSParams } from '../../types'
+import type { InnetJSParams } from '../../types'
 
 export function getDefaultOptions ({
   envPrefix = process.env.INNETJS_ENV_PREFIX || 'INNETJS_',

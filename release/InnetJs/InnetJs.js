@@ -52,23 +52,23 @@ class InnetJS {
             yield init.init(appName, options);
         });
     }
-    build(options = {}) {
-        return tslib.__awaiter(this, void 0, void 0, function* () {
+    build() {
+        return tslib.__awaiter(this, arguments, void 0, function* (options = {}) {
             yield build.build(options, this);
         });
     }
-    start(options = {}) {
-        return tslib.__awaiter(this, void 0, void 0, function* () {
+    start() {
+        return tslib.__awaiter(this, arguments, void 0, function* (options = {}) {
             yield start.start(options, this);
         });
     }
-    run(file, options = {}) {
-        return tslib.__awaiter(this, void 0, void 0, function* () {
+    run(file_1) {
+        return tslib.__awaiter(this, arguments, void 0, function* (file, options = {}) {
             yield run.run(file, options);
         });
     }
-    release(options = {}) {
-        return tslib.__awaiter(this, void 0, void 0, function* () {
+    release() {
+        return tslib.__awaiter(this, arguments, void 0, function* (options = {}) {
             yield release.release(options, this);
         });
     }
@@ -217,6 +217,7 @@ class InnetJS {
                     });
                     child.on('close', (code) => {
                         if (code !== 0 && stderrBuffer) {
+                            // eslint-disable-next-line no-console
                             console.error(printErrorWithFrame.printErrorWithFrame(stderrBuffer, 0, !error));
                             stderrBuffer = '';
                         }

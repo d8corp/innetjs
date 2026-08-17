@@ -36,6 +36,7 @@ function printErrorWithFrame(output, deep = 0, hide = false) {
         try {
             const source = fs__default["default"].readFileSync(filePath, 'utf8');
             frame = codeFrame.codeFrameColumns(source, { start: { line, column } }, { highlightCode: true });
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         }
         catch (e) { }
     }

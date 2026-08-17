@@ -9,15 +9,17 @@ import http from 'http'
 import https from 'https'
 import path from 'path'
 import prompt from 'prompts'
-import rollup from 'rollup'
-import env, { EnvValues } from 'rollup-plugin-process-env'
+// eslint-disable-next-line import/default
+import type rollup from 'rollup'
+import type { EnvValues } from 'rollup-plugin-process-env'
+import env from 'rollup-plugin-process-env'
 
 import { build, init, release, run, start } from '../commands'
 import {
   lintInclude,
 } from '../constants'
 import { convertIndexFile } from '../helpers'
-import { BuildOptions, InitOptions, InnetJSParams, ReleaseOptions, RunOptions, StartOptions } from '../types'
+import type { BuildOptions, InitOptions, InnetJSParams, ReleaseOptions, RunOptions, StartOptions } from '../types'
 import { getDefaultOptions, printErrorWithFrame } from '../utils'
 
 const { spawn } = require('child_process')
@@ -87,17 +89,20 @@ export class InnetJS {
           version[2]++
           break
         }
+
         case 'minor': {
           version[1]++
           version[2] = 0
           break
         }
+
         case 'major': {
           version[1] = 0
           version[2] = 0
           version[0]++
           break
         }
+
         default: return
       }
 
@@ -135,8 +140,10 @@ export class InnetJS {
       writeBundle: async () => {
         if (!app) {
           app = express()
+
           const update = async () => {
             const data = await fsx.readFile(this.params.publicIndexFile)
+
             await fsx.writeFile(
               this.params.devBuildIndexFile,
               await convertIndexFile(data, pkg.version, this.params.baseUrl, index, inject),
@@ -172,15 +179,18 @@ export class InnetJS {
 
           const server = httpsUsing ? https.createServer({ key, cert }, app) : http.createServer(app)
           let port = this.params.port
+
           const listener = () => {
             const baseUrl = this.params.baseUrl === '/' ? '' : this.params.baseUrl
             logger.log(`${chalk.green('➤')} Started on http${httpsUsing ? 's' : ''}://localhost:${port}${baseUrl} and http${httpsUsing ? 's' : ''}://${address.ip()}:${port}${baseUrl}`)
           }
 
           server.listen(port, listener)
+
           server.on('error', async (e: any) => {
             if (e.code === 'EADDRINUSE') {
               port++
+
               const { userPort } = await prompt({
                 name: 'userPort',
                 type: 'number',
@@ -215,6 +225,7 @@ export class InnetJS {
 
           if (usualConsoleOutput) {
             apps[name] = spawn('node', ['-r', 'source-map-support/register', filePath], { stdio: 'inherit' })
+
             return
           }
 
@@ -230,6 +241,7 @@ export class InnetJS {
 
           child.on('close', (code) => {
             if (code !== 0 && stderrBuffer) {
+              // eslint-disable-next-line no-console
               console.error(printErrorWithFrame(stderrBuffer, 0, !error))
               stderrBuffer = ''
             }

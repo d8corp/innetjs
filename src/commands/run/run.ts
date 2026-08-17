@@ -3,11 +3,11 @@ import commonjs from '@rollup/plugin-commonjs'
 import json from '@rollup/plugin-json'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 import ts from '@rollup/plugin-typescript'
-import rollup from 'rollup'
+import { rollup } from 'rollup'
 import tmp from 'tmp'
 
 import { getFile } from '../../helpers'
-import { RunOptions } from '../../types'
+import type { RunOptions } from '../../types'
 const { spawn } = require('child_process')
 
 export async function run (file: string, { config = '', exposeGc = false }: RunOptions = {}) {
@@ -48,7 +48,7 @@ export async function run (file: string, { config = '', exposeGc = false }: RunO
       sourcemap: true,
     }
 
-    const bundle = await rollup.rollup(inputOptions)
+    const bundle = await rollup(inputOptions)
     await bundle.write(outputOptions)
     await bundle.close()
   })

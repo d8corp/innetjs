@@ -4,13 +4,13 @@ import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import ts from '@rollup/plugin-typescript';
-import rollup from 'rollup';
+import { rollup } from 'rollup';
 import tmp from 'tmp';
 import { getFile } from '../../helpers.mjs';
 
 const { spawn } = require('child_process');
-function run(file, { config = '', exposeGc = false } = {}) {
-    return __awaiter(this, void 0, void 0, function* () {
+function run(file_1) {
+    return __awaiter(this, arguments, void 0, function* (file, { config = '', exposeGc = false } = {}) {
         const input = yield logger.start('Check file', () => getFile(file));
         const folder = yield new Promise((resolve, reject) => {
             tmp.dir((err, folder) => {
@@ -44,7 +44,7 @@ function run(file, { config = '', exposeGc = false } = {}) {
                 file: jsFilePath,
                 sourcemap: true,
             };
-            const bundle = yield rollup.rollup(inputOptions);
+            const bundle = yield rollup(inputOptions);
             yield bundle.write(outputOptions);
             yield bundle.close();
         }));

@@ -34,23 +34,23 @@ class InnetJS {
             yield init(appName, options);
         });
     }
-    build(options = {}) {
-        return __awaiter(this, void 0, void 0, function* () {
+    build() {
+        return __awaiter(this, arguments, void 0, function* (options = {}) {
             yield build(options, this);
         });
     }
-    start(options = {}) {
-        return __awaiter(this, void 0, void 0, function* () {
+    start() {
+        return __awaiter(this, arguments, void 0, function* (options = {}) {
             yield start(options, this);
         });
     }
-    run(file, options = {}) {
-        return __awaiter(this, void 0, void 0, function* () {
+    run(file_1) {
+        return __awaiter(this, arguments, void 0, function* (file, options = {}) {
             yield run(file, options);
         });
     }
-    release(options = {}) {
-        return __awaiter(this, void 0, void 0, function* () {
+    release() {
+        return __awaiter(this, arguments, void 0, function* (options = {}) {
             yield release(options, this);
         });
     }
@@ -199,6 +199,7 @@ class InnetJS {
                     });
                     child.on('close', (code) => {
                         if (code !== 0 && stderrBuffer) {
+                            // eslint-disable-next-line no-console
                             console.error(printErrorWithFrame(stderrBuffer, 0, !error));
                             stderrBuffer = '';
                         }

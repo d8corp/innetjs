@@ -1,26 +1,28 @@
-import { ReleaseOptions } from '../../types'
-import type { InnetJS } from '../../InnetJs'
 import { logger } from '@cantinc/logger'
+import image from '@rollup/plugin-image'
+import json from '@rollup/plugin-json'
+import { nodeResolve } from '@rollup/plugin-node-resolve'
+import ts from '@rollup/plugin-typescript'
+import autoprefixer from 'autoprefixer'
+import { promises as fsx } from 'fs'
 import fs from 'fs-extra'
-import rollup, { OutputOptions } from 'rollup'
-import { string } from 'rollup-plugin-string'
 import glob from 'glob'
 import path from 'path'
-import { REG_EXT, REG_TJSX, stringExcludeDom } from '../../constants'
-import json from '@rollup/plugin-json'
-import ts from '@rollup/plugin-typescript'
-import jsx from 'rollup-plugin-innet-jsx'
-import externals from 'rollup-plugin-node-externals'
-import image from '@rollup/plugin-image'
-import styles from 'rollup-plugin-styles'
-import autoprefixer from 'autoprefixer'
-import { nodeResolve } from '@rollup/plugin-node-resolve'
+import type { ModuleFormat, OutputOptions, RollupOptions } from 'rollup'
+import { rollup } from 'rollup'
 import external from 'rollup-plugin-external-node-modules'
-import { terser } from 'rollup-plugin-terser'
+import jsx from 'rollup-plugin-innet-jsx'
+import { externals } from 'rollup-plugin-node-externals'
 import { preserveShebangs } from 'rollup-plugin-preserve-shebangs'
-import { promises as fsx } from 'fs'
-import { getNpmTag } from '../../utils'
+import { string } from 'rollup-plugin-string'
+import styles from 'rollup-plugin-styles'
+import { terser } from 'rollup-plugin-terser'
 import { promisify } from 'util'
+
+import { REG_EXT, REG_TJSX, stringExcludeDom } from '../../constants'
+import type { InnetJS } from '../../InnetJs'
+import type { ReleaseOptions } from '../../types'
+import { getNpmTag } from '../../utils'
 
 const { exec } = require('child_process')
 const execAsync = promisify(exec)
@@ -31,7 +33,7 @@ export async function release ({ index = 'index', pub, min }: ReleaseOptions, in
 
   const pkg = await instance.getPackage()
 
-  const build = async (format: rollup.ModuleFormat) => {
+  const build = async (format: ModuleFormat) => {
     const ext: string = format === 'es'
       ? (pkg.module || pkg.esnext || pkg['jsnext:main'])?.replace('index', '') || '.mjs'
       : pkg.main?.replace('index', '') || '.js'
@@ -44,29 +46,29 @@ export async function release ({ index = 'index', pub, min }: ReleaseOptions, in
 
     const output: OutputOptions = format === 'iife'
       ? {
-        file: path.join(releaseFolder, pkg.browser || 'index.min.js'),
-        inlineDynamicImports: true,
-        name: pkg.browserName || pkg.name
-          .split('-')
-          .map((part: string) => part.charAt(0).toUpperCase() + part.slice(1))
-          .join(''),
-      }
+          file: path.join(releaseFolder, pkg.browser || 'index.min.js'),
+          inlineDynamicImports: true,
+          name: pkg.browserName || pkg.name
+            .split('-')
+            .map((part: string) => part.charAt(0).toUpperCase() + part.slice(1))
+            .join(''),
+        }
       : {
-        dir: releaseFolder,
-        preserveModules: true,
-        exports: 'named',
-        entryFileNames: ({ name, facadeModuleId }) => {
-          if (REG_TJSX.test(facadeModuleId)) {
-            return `${name}${ext}`
-          }
+          dir: releaseFolder,
+          preserveModules: true,
+          exports: 'named',
+          entryFileNames: ({ name, facadeModuleId }) => {
+            if (REG_TJSX.test(facadeModuleId)) {
+              return `${name}${ext}`
+            }
 
-          const match = facadeModuleId.match(REG_EXT)
+            const match = facadeModuleId.match(REG_EXT)
 
-          return match ? `${name}${match[0]}${ext}` : `${name}${ext}`
-        },
-      }
+            return match ? `${name}${match[0]}${ext}` : `${name}${ext}`
+          },
+        }
 
-    const options: rollup.RollupOptions = {
+    const options: RollupOptions = {
       input,
       external: ['tslib'],
       treeshake: false,
@@ -108,8 +110,8 @@ export async function release ({ index = 'index', pub, min }: ReleaseOptions, in
     instance.withLint(options)
     instance.withEnv(options, true)
 
-    const bundle = await rollup.rollup(options)
-    await bundle.write(options.output as rollup.OutputOptions)
+    const bundle = await rollup(options)
+    await bundle.write(options.output as OutputOptions)
     await bundle.close()
   }
 
@@ -153,7 +155,7 @@ export async function release ({ index = 'index', pub, min }: ReleaseOptions, in
         const input = glob.sync(`src/${value}.{${instance.params.indexExt}}`)
         const file = path.join(instance.params.releaseFolder, value)
 
-        const options: rollup.RollupOptions = {
+        const options: RollupOptions = {
           input,
           external: [...Object.keys(pkg.dependencies), 'tslib'],
           output: {
@@ -176,8 +178,8 @@ export async function release ({ index = 'index', pub, min }: ReleaseOptions, in
         instance.withLint(options)
         instance.withEnv(options)
 
-        const bundle = await rollup.rollup(options)
-        await bundle.write(options.output as rollup.OutputOptions)
+        const bundle = await rollup(options)
+        await bundle.write(options.output as OutputOptions)
         await bundle.close()
       }
     })

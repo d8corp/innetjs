@@ -1,20 +1,22 @@
 import { logger } from '@cantinc/logger'
+import eslint from '@rollup/plugin-eslint'
 import autoprefixer from 'autoprefixer'
 import { spawn } from 'child_process'
 import fs from 'fs-extra'
 import glob from 'glob'
 import path from 'path'
-import { RolldownPluginOption, watch, WatchOptions } from 'rolldown'
+import type { OutputOptions, RolldownPluginOption, WatchOptions } from 'rolldown'
+import { watch } from 'rolldown'
 import importAssets from 'rollup-plugin-import-assets'
 import livereload from 'rollup-plugin-livereload'
 import polyfill from 'rollup-plugin-polyfill-node'
-import { EnvValues } from 'rollup-plugin-process-env'
+import type { EnvValues } from 'rollup-plugin-process-env'
 import { string } from 'rollup-plugin-string'
 import styles from 'rollup-plugin-styles'
 
-import { imageInclude, stringExcludeDom, stringExcludeNode } from '../../constants'
+import { imageInclude, lintInclude, stringExcludeDom, stringExcludeNode } from '../../constants'
 import type { InnetJS } from '../../InnetJs'
-import { StartOptions } from '../../types'
+import type { StartOptions } from '../../types'
 
 export function typecheckWatchPlugin () {
   let tscProcess = null
@@ -29,6 +31,7 @@ export function typecheckWatchPlugin () {
       }
 
       logger.start('Check TypeScript')
+
       tscProcess = spawn('tsc', ['--noEmit'], {
         stdio: 'inherit',
         shell: true,
@@ -46,6 +49,7 @@ export async function start ({
   inject = false,
   error = false,
   typeCheck = false,
+  lintCheck = false,
   usualConsoleOutput = false,
   index = 'index',
 }: StartOptions, instance: InnetJS) {
@@ -61,24 +65,32 @@ export async function start ({
 
   const plugins: RolldownPluginOption[] = []
 
+  const output: OutputOptions = {
+    dir: params.devBuildFolder,
+    sourcemap: true,
+  }
+
   const options: WatchOptions = {
     input,
     preserveEntrySignatures: 'strict',
-    output: {
-      dir: params.devBuildFolder,
-      sourcemap: true,
-    },
+    output,
     plugins,
   }
 
   let preset: EnvValues
-  instance.withLint(options as any)
+
+  if (lintCheck) {
+    plugins.push(eslint({
+      include: lintInclude,
+      throwOnError: false,
+    }))
+  }
 
   if (node) {
     preset = { NODE_ENV: 'dev' }
-    // @ts-expect-error
-    options.output.format = 'cjs'
+    output.format = 'cjs'
     options.external = Object.keys(pkg?.dependencies || {})
+
     plugins.push(
       string({
         include: '**/*.*',
@@ -99,8 +111,8 @@ export async function start ({
         ? fs.readFileSync(params.sslCrt)
         : undefined
 
-    // @ts-expect-error
-    options.output.format = 'es'
+    output.format = 'es'
+
     plugins.push(
       polyfill(),
       importAssets({
@@ -132,10 +144,10 @@ export async function start ({
         ...(key && cert ? { https: { key, cert } } : {}),
       }),
     )
+  }
 
-    if (typeCheck) {
-      plugins.push(typecheckWatchPlugin())
-    }
+  if (typeCheck) {
+    plugins.push(typecheckWatchPlugin())
   }
 
   instance.withEnv(options as any, true, preset)

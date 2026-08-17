@@ -1,31 +1,31 @@
 import { __awaiter } from 'tslib';
 import { logger } from '@cantinc/logger';
+import image from '@rollup/plugin-image';
+import json from '@rollup/plugin-json';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+import ts from '@rollup/plugin-typescript';
+import autoprefixer from 'autoprefixer';
+import { promises } from 'node:fs';
 import fs from 'fs-extra';
-import rollup from 'rollup';
-import { string } from 'rollup-plugin-string';
 import glob from 'glob';
 import path from 'node:path';
-import { REG_TJSX, REG_EXT, stringExcludeDom } from '../../constants.mjs';
-import json from '@rollup/plugin-json';
-import ts from '@rollup/plugin-typescript';
-import jsx from 'rollup-plugin-innet-jsx';
-import externals from 'rollup-plugin-node-externals';
-import image from '@rollup/plugin-image';
-import styles from 'rollup-plugin-styles';
-import autoprefixer from 'autoprefixer';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
+import { rollup } from 'rollup';
 import external from 'rollup-plugin-external-node-modules';
-import { terser } from 'rollup-plugin-terser';
+import jsx from 'rollup-plugin-innet-jsx';
+import { externals } from 'rollup-plugin-node-externals';
 import { preserveShebangs } from 'rollup-plugin-preserve-shebangs';
-import { promises } from 'node:fs';
-import '../../utils/index.mjs';
+import { string } from 'rollup-plugin-string';
+import styles from 'rollup-plugin-styles';
+import { terser } from 'rollup-plugin-terser';
 import { promisify } from 'node:util';
+import { REG_TJSX, REG_EXT, stringExcludeDom } from '../../constants.mjs';
+import '../../utils/index.mjs';
 import { getNpmTag } from '../../utils/getNpmTag/getNpmTag.mjs';
 
 const { exec } = require('child_process');
 const execAsync = promisify(exec);
-function release({ index = 'index', pub, min }, instance) {
-    return __awaiter(this, void 0, void 0, function* () {
+function release(_a, instance_1) {
+    return __awaiter(this, arguments, void 0, function* ({ index = 'index', pub, min }, instance) {
         const { releaseFolder, cssModules } = instance.params;
         yield logger.start('Remove previous release', () => fs.remove(releaseFolder));
         const pkg = yield instance.getPackage();
@@ -95,7 +95,7 @@ function release({ index = 'index', pub, min }, instance) {
             }
             instance.withLint(options);
             instance.withEnv(options, true);
-            const bundle = yield rollup.rollup(options);
+            const bundle = yield rollup(options);
             yield bundle.write(options.output);
             yield bundle.close();
         });
@@ -148,7 +148,7 @@ function release({ index = 'index', pub, min }, instance) {
                     };
                     instance.withLint(options);
                     instance.withEnv(options);
-                    const bundle = yield rollup.rollup(options);
+                    const bundle = yield rollup(options);
                     yield bundle.write(options.output);
                     yield bundle.close();
                 }

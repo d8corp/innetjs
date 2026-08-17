@@ -1,6 +1,6 @@
-import rollup from 'rollup';
-import { EnvValues } from 'rollup-plugin-process-env';
-import { BuildOptions, InitOptions, InnetJSParams, ReleaseOptions, RunOptions, StartOptions } from '../types';
+import type rollup from 'rollup';
+import type { EnvValues } from 'rollup-plugin-process-env';
+import type { BuildOptions, InitOptions, InnetJSParams, ReleaseOptions, RunOptions, StartOptions } from '../types';
 export declare class InnetJS {
     params: Required<InnetJSParams>;
     private package;
