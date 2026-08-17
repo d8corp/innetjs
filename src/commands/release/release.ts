@@ -127,7 +127,7 @@ export async function release ({ index = 'index', pub, min, typeCheck, lintCheck
         minimize: true,
       }),
       external(),
-      env(this.params.envPrefix, {
+      env(instance.params.envPrefix, {
         include: input,
         virtual: true,
       }),
@@ -196,7 +196,7 @@ export async function release ({ index = 'index', pub, min, typeCheck, lintCheck
         const plugins: RolldownPluginOption[] = [
           preserveShebangs(),
           externals(),
-          env(this.params.envPrefix, {
+          env(instance.params.envPrefix, {
             include: input,
           }),
         ]

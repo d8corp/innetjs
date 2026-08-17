@@ -126,7 +126,7 @@ function release(_a, instance_1) {
                     minimize: true,
                 }),
                 external__default["default"](),
-                env__default["default"](this.params.envPrefix, {
+                env__default["default"](instance.params.envPrefix, {
                     include: input,
                     virtual: true,
                 }),
@@ -176,7 +176,7 @@ function release(_a, instance_1) {
                     const plugins = [
                         rollupPluginPreserveShebangs.preserveShebangs(),
                         rollupPluginNodeExternals.externals(),
-                        env__default["default"](this.params.envPrefix, {
+                        env__default["default"](instance.params.envPrefix, {
                             include: input,
                         }),
                     ];

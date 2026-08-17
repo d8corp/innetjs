@@ -302,7 +302,7 @@ function build(_a, instance_1) {
         yield logger.logger.start('Remove build', () => fs__default["default"].remove(params.buildFolder));
         const pkg = node && (yield instance.getPackage());
         const plugins = [
-            env__default["default"](this.params.envPrefix, {
+            env__default["default"](instance.params.envPrefix, {
                 include: input,
                 virtual: true,
             }),
@@ -534,7 +534,7 @@ function release(_a, instance_1) {
                     minimize: true,
                 }),
                 external__default["default"](),
-                env__default["default"](this.params.envPrefix, {
+                env__default["default"](instance.params.envPrefix, {
                     include: input,
                     virtual: true,
                 }),
@@ -584,7 +584,7 @@ function release(_a, instance_1) {
                     const plugins = [
                         rollupPluginPreserveShebangs.preserveShebangs(),
                         rollupPluginNodeExternals.externals(),
-                        env__default["default"](this.params.envPrefix, {
+                        env__default["default"](instance.params.envPrefix, {
                             include: input,
                         }),
                     ];
@@ -798,7 +798,7 @@ function start(_a, instance_1) {
         if (lintCheck) {
             plugins.push(lintCheckWatchPlugin());
         }
-        plugins.push(env__default["default"](this.params.envPrefix, {
+        plugins.push(env__default["default"](instance.params.envPrefix, {
             include: input,
             virtual: true,
             preset,
@@ -960,7 +960,7 @@ class InnetJS {
 }
 
 (function () {
-  const env = {"__INNETJS__PACKAGE_VERSION":"4.0.0-alpha.13"};
+  const env = {"__INNETJS__PACKAGE_VERSION":"4.0.0-alpha.15"};
   if (typeof process === 'undefined') {
     globalThis.process = { env: env };
   } else if (process.env) {

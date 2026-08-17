@@ -173,7 +173,7 @@ export async function start ({
     plugins.push(lintCheckWatchPlugin())
   }
 
-  plugins.push(env(this.params.envPrefix, {
+  plugins.push(env(instance.params.envPrefix, {
     include: input,
     virtual: true,
     preset,

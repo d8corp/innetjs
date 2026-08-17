@@ -82,7 +82,7 @@ function build(_a, instance_1) {
         yield logger.logger.start('Remove build', () => fs__default["default"].remove(params.buildFolder));
         const pkg = node && (yield instance.getPackage());
         const plugins = [
-            env__default["default"](this.params.envPrefix, {
+            env__default["default"](instance.params.envPrefix, {
                 include: input,
                 virtual: true,
             }),

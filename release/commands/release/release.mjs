@@ -110,7 +110,7 @@ function release(_a, instance_1) {
                     minimize: true,
                 }),
                 external(),
-                env(this.params.envPrefix, {
+                env(instance.params.envPrefix, {
                     include: input,
                     virtual: true,
                 }),
@@ -160,7 +160,7 @@ function release(_a, instance_1) {
                     const plugins = [
                         preserveShebangs(),
                         externals(),
-                        env(this.params.envPrefix, {
+                        env(instance.params.envPrefix, {
                             include: input,
                         }),
                     ];

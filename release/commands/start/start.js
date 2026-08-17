@@ -138,7 +138,7 @@ function start(_a, instance_1) {
         if (lintCheck) {
             plugins.push(lintCheckWatchPlugin());
         }
-        plugins.push(env__default["default"](this.params.envPrefix, {
+        plugins.push(env__default["default"](instance.params.envPrefix, {
             include: input,
             virtual: true,
             preset,

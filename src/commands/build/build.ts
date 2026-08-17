@@ -78,7 +78,7 @@ export async function build ({ node = false, inject = false, index = 'index', ty
   const pkg = node && await instance.getPackage()
 
   const plugins: RolldownPluginOption[] = [
-    env(this.params.envPrefix, {
+    env(instance.params.envPrefix, {
       include: input,
       virtual: true,
     }),
