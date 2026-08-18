@@ -106,15 +106,17 @@ export class InnetJS {
               })
             }
 
-            app.use(this.params.api, proxy(this.params.proxy, {
-              https: httpsUsing,
-              limit: '1000mb',
-              proxyReqPathResolver: req => req.originalUrl,
-            }))
+            if (this.params.proxy) {
+              app.use(this.params.api, proxy(this.params.proxy, {
+                https: httpsUsing,
+                limit: '1000mb',
+                proxyReqPathResolver: req => req.originalUrl,
+              }))
+            }
           }
 
           app.use(/^([^.]*|.*\.[^.]{5,})$/, (req, res) => {
-            res.sendFile(path.resolve(this.params.devBuildFolder, 'index.html'))
+            res.sendFile(path.resolve(this.params.devBuildFolder, 'index.html'), { dotfiles: 'allow' })
           })
 
           const server = httpsUsing ? https.createServer({ key, cert }, app) : http.createServer(app)

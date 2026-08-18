@@ -19,7 +19,12 @@ import http from "node:http";
 import https from "node:https";
 import path from "node:path";
 import prompt from "prompts";
+import promptStyles from "prompts/lib/util/style";
 //#region src/InnetJs/InnetJs.ts
+const originSymbol = promptStyles.symbol;
+promptStyles.symbol = function(...rest) {
+	return `\u001b[32m${"│".repeat(logger.deep.length)}\u001b[39m ${originSymbol.apply(this, rest)}`;
+};
 var InnetJS = class {
 	constructor(options = {}) {
 		this.params = getDefaultOptions(options);
@@ -68,23 +73,25 @@ var InnetJS = class {
 							req.headers["X-Real-IP"] = this.params.simulateIP;
 							next();
 						});
-						app.use(this.params.api, proxy(this.params.proxy, {
+						if (this.params.proxy) app.use(this.params.api, proxy(this.params.proxy, {
 							https: httpsUsing,
 							limit: "1000mb",
 							proxyReqPathResolver: (req) => req.originalUrl
 						}));
 					}
 					app.use(/^([^.]*|.*\.[^.]{5,})$/, (req, res) => {
-						res.sendFile(this.params.devBuildFolder + "/index.html");
+						res.sendFile(path.resolve(this.params.devBuildFolder, "index.html"), { dotfiles: "allow" });
 					});
 					const server = httpsUsing ? https.createServer({
 						key,
 						cert
 					}, app) : http.createServer(app);
 					let port = this.params.port;
+					const { promise, resolve } = Promise.withResolvers();
 					const listener = () => {
 						const baseUrl = this.params.baseUrl === "/" ? "" : this.params.baseUrl;
 						logger.log(`${chalk.green("➤")} Started on http${httpsUsing ? "s" : ""}://localhost:${port}${baseUrl} and http${httpsUsing ? "s" : ""}://${address.ip()}:${port}${baseUrl}`);
+						resolve(void 0);
 					};
 					server.listen(port, listener);
 					server.on("error", async (e) => {
@@ -99,6 +106,7 @@ var InnetJS = class {
 							server.listen(port);
 						} else throw e;
 					});
+					await promise;
 				}
 			}
 		};

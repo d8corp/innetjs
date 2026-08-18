@@ -43,6 +43,8 @@ let node_https = require("node:https");
 node_https = __toESM(node_https);
 let prompts = require("prompts");
 prompts = __toESM(prompts);
+let prompts_lib_util_style = require("prompts/lib/util/style");
+prompts_lib_util_style = __toESM(prompts_lib_util_style);
 let _rollup_plugin_terser = require("@rollup/plugin-terser");
 _rollup_plugin_terser = __toESM(_rollup_plugin_terser);
 let autoprefixer = require("autoprefixer");
@@ -593,7 +595,7 @@ function typecheckWatchPlugin() {
 	let tscProcess = null;
 	return {
 		name: "type-check",
-		buildStart() {
+		writeBundle() {
 			if (tscProcess) {
 				_cantinc_logger.logger.end("Check TypeScript");
 				tscProcess.kill();
@@ -613,7 +615,7 @@ function lintCheckWatchPlugin() {
 	let lintProcess = null;
 	return {
 		name: "lint-check",
-		buildStart() {
+		writeBundle() {
 			if (lintProcess) {
 				_cantinc_logger.logger.end("Check ESLint");
 				lintProcess.kill();
@@ -710,6 +712,10 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 }
 //#endregion
 //#region src/InnetJs/InnetJs.ts
+const originSymbol = prompts_lib_util_style.default.symbol;
+prompts_lib_util_style.default.symbol = function(...rest) {
+	return `\u001b[32m${"│".repeat(_cantinc_logger.logger.deep.length)}\u001b[39m ${originSymbol.apply(this, rest)}`;
+};
 var InnetJS = class {
 	constructor(options = {}) {
 		this.params = getDefaultOptions(options);
@@ -758,23 +764,25 @@ var InnetJS = class {
 							req.headers["X-Real-IP"] = this.params.simulateIP;
 							next();
 						});
-						app.use(this.params.api, (0, express_http_proxy.default)(this.params.proxy, {
+						if (this.params.proxy) app.use(this.params.api, (0, express_http_proxy.default)(this.params.proxy, {
 							https: httpsUsing,
 							limit: "1000mb",
 							proxyReqPathResolver: (req) => req.originalUrl
 						}));
 					}
 					app.use(/^([^.]*|.*\.[^.]{5,})$/, (req, res) => {
-						res.sendFile(this.params.devBuildFolder + "/index.html");
+						res.sendFile(node_path.default.resolve(this.params.devBuildFolder, "index.html"), { dotfiles: "allow" });
 					});
 					const server = httpsUsing ? node_https.default.createServer({
 						key,
 						cert
 					}, app) : node_http.default.createServer(app);
 					let port = this.params.port;
+					const { promise, resolve } = Promise.withResolvers();
 					const listener = () => {
 						const baseUrl = this.params.baseUrl === "/" ? "" : this.params.baseUrl;
 						_cantinc_logger.logger.log(`${chalk.default.green("➤")} Started on http${httpsUsing ? "s" : ""}://localhost:${port}${baseUrl} and http${httpsUsing ? "s" : ""}://${address.default.ip()}:${port}${baseUrl}`);
+						resolve(void 0);
 					};
 					server.listen(port, listener);
 					server.on("error", async (e) => {
@@ -789,6 +797,7 @@ var InnetJS = class {
 							server.listen(port);
 						} else throw e;
 					});
+					await promise;
 				}
 			}
 		};
@@ -834,7 +843,7 @@ var InnetJS = class {
 //#endregion
 //#region src/bin/innet.ts
 (function() {
-	const env = { "__INNETJS__PACKAGE_VERSION": "4.0.0-alpha.20" };
+	const env = { "__INNETJS__PACKAGE_VERSION": "4.0.0-alpha.21" };
 	if (typeof process === "undefined") globalThis.process = { env };
 	else if (process.env) Object.assign(process.env, env);
 	else process.env = env;

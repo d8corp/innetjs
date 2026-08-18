@@ -29,7 +29,13 @@ let node_path = require("node:path");
 node_path = require_runtime.__toESM(node_path);
 let prompts = require("prompts");
 prompts = require_runtime.__toESM(prompts);
+let prompts_lib_util_style = require("prompts/lib/util/style");
+prompts_lib_util_style = require_runtime.__toESM(prompts_lib_util_style);
 //#region src/InnetJs/InnetJs.ts
+const originSymbol = prompts_lib_util_style.default.symbol;
+prompts_lib_util_style.default.symbol = function(...rest) {
+	return `\u001b[32m${"│".repeat(_cantinc_logger.logger.deep.length)}\u001b[39m ${originSymbol.apply(this, rest)}`;
+};
 var InnetJS = class {
 	constructor(options = {}) {
 		this.params = require_getDefaultOptions.getDefaultOptions(options);
@@ -78,23 +84,25 @@ var InnetJS = class {
 							req.headers["X-Real-IP"] = this.params.simulateIP;
 							next();
 						});
-						app.use(this.params.api, (0, express_http_proxy.default)(this.params.proxy, {
+						if (this.params.proxy) app.use(this.params.api, (0, express_http_proxy.default)(this.params.proxy, {
 							https: httpsUsing,
 							limit: "1000mb",
 							proxyReqPathResolver: (req) => req.originalUrl
 						}));
 					}
 					app.use(/^([^.]*|.*\.[^.]{5,})$/, (req, res) => {
-						res.sendFile(this.params.devBuildFolder + "/index.html");
+						res.sendFile(node_path.default.resolve(this.params.devBuildFolder, "index.html"), { dotfiles: "allow" });
 					});
 					const server = httpsUsing ? node_https.default.createServer({
 						key,
 						cert
 					}, app) : node_http.default.createServer(app);
 					let port = this.params.port;
+					const { promise, resolve } = Promise.withResolvers();
 					const listener = () => {
 						const baseUrl = this.params.baseUrl === "/" ? "" : this.params.baseUrl;
 						_cantinc_logger.logger.log(`${chalk.default.green("➤")} Started on http${httpsUsing ? "s" : ""}://localhost:${port}${baseUrl} and http${httpsUsing ? "s" : ""}://${address.default.ip()}:${port}${baseUrl}`);
+						resolve(void 0);
 					};
 					server.listen(port, listener);
 					server.on("error", async (e) => {
@@ -109,6 +117,7 @@ var InnetJS = class {
 							server.listen(port);
 						} else throw e;
 					});
+					await promise;
 				}
 			}
 		};

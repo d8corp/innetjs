@@ -17,7 +17,7 @@ function typecheckWatchPlugin() {
 	let tscProcess = null;
 	return {
 		name: "type-check",
-		buildStart() {
+		writeBundle() {
 			if (tscProcess) {
 				logger.end("Check TypeScript");
 				tscProcess.kill();
@@ -37,7 +37,7 @@ function lintCheckWatchPlugin() {
 	let lintProcess = null;
 	return {
 		name: "lint-check",
-		buildStart() {
+		writeBundle() {
 			if (lintProcess) {
 				logger.end("Check ESLint");
 				lintProcess.kill();
