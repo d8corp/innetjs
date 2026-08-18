@@ -24,7 +24,7 @@ export function typecheckWatchPlugin (): Plugin {
   return {
     name: 'type-check',
 
-    buildStart () {
+    writeBundle () {
       if (tscProcess) {
         logger.end('Check TypeScript')
         tscProcess.kill()
@@ -50,7 +50,7 @@ export function lintCheckWatchPlugin (): Plugin {
   return {
     name: 'lint-check',
 
-    buildStart () {
+    writeBundle () {
       if (lintProcess) {
         logger.end('Check ESLint')
         lintProcess.kill()

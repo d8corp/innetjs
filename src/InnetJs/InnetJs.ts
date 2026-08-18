@@ -9,7 +9,15 @@ import http from 'http'
 import https from 'https'
 import path from 'path'
 import prompt from 'prompts'
+import promptStyles from 'prompts/lib/util/style'
 import type { Plugin } from 'rolldown'
+
+const originSymbol = promptStyles.symbol
+
+promptStyles.symbol = function (...rest: any[]) {
+  // @ts-expect-error Hack
+  return `\u001b[32m${'│'.repeat(logger.deep.length)}\u001b[39m ${originSymbol.apply(this, rest)}`
+}
 
 import { build, init, release, run, start } from '../commands'
 import { convertIndexFile } from '../helpers'
@@ -106,15 +114,17 @@ export class InnetJS {
           }
 
           app.use(/^([^.]*|.*\.[^.]{5,})$/, (req, res) => {
-            res.sendFile(this.params.devBuildFolder + '/index.html')
+            res.sendFile(path.resolve(this.params.devBuildFolder, 'index.html'))
           })
 
           const server = httpsUsing ? https.createServer({ key, cert }, app) : http.createServer(app)
           let port = this.params.port
+          const { promise, resolve } = Promise.withResolvers()
 
           const listener = () => {
             const baseUrl = this.params.baseUrl === '/' ? '' : this.params.baseUrl
             logger.log(`${chalk.green('➤')} Started on http${httpsUsing ? 's' : ''}://localhost:${port}${baseUrl} and http${httpsUsing ? 's' : ''}://${address.ip()}:${port}${baseUrl}`)
+            resolve(undefined)
           }
 
           server.listen(port, listener)
@@ -138,6 +148,8 @@ export class InnetJS {
               throw e
             }
           })
+
+          await promise
         }
       },
     }
