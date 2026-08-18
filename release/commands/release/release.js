@@ -103,6 +103,7 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 			input,
 			external: ["tslib"],
 			treeshake: false,
+			tsconfig: instance.params.tsconfig,
 			output: {
 				...output,
 				format
@@ -143,6 +144,7 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 			const options = {
 				input,
 				external: [...Object.keys(pkg.dependencies), "tslib"],
+				tsconfig: instance.params.tsconfig,
 				output: {
 					file,
 					format: type === "module" ? "es" : "cjs"

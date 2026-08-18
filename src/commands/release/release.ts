@@ -137,6 +137,7 @@ export async function release ({ index = 'index', pub, min, typeCheck, lintCheck
       input,
       external: ['tslib'],
       treeshake: false,
+      tsconfig: instance.params.tsconfig,
       output: {
         ...output,
         format,
@@ -204,6 +205,7 @@ export async function release ({ index = 'index', pub, min, typeCheck, lintCheck
         const options: RolldownOptions = {
           input,
           external: [...Object.keys(pkg.dependencies), 'tslib'],
+          tsconfig: instance.params.tsconfig,
           output: {
             file,
             format: type === 'module' ? 'es' : 'cjs',

@@ -281,6 +281,7 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 	const options = {
 		input,
 		preserveEntrySignatures: "strict",
+		transform: { jsx: "react-jsx" },
 		plugins
 	};
 	const outputOptions = {
@@ -468,6 +469,7 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 			input,
 			external: ["tslib"],
 			treeshake: false,
+			tsconfig: instance.params.tsconfig,
 			output: {
 				...output,
 				format
@@ -508,6 +510,7 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 			const options = {
 				input,
 				external: [...Object.keys(pkg.dependencies), "tslib"],
+				tsconfig: instance.params.tsconfig,
 				output: {
 					file,
 					format: type === "module" ? "es" : "cjs"
@@ -831,7 +834,7 @@ var InnetJS = class {
 //#endregion
 //#region src/bin/innet.ts
 (function() {
-	const env = { "__INNETJS__PACKAGE_VERSION": "4.0.0-alpha.19" };
+	const env = { "__INNETJS__PACKAGE_VERSION": "4.0.0-alpha.20" };
 	if (typeof process === "undefined") globalThis.process = { env };
 	else if (process.env) Object.assign(process.env, env);
 	else process.env = env;

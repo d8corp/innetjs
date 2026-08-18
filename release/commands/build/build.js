@@ -63,6 +63,7 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 	const options = {
 		input,
 		preserveEntrySignatures: "strict",
+		transform: { jsx: "react-jsx" },
 		plugins
 	};
 	const outputOptions = {

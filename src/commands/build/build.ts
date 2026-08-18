@@ -87,6 +87,9 @@ export async function build ({ node = false, inject = false, index = 'index', ty
   const options: RolldownOptions = {
     input,
     preserveEntrySignatures: 'strict',
+    transform: {
+      jsx: 'react-jsx',
+    },
     plugins,
   }
 
