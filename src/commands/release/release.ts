@@ -54,8 +54,8 @@ export async function release ({ index = 'index', pub, min, typeCheck, lintCheck
 
       const params = ['--emitDeclarationOnly', '--outDir', releaseFolder]
 
-      if (instance.params.tsconfig) {
-        params.push('-p', instance.params.tsconfig)
+      if (instance.params.releaseTSConfig) {
+        params.push('-p', instance.params.releaseTSConfig)
       }
 
       const process = spawn('tsc', params, {
@@ -137,7 +137,7 @@ export async function release ({ index = 'index', pub, min, typeCheck, lintCheck
       input,
       external: ['tslib'],
       treeshake: false,
-      tsconfig: instance.params.tsconfig,
+      tsconfig: instance.params.releaseTSConfig,
       output: {
         ...output,
         format,
@@ -201,7 +201,7 @@ export async function release ({ index = 'index', pub, min, typeCheck, lintCheck
         const options: RolldownOptions = {
           input,
           external: [...Object.keys(pkg.dependencies), 'tslib'],
-          tsconfig: instance.params.tsconfig,
+          tsconfig: instance.params.releaseTSConfig,
           output: {
             file,
             format: type === 'module' ? 'es' : 'cjs',

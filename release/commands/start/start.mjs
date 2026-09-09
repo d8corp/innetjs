@@ -13,7 +13,7 @@ import { string } from "rollup-plugin-string";
 import styles from "rollup-plugin-styles";
 import livereload from "rollup-plugin-livereload";
 //#region src/commands/start/start.ts
-function typecheckWatchPlugin() {
+function typecheckWatchPlugin(instance) {
 	let tscProcess = null;
 	return {
 		name: "type-check",
@@ -23,7 +23,9 @@ function typecheckWatchPlugin() {
 				tscProcess.kill();
 			}
 			logger.start("Check TypeScript");
-			tscProcess = spawn("tsc", ["--noEmit"], {
+			const params = ["--noEmit"];
+			if (instance.params.startTSConfig) params.push("-p", instance.params.startTSConfig);
+			tscProcess = spawn("tsc", params, {
 				stdio: "inherit",
 				shell: true
 			});
@@ -68,7 +70,8 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 		input,
 		preserveEntrySignatures: "strict",
 		output,
-		plugins
+		plugins,
+		tsconfig: instance.params.startTSConfig
 	};
 	let preset;
 	if (node) {
@@ -119,7 +122,7 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 			} } : {}
 		}));
 	}
-	if (typeCheck) plugins.push(typecheckWatchPlugin());
+	if (typeCheck) plugins.push(typecheckWatchPlugin(instance));
 	if (lintCheck) plugins.push(lintCheckWatchPlugin());
 	plugins.push(env(instance.params.envPrefix, {
 		include: input,

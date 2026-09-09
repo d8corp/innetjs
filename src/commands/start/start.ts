@@ -18,7 +18,7 @@ import { imageInclude, stringExcludeDom, stringExcludeNode } from '../../constan
 import type { InnetJS } from '../../InnetJs'
 import type { StartOptions } from '../../types'
 
-export function typecheckWatchPlugin (): Plugin {
+export function typecheckWatchPlugin (instance: InnetJS): Plugin {
   let tscProcess = null
 
   return {
@@ -32,7 +32,13 @@ export function typecheckWatchPlugin (): Plugin {
 
       logger.start('Check TypeScript')
 
-      tscProcess = spawn('tsc', ['--noEmit'], {
+      const params = ['--noEmit']
+
+      if (instance.params.startTSConfig) {
+        params.push('-p', instance.params.startTSConfig)
+      }
+
+      tscProcess = spawn('tsc', params, {
         stdio: 'inherit',
         shell: true,
       })
@@ -101,6 +107,7 @@ export async function start ({
     preserveEntrySignatures: 'strict',
     output,
     plugins,
+    tsconfig: instance.params.startTSConfig,
   }
 
   let preset: EnvValues
@@ -166,7 +173,7 @@ export async function start ({
   }
 
   if (typeCheck) {
-    plugins.push(typecheckWatchPlugin())
+    plugins.push(typecheckWatchPlugin(instance))
   }
 
   if (lintCheck) {

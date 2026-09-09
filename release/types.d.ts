@@ -16,6 +16,9 @@ export interface InnetJSParams {
     port?: number;
     api?: string;
     tsconfig?: string;
+    startTSConfig?: string;
+    buildTSConfig?: string;
+    releaseTSConfig?: string;
     licenseFile?: string;
     licenseReleaseFile?: string;
     readmeFile?: string;

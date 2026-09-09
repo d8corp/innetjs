@@ -49,7 +49,7 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 			"--outDir",
 			releaseFolder
 		];
-		if (instance.params.tsconfig) params.push("-p", instance.params.tsconfig);
+		if (instance.params.releaseTSConfig) params.push("-p", instance.params.releaseTSConfig);
 		(0, node_child_process.spawn)("tsc", params, {
 			stdio: "inherit",
 			shell: true
@@ -102,7 +102,7 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 			input,
 			external: ["tslib"],
 			treeshake: false,
-			tsconfig: instance.params.tsconfig,
+			tsconfig: instance.params.releaseTSConfig,
 			output: {
 				...output,
 				format
@@ -142,7 +142,7 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 			const options = {
 				input,
 				external: [...Object.keys(pkg.dependencies), "tslib"],
-				tsconfig: instance.params.tsconfig,
+				tsconfig: instance.params.releaseTSConfig,
 				output: {
 					file,
 					format: type === "module" ? "es" : "cjs"

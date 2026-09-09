@@ -1,7 +1,7 @@
 import { SCRIPT_EXTENSIONS } from "../../constants.mjs";
 import path from "node:path";
 //#region src/utils/getDefaultOptions/getDefaultOptions.ts
-function getDefaultOptions({ envPrefix = process.env.INNETJS_ENV_PREFIX || "INNETJS_", projectFolder = process.env.PROJECT_FOLDER || "", baseUrl = process.env.BASE_URL || "", publicFolder = process.env.PUBLIC_FOLDER || "public", releaseFolder = process.env.RELEASE_FOLDER || "release", buildFolder = process.env.BUILD_FOLDER || "build", srcFolder = process.env.SRC_FOLDER || "src", sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === "true" : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === "true" : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === "true" : true, sslKey = process.env.SSL_KEY || "localhost.key", sslCrt = process.env.SSL_CRT || "localhost.crt", proxy = process.env.PROXY || "", simulateIP = process.env.IP, port = process.env.PORT ? +process.env.PORT : 3e3, api = process.env.API || "/api/?*", tsconfig = process.env.TSCONFIG, indexExt = SCRIPT_EXTENSIONS.join(",") }) {
+function getDefaultOptions({ envPrefix = process.env.INNETJS_ENV_PREFIX || "INNETJS_", projectFolder = process.env.PROJECT_FOLDER || "", baseUrl = process.env.BASE_URL || "", publicFolder = process.env.PUBLIC_FOLDER || "public", releaseFolder = process.env.RELEASE_FOLDER || "release", buildFolder = process.env.BUILD_FOLDER || "build", srcFolder = process.env.SRC_FOLDER || "src", sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === "true" : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === "true" : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === "true" : true, sslKey = process.env.SSL_KEY || "localhost.key", sslCrt = process.env.SSL_CRT || "localhost.crt", proxy = process.env.PROXY || "", simulateIP = process.env.IP, port = process.env.PORT ? +process.env.PORT : 3e3, api = process.env.API || "/api/?*", tsconfig = process.env.TSCONFIG, buildTSConfig = process.env.BUILD_TSCONFIG ?? tsconfig, releaseTSConfig = process.env.RELEASE_TSCONFIG ?? tsconfig, startTSConfig = process.env.START_TSCONFIG ?? tsconfig, indexExt = SCRIPT_EXTENSIONS.join(",") }) {
 	const devBuildFolder = path.resolve(projectFolder, "node_modules", ".cache", "innetjs", "build");
 	return {
 		projectFolder: path.resolve(projectFolder),
@@ -31,6 +31,9 @@ function getDefaultOptions({ envPrefix = process.env.INNETJS_ENV_PREFIX || "INNE
 		envPrefix,
 		simulateIP,
 		tsconfig,
+		buildTSConfig,
+		releaseTSConfig,
+		startTSConfig,
 		indexExt
 	};
 }

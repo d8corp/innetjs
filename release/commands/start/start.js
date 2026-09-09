@@ -23,7 +23,7 @@ rollup_plugin_styles = require_runtime.__toESM(rollup_plugin_styles);
 let rollup_plugin_livereload = require("rollup-plugin-livereload");
 rollup_plugin_livereload = require_runtime.__toESM(rollup_plugin_livereload);
 //#region src/commands/start/start.ts
-function typecheckWatchPlugin() {
+function typecheckWatchPlugin(instance) {
 	let tscProcess = null;
 	return {
 		name: "type-check",
@@ -33,7 +33,9 @@ function typecheckWatchPlugin() {
 				tscProcess.kill();
 			}
 			_cantinc_logger.logger.start("Check TypeScript");
-			tscProcess = (0, node_child_process.spawn)("tsc", ["--noEmit"], {
+			const params = ["--noEmit"];
+			if (instance.params.startTSConfig) params.push("-p", instance.params.startTSConfig);
+			tscProcess = (0, node_child_process.spawn)("tsc", params, {
 				stdio: "inherit",
 				shell: true
 			});
@@ -78,7 +80,8 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 		input,
 		preserveEntrySignatures: "strict",
 		output,
-		plugins
+		plugins,
+		tsconfig: instance.params.startTSConfig
 	};
 	let preset;
 	if (node) {
@@ -129,7 +132,7 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 			} } : {}
 		}));
 	}
-	if (typeCheck) plugins.push(typecheckWatchPlugin());
+	if (typeCheck) plugins.push(typecheckWatchPlugin(instance));
 	if (lintCheck) plugins.push(lintCheckWatchPlugin());
 	plugins.push((0, rollup_plugin_process_env.default)(instance.params.envPrefix, {
 		include: input,

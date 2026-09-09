@@ -21,6 +21,9 @@ export function getDefaultOptions ({
   port = process.env.PORT ? +process.env.PORT : 3000,
   api = process.env.API || '/api/?*',
   tsconfig = process.env.TSCONFIG,
+  buildTSConfig = process.env.BUILD_TSCONFIG ?? tsconfig,
+  releaseTSConfig = process.env.RELEASE_TSCONFIG ?? tsconfig,
+  startTSConfig = process.env.START_TSCONFIG ?? tsconfig,
   indexExt = SCRIPT_EXTENSIONS.join(','),
 }: InnetJSParams): Required<InnetJSParams> {
   const devBuildFolder = path.resolve(projectFolder, 'node_modules', '.cache', 'innetjs', 'build')
@@ -53,6 +56,9 @@ export function getDefaultOptions ({
     envPrefix,
     simulateIP,
     tsconfig,
+    buildTSConfig,
+    releaseTSConfig,
+    startTSConfig,
     indexExt,
   }
 }

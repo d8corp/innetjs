@@ -34,7 +34,13 @@ export async function build ({ node = false, inject = false, index = 'index', ty
     await logger.start('Check TypeScript', async () => {
       const { resolve, reject, promise } = Promise.withResolvers()
 
-      const process = spawn('tsc', ['--noEmit'], {
+      const params = ['--noEmit']
+
+      if (instance.params.buildTSConfig) {
+        params.push('-p', instance.params.buildTSConfig)
+      }
+
+      const process = spawn('tsc', params, {
         stdio: 'inherit',
         shell: true,
       })
@@ -86,9 +92,7 @@ export async function build ({ node = false, inject = false, index = 'index', ty
   const options: RolldownOptions = {
     input,
     preserveEntrySignatures: 'strict',
-    transform: {
-      jsx: 'react-jsx',
-    },
+    tsconfig: instance.params.buildTSConfig,
     plugins,
   }
 

@@ -23,7 +23,9 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 	if (!input.length) throw Error("index file is not detected");
 	if (typeCheck) await logger.start("Check TypeScript", async () => {
 		const { resolve, reject, promise } = Promise.withResolvers();
-		spawn("tsc", ["--noEmit"], {
+		const params = ["--noEmit"];
+		if (instance.params.buildTSConfig) params.push("-p", instance.params.buildTSConfig);
+		spawn("tsc", params, {
 			stdio: "inherit",
 			shell: true
 		}).on("close", (code) => {
@@ -52,7 +54,7 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 	const options = {
 		input,
 		preserveEntrySignatures: "strict",
-		transform: { jsx: "react-jsx" },
+		tsconfig: instance.params.buildTSConfig,
 		plugins
 	};
 	const outputOptions = {
