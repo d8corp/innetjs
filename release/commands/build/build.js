@@ -7,8 +7,6 @@ let fs_extra = require("fs-extra");
 fs_extra = require_runtime.__toESM(fs_extra);
 let node_path = require("node:path");
 node_path = require_runtime.__toESM(node_path);
-let _rollup_plugin_terser = require("@rollup/plugin-terser");
-_rollup_plugin_terser = require_runtime.__toESM(_rollup_plugin_terser);
 let autoprefixer = require("autoprefixer");
 autoprefixer = require_runtime.__toESM(autoprefixer);
 let node_fs = require("node:fs");
@@ -100,7 +98,8 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 			exclude: require_constants.stringExcludeDom
 		}));
 		outputOptions.format = "es";
-		outputOptions.plugins = [(0, _rollup_plugin_terser.default)(), (0, rollup_plugin_filesize.default)({ reporter: require_helpers.reporter })];
+		outputOptions.minify = true;
+		outputOptions.plugins = [(0, rollup_plugin_filesize.default)({ reporter: require_helpers.reporter })];
 	}
 	await _cantinc_logger.logger.start("Build production bundle", async () => {
 		const bundle = await (0, rolldown.rolldown)(options);

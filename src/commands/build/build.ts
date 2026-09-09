@@ -1,5 +1,4 @@
 import { logger } from '@cantinc/logger'
-import terser from '@rollup/plugin-terser'
 import autoprefixer from 'autoprefixer'
 import { spawn } from 'child_process'
 import { promises as fsx } from 'fs'
@@ -137,9 +136,9 @@ export async function build ({ node = false, inject = false, index = 'index', ty
     )
 
     outputOptions.format = 'es'
+    outputOptions.minify = true
 
     outputOptions.plugins = [
-      terser(),
       filesize({
         reporter,
       }),

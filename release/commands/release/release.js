@@ -8,8 +8,6 @@ let fs_extra = require("fs-extra");
 fs_extra = require_runtime.__toESM(fs_extra);
 let node_path = require("node:path");
 node_path = require_runtime.__toESM(node_path);
-let _rollup_plugin_terser = require("@rollup/plugin-terser");
-_rollup_plugin_terser = require_runtime.__toESM(_rollup_plugin_terser);
 let autoprefixer = require("autoprefixer");
 autoprefixer = require_runtime.__toESM(autoprefixer);
 let node_fs = require("node:fs");
@@ -69,6 +67,7 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 		const output = format === "iife" ? {
 			file: node_path.default.join(releaseFolder, pkg.browser || "index.min.js"),
 			codeSplitting: false,
+			minify: true,
 			name: pkg.browserName || pkg.name.split("-").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join("")
 		} : {
 			dir: releaseFolder,
@@ -110,7 +109,6 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 			},
 			plugins
 		};
-		if (format === "iife") plugins.push((0, _rollup_plugin_terser.default)());
 		const bundle = await (0, rolldown.rolldown)(options);
 		await bundle.write(options.output);
 		await bundle.close();

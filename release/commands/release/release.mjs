@@ -5,7 +5,6 @@ import { logger } from "@cantinc/logger";
 import { exec, spawn } from "node:child_process";
 import fs from "fs-extra";
 import path from "node:path";
-import terser from "@rollup/plugin-terser";
 import autoprefixer from "autoprefixer";
 import { promises as promises$1 } from "node:fs";
 import glob from "glob";
@@ -59,6 +58,7 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 		const output = format === "iife" ? {
 			file: path.join(releaseFolder, pkg.browser || "index.min.js"),
 			codeSplitting: false,
+			minify: true,
 			name: pkg.browserName || pkg.name.split("-").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join("")
 		} : {
 			dir: releaseFolder,
@@ -100,7 +100,6 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 			},
 			plugins
 		};
-		if (format === "iife") plugins.push(terser());
 		const bundle = await rolldown(options);
 		await bundle.write(options.output);
 		await bundle.close();

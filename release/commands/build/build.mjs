@@ -4,7 +4,6 @@ import { logger } from "@cantinc/logger";
 import { spawn } from "node:child_process";
 import fs from "fs-extra";
 import path from "node:path";
-import terser from "@rollup/plugin-terser";
 import autoprefixer from "autoprefixer";
 import { promises as promises$1 } from "node:fs";
 import glob from "glob";
@@ -90,7 +89,8 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 			exclude: stringExcludeDom
 		}));
 		outputOptions.format = "es";
-		outputOptions.plugins = [terser(), filesize({ reporter })];
+		outputOptions.minify = true;
+		outputOptions.plugins = [filesize({ reporter })];
 	}
 	await logger.start("Build production bundle", async () => {
 		const bundle = await rolldown(options);

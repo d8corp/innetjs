@@ -1,6 +1,5 @@
 import { logger } from '@cantinc/logger'
 import image from '@rollup/plugin-image'
-import terser from '@rollup/plugin-terser'
 import autoprefixer from 'autoprefixer'
 import { exec, spawn } from 'child_process'
 import { promises as fsx } from 'fs'
@@ -93,6 +92,7 @@ export async function release ({ index = 'index', pub, min, typeCheck, lintCheck
       ? {
           file: path.join(releaseFolder, pkg.browser || 'index.min.js'),
           codeSplitting: false,
+          minify: true,
           name: pkg.browserName || pkg.name
             .split('-')
             .map((part: string) => part.charAt(0).toUpperCase() + part.slice(1))
@@ -143,10 +143,6 @@ export async function release ({ index = 'index', pub, min, typeCheck, lintCheck
         format,
       },
       plugins,
-    }
-
-    if (format === 'iife') {
-      plugins.push(terser())
     }
 
     const bundle = await rolldown(options)
