@@ -108,6 +108,11 @@ export async function start ({
     output,
     plugins,
     tsconfig: instance.params.startTSConfig,
+    transform: {
+      define: {
+        'process.env.DEV': 'true',
+      },
+    },
   }
 
   let preset: EnvValues

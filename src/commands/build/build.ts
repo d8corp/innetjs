@@ -94,6 +94,11 @@ export async function build ({ node = false, inject = false, index = 'index', ty
     preserveEntrySignatures: 'strict',
     tsconfig: instance.params.buildTSConfig,
     plugins,
+    transform: {
+      define: {
+        'process.env.DEV': 'false',
+      },
+    },
   }
 
   const outputOptions: OutputOptions = {

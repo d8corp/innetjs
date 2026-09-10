@@ -287,7 +287,8 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 		input,
 		preserveEntrySignatures: "strict",
 		tsconfig: instance.params.buildTSConfig,
-		plugins
+		plugins,
+		transform: { define: { "process.env.DEV": "false" } }
 	};
 	const outputOptions = {
 		dir: params.buildFolder,
@@ -653,7 +654,8 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 		preserveEntrySignatures: "strict",
 		output,
 		plugins,
-		tsconfig: instance.params.startTSConfig
+		tsconfig: instance.params.startTSConfig,
+		transform: { define: { "process.env.DEV": "true" } }
 	};
 	let preset;
 	if (node) {
@@ -850,7 +852,7 @@ var InnetJS = class {
 //#endregion
 //#region src/bin/innet.ts
 (function() {
-	const env = { "__INNETJS__PACKAGE_VERSION": "4.0.0-beta.3" };
+	const env = { "__INNETJS__PACKAGE_VERSION": "4.0.0-beta.4" };
 	if (typeof process === "undefined") globalThis.process = { env };
 	else if (process.env) Object.assign(process.env, env);
 	else process.env = env;

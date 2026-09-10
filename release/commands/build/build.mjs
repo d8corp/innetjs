@@ -55,7 +55,8 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 		input,
 		preserveEntrySignatures: "strict",
 		tsconfig: instance.params.buildTSConfig,
-		plugins
+		plugins,
+		transform: { define: { "process.env.DEV": "false" } }
 	};
 	const outputOptions = {
 		dir: params.buildFolder,

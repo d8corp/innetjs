@@ -81,7 +81,8 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 		preserveEntrySignatures: "strict",
 		output,
 		plugins,
-		tsconfig: instance.params.startTSConfig
+		tsconfig: instance.params.startTSConfig,
+		transform: { define: { "process.env.DEV": "true" } }
 	};
 	let preset;
 	if (node) {
