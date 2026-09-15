@@ -288,7 +288,10 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 		preserveEntrySignatures: "strict",
 		tsconfig: instance.params.buildTSConfig,
 		plugins,
-		transform: { define: { "process.env.DEV": "false" } }
+		transform: { define: {
+			"process.env.DEV": "false",
+			"import.meta.env": JSON.stringify(instance.getSharedEnv({ DEV: "false" }))
+		} }
 	};
 	const outputOptions = {
 		dir: params.buildFolder,
@@ -655,7 +658,10 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 		output,
 		plugins,
 		tsconfig: instance.params.startTSConfig,
-		transform: { define: { "process.env.DEV": "true" } }
+		transform: { define: {
+			"process.env.DEV": "true",
+			"import.meta.env": JSON.stringify(instance.getSharedEnv({ DEV: "true" }))
+		} }
 	};
 	let preset;
 	if (node) {
@@ -751,6 +757,11 @@ var InnetJS = class {
 			if (fs_extra.default.existsSync(packageFolder)) this.package = await fs_extra.default.readJson(packageFolder);
 		});
 		return this.package;
+	}
+	getSharedEnv(from = {}) {
+		const shareEnv = { ...from };
+		for (const key in process.env) if (key.startsWith(this.params.envPrefix)) shareEnv[key] = process.env[key];
+		return shareEnv;
 	}
 	createClient(key, cert, pkg, index, inject) {
 		let app;
@@ -852,7 +863,7 @@ var InnetJS = class {
 //#endregion
 //#region src/bin/innet.ts
 (function() {
-	const env = { "__INNETJS__PACKAGE_VERSION": "4.0.0-beta.4" };
+	const env = { "__INNETJS__PACKAGE_VERSION": "4.0.0-beta.5" };
 	if (typeof process === "undefined") globalThis.process = { env };
 	else if (process.env) Object.assign(process.env, env);
 	else process.env = env;

@@ -10,6 +10,7 @@ export declare class InnetJS {
     run(file: string, options?: RunOptions): Promise<void>;
     release(options?: ReleaseOptions): Promise<void>;
     getPackage(): Promise<Record<string, any>>;
+    getSharedEnv(from?: Record<string, string>): Record<string, string>;
     createClient(key: any, cert: any, pkg: any, index: string, inject: boolean): Plugin;
     createServer(input: string[], error?: boolean, usualConsoleOutput?: boolean): Plugin;
 }

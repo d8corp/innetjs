@@ -97,6 +97,9 @@ export async function build ({ node = false, inject = false, index = 'index', ty
     transform: {
       define: {
         'process.env.DEV': 'false',
+        'import.meta.env': JSON.stringify(instance.getSharedEnv({
+          DEV: 'false',
+        })),
       },
     },
   }

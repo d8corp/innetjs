@@ -63,6 +63,11 @@ var InnetJS = class {
 		});
 		return this.package;
 	}
+	getSharedEnv(from = {}) {
+		const shareEnv = { ...from };
+		for (const key in process.env) if (key.startsWith(this.params.envPrefix)) shareEnv[key] = process.env[key];
+		return shareEnv;
+	}
 	createClient(key, cert, pkg, index, inject) {
 		let app;
 		return {

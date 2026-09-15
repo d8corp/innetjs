@@ -72,6 +72,18 @@ export class InnetJS {
     return this.package
   }
 
+  getSharedEnv (from: Record<string, string> = {}): Record<string, string> {
+    const shareEnv: Record<string, string> = { ...from }
+
+    for (const key in process.env) {
+      if (key.startsWith(this.params.envPrefix)) {
+        shareEnv[key] = process.env[key]
+      }
+    }
+
+    return shareEnv
+  }
+
   createClient (key, cert, pkg, index: string, inject: boolean): Plugin {
     let app
 

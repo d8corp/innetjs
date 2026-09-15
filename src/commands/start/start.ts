@@ -111,6 +111,9 @@ export async function start ({
     transform: {
       define: {
         'process.env.DEV': 'true',
+        'import.meta.env': JSON.stringify(instance.getSharedEnv({
+          DEV: 'true',
+        })),
       },
     },
   }

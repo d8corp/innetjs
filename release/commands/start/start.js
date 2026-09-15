@@ -82,7 +82,10 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 		output,
 		plugins,
 		tsconfig: instance.params.startTSConfig,
-		transform: { define: { "process.env.DEV": "true" } }
+		transform: { define: {
+			"process.env.DEV": "true",
+			"import.meta.env": JSON.stringify(instance.getSharedEnv({ DEV: "true" }))
+		} }
 	};
 	let preset;
 	if (node) {
