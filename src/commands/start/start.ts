@@ -18,36 +18,34 @@ import { imageInclude, stringExcludeDom, stringExcludeNode } from '../../constan
 import type { InnetJS } from '../../InnetJs'
 import type { StartOptions } from '../../types'
 
-export function typecheckWatchPlugin (instance: InnetJS): Plugin {
-  let tscProcess = null
+export function typecheckWatchPlugin (instance: InnetJS) {
+  const params = ['--noEmit', '-w', '--preserveWatchOutput']
 
-  return {
-    name: 'type-check',
-
-    writeBundle () {
-      if (tscProcess) {
-        logger.end('Check TypeScript')
-        tscProcess.kill()
-      }
-
-      logger.start('Check TypeScript')
-
-      const params = ['--noEmit']
-
-      if (instance.params.startTSConfig) {
-        params.push('-p', instance.params.startTSConfig)
-      }
-
-      tscProcess = spawn('tsc', params, {
-        stdio: 'inherit',
-        shell: true,
-      })
-
-      tscProcess.on('close', (code: number) => {
-        logger.end('Check TypeScript', code ? 'TypeScript has errors' : undefined)
-      })
-    },
+  if (instance.params.startTSConfig) {
+    params.push('-p', instance.params.startTSConfig)
   }
+
+  const tscProcess = spawn('tsc', params, {
+    stdio: ['ignore', 'pipe', 'inherit'],
+    shell: true,
+  })
+
+  tscProcess.stdout.setEncoding('utf8')
+
+  tscProcess.stdout.on('data', (data: string) => {
+    if (data.includes('Starting compilation') || data.includes('Starting incremental compilation')) {
+      logger.start('Check TypeScript')
+    } else if (data.includes('Watching for file changes')) {
+      const hasErrors = data.includes('Found 0 errors') === false
+      logger.end('Check TypeScript', hasErrors ? 'TypeScript has errors' : undefined)
+
+      if (hasErrors) {
+        process.stdout.write(data)
+      }
+    } else {
+      process.stdout.write(data)
+    }
+  })
 }
 
 export function lintCheckWatchPlugin (): Plugin {
@@ -64,7 +62,7 @@ export function lintCheckWatchPlugin (): Plugin {
 
       logger.start('Check ESLint')
 
-      lintProcess = spawn('eslint', ['src'], {
+      lintProcess = spawn('eslint', ['src', '--cache', '--cache-file', 'node_modules/.cache/.eslintcache'], {
         stdio: 'inherit',
         shell: true,
       })
@@ -181,7 +179,7 @@ export async function start ({
   }
 
   if (typeCheck) {
-    plugins.push(typecheckWatchPlugin(instance))
+    typecheckWatchPlugin(instance)
   }
 
   if (lintCheck) {

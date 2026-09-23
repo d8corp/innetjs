@@ -24,26 +24,29 @@ let rollup_plugin_livereload = require("rollup-plugin-livereload");
 rollup_plugin_livereload = require_runtime.__toESM(rollup_plugin_livereload);
 //#region src/commands/start/start.ts
 function typecheckWatchPlugin(instance) {
-	let tscProcess = null;
-	return {
-		name: "type-check",
-		writeBundle() {
-			if (tscProcess) {
-				_cantinc_logger.logger.end("Check TypeScript");
-				tscProcess.kill();
-			}
-			_cantinc_logger.logger.start("Check TypeScript");
-			const params = ["--noEmit"];
-			if (instance.params.startTSConfig) params.push("-p", instance.params.startTSConfig);
-			tscProcess = (0, node_child_process.spawn)("tsc", params, {
-				stdio: "inherit",
-				shell: true
-			});
-			tscProcess.on("close", (code) => {
-				_cantinc_logger.logger.end("Check TypeScript", code ? "TypeScript has errors" : void 0);
-			});
-		}
-	};
+	const params = [
+		"--noEmit",
+		"-w",
+		"--preserveWatchOutput"
+	];
+	if (instance.params.startTSConfig) params.push("-p", instance.params.startTSConfig);
+	const tscProcess = (0, node_child_process.spawn)("tsc", params, {
+		stdio: [
+			"ignore",
+			"pipe",
+			"inherit"
+		],
+		shell: true
+	});
+	tscProcess.stdout.setEncoding("utf8");
+	tscProcess.stdout.on("data", (data) => {
+		if (data.includes("Starting compilation") || data.includes("Starting incremental compilation")) _cantinc_logger.logger.start("Check TypeScript");
+		else if (data.includes("Watching for file changes")) {
+			const hasErrors = data.includes("Found 0 errors") === false;
+			_cantinc_logger.logger.end("Check TypeScript", hasErrors ? "TypeScript has errors" : void 0);
+			if (hasErrors) process.stdout.write(data);
+		} else process.stdout.write(data);
+	});
 }
 function lintCheckWatchPlugin() {
 	let lintProcess = null;
@@ -55,7 +58,12 @@ function lintCheckWatchPlugin() {
 				lintProcess.kill();
 			}
 			_cantinc_logger.logger.start("Check ESLint");
-			lintProcess = (0, node_child_process.spawn)("eslint", ["src"], {
+			lintProcess = (0, node_child_process.spawn)("eslint", [
+				"src",
+				"--cache",
+				"--cache-file",
+				"node_modules/.cache/.eslintcache"
+			], {
 				stdio: "inherit",
 				shell: true
 			});
@@ -136,7 +144,7 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 			} } : {}
 		}));
 	}
-	if (typeCheck) plugins.push(typecheckWatchPlugin(instance));
+	if (typeCheck) typecheckWatchPlugin(instance);
 	if (lintCheck) plugins.push(lintCheckWatchPlugin());
 	plugins.push((0, rollup_plugin_process_env.default)(instance.params.envPrefix, {
 		include: input,
