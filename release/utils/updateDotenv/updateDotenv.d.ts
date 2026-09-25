@@ -1,1 +1,1 @@
-export declare function updateDotenv(): void;
+export declare function updateDotenv(envFile: string): void;

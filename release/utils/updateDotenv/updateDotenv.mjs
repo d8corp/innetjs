@@ -1,10 +1,15 @@
 import { __require } from "../../_virtual/_rolldown/runtime.mjs";
 //#region src/utils/updateDotenv/updateDotenv.ts
-function updateDotenv() {
+function updateDotenv(envFile) {
 	const { __INNETJS__PACKAGE_VERSION: before } = process.env;
 	delete process.env.__INNETJS__PACKAGE_VERSION;
-	__require("dotenv-expand").expand(__require("dotenv").config());
+	__require("dotenv-expand").expand(__require("dotenv").config({ path: [".env", `.env.${envFile}`] }));
 	if (!("__INNETJS__PACKAGE_VERSION" in process.env)) process.env.__INNETJS__PACKAGE_VERSION = before;
+	while ("__ENV_EXTENDS" in process.env) {
+		const path = process.env.__ENV_EXTENDS;
+		delete process.env.__ENV_EXTENDS;
+		__require("dotenv-expand").expand(__require("dotenv").config({ path }));
+	}
 }
 //#endregion
 export { updateDotenv };

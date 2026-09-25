@@ -5,10 +5,6 @@ import { updateDotenv } from '../utils'
 
 import { InnetJS } from '..'
 
-updateDotenv()
-
-const innetJS = new InnetJS()
-
 const errorOption = new Option('-e, --error', 'Show error details')
 
 const checkError = (flag: boolean) => (error: any) => {
@@ -28,7 +24,8 @@ program
   .option('-t, --template <template>', 'Select template fe or be')
   .addOption(errorOption)
   .action((appName, { error, template }) => {
-    innetJS.init(appName, { template }).catch(checkError(error))
+    updateDotenv('init')
+    new InnetJS().init(appName, { template }).catch(checkError(error))
   })
 
 program
@@ -39,7 +36,8 @@ program
   .option('-tc, --type-check', 'Runes TypeScript errors checker')
   .addOption(errorOption)
   .action((filePath: string, params) => {
-    innetJS.run(filePath, params).catch(checkError(params.error))
+    updateDotenv('run')
+    new InnetJS().run(filePath, params).catch(checkError(params.error))
   })
 
 program
@@ -53,7 +51,8 @@ program
   .option('-i, --index <index>', 'Root index file name', 'index')
   .addOption(errorOption)
   .action((params) => {
-    innetJS.start(params).catch(checkError(params.error))
+    updateDotenv('start')
+    new InnetJS().start(params).catch(checkError(params.error))
   })
 
 program
@@ -66,7 +65,8 @@ program
   .option('-tc, --type-check', 'Runes TypeScript errors checker')
   .option('-lc, --lint-check', 'Runes ESLint errors checker')
   .action((params) => {
-    innetJS.build(params).catch(checkError(params.error))
+    updateDotenv('build')
+    new InnetJS().build(params).catch(checkError(params.error))
   })
 
 program
@@ -79,7 +79,8 @@ program
   .option('-lc, --lint-check', 'Runes ESLint errors checker')
   .addOption(errorOption)
   .action(({ error, index, public: pub, min, lintCheck, typeCheck }) => {
-    innetJS.release({ index, pub, min, lintCheck, typeCheck }).catch(checkError(error))
+    updateDotenv('release')
+    new InnetJS().release({ index, pub, min, lintCheck, typeCheck }).catch(checkError(error))
   })
 
 program
