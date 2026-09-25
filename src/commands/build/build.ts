@@ -89,6 +89,12 @@ export async function build ({ node = false, inject = false, index = 'index', ty
     }),
   ]
 
+  const transformVariables = {}
+
+  for (const [key, value] of Object.entries(instance.getSharedEnv({ DEV: 'false' }))) {
+    transformVariables[`import.meta.env.${key}`] = JSON.stringify(value)
+  }
+
   const options: RolldownOptions = {
     input,
     preserveEntrySignatures: 'strict',
@@ -97,9 +103,8 @@ export async function build ({ node = false, inject = false, index = 'index', ty
     transform: {
       define: {
         'process.env.DEV': 'false',
-        'import.meta.env': JSON.stringify(instance.getSharedEnv({
-          DEV: 'false',
-        })),
+        'import.meta.require': 'require',
+        ...transformVariables,
       },
     },
   }

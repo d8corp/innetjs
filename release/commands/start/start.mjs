@@ -74,6 +74,8 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 		dir: params.devBuildFolder,
 		sourcemap: true
 	};
+	const transformVariables = {};
+	for (const [key, value] of Object.entries(instance.getSharedEnv({ DEV: "true" }))) transformVariables[`import.meta.env.${key}`] = JSON.stringify(value);
 	const options = {
 		input,
 		preserveEntrySignatures: "strict",
@@ -82,7 +84,8 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 		tsconfig: instance.params.startTSConfig,
 		transform: { define: {
 			"process.env.DEV": "true",
-			"import.meta.env": JSON.stringify(instance.getSharedEnv({ DEV: "true" }))
+			"import.meta.require": "require",
+			...transformVariables
 		} }
 	};
 	let preset;

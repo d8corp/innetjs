@@ -100,6 +100,12 @@ export async function start ({
     sourcemap: true,
   }
 
+  const transformVariables = {}
+
+  for (const [key, value] of Object.entries(instance.getSharedEnv({ DEV: 'true' }))) {
+    transformVariables[`import.meta.env.${key}`] = JSON.stringify(value)
+  }
+
   const options: WatchOptions = {
     input,
     preserveEntrySignatures: 'strict',
@@ -109,9 +115,8 @@ export async function start ({
     transform: {
       define: {
         'process.env.DEV': 'true',
-        'import.meta.env': JSON.stringify(instance.getSharedEnv({
-          DEV: 'true',
-        })),
+        'import.meta.require': 'require',
+        ...transformVariables,
       },
     },
   }

@@ -283,6 +283,8 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 		include: input,
 		virtual: true
 	})];
+	const transformVariables = {};
+	for (const [key, value] of Object.entries(instance.getSharedEnv({ DEV: "false" }))) transformVariables[`import.meta.env.${key}`] = JSON.stringify(value);
 	const options = {
 		input,
 		preserveEntrySignatures: "strict",
@@ -290,7 +292,8 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 		plugins,
 		transform: { define: {
 			"process.env.DEV": "false",
-			"import.meta.env": JSON.stringify(instance.getSharedEnv({ DEV: "false" }))
+			"import.meta.require": "require",
+			...transformVariables
 		} }
 	};
 	const outputOptions = {
@@ -660,6 +663,8 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 		dir: params.devBuildFolder,
 		sourcemap: true
 	};
+	const transformVariables = {};
+	for (const [key, value] of Object.entries(instance.getSharedEnv({ DEV: "true" }))) transformVariables[`import.meta.env.${key}`] = JSON.stringify(value);
 	const options = {
 		input,
 		preserveEntrySignatures: "strict",
@@ -668,7 +673,8 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 		tsconfig: instance.params.startTSConfig,
 		transform: { define: {
 			"process.env.DEV": "true",
-			"import.meta.env": JSON.stringify(instance.getSharedEnv({ DEV: "true" }))
+			"import.meta.require": "require",
+			...transformVariables
 		} }
 	};
 	let preset;
@@ -871,7 +877,7 @@ var InnetJS = class {
 //#endregion
 //#region src/bin/innet.ts
 (function() {
-	const env = { "__INNETJS__PACKAGE_VERSION": "4.0.0-beta.6" };
+	const env = { "__INNETJS__PACKAGE_VERSION": "4.0.0-beta.7" };
 	if (typeof process === "undefined") globalThis.process = { env };
 	else if (process.env) Object.assign(process.env, env);
 	else process.env = env;

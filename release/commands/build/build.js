@@ -60,6 +60,8 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 		include: input,
 		virtual: true
 	})];
+	const transformVariables = {};
+	for (const [key, value] of Object.entries(instance.getSharedEnv({ DEV: "false" }))) transformVariables[`import.meta.env.${key}`] = JSON.stringify(value);
 	const options = {
 		input,
 		preserveEntrySignatures: "strict",
@@ -67,7 +69,8 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 		plugins,
 		transform: { define: {
 			"process.env.DEV": "false",
-			"import.meta.env": JSON.stringify(instance.getSharedEnv({ DEV: "false" }))
+			"import.meta.require": "require",
+			...transformVariables
 		} }
 	};
 	const outputOptions = {
