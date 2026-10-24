@@ -167,15 +167,20 @@ export async function build ({ node = false, inject = false, index = 'index', ty
     await bundle.write(outputOptions)
     await bundle.close()
 
-    if (!node) {
-      await copyFiles(params.publicFolder, params.buildFolder)
-      const data = await fsx.readFile(params.publicIndexFile)
-      const pkg = await instance.getPackage()
+    if (!node && fs.existsSync(params.publicFolder)) {
+      await logger.start('Copy public files', () => copyFiles(params.publicFolder, params.buildFolder))
 
-      await fsx.writeFile(
-        params.buildIndexFile,
-        await convertIndexFile(data, pkg.version, params.baseUrl, path.parse(input[0]).name, inject),
-      )
+      if (fs.existsSync(params.publicIndexFile)) {
+        await logger.start('Copy index.html', async () => {
+          const data = await fsx.readFile(params.publicIndexFile)
+          const pkg = await instance.getPackage()
+
+          await fsx.writeFile(
+            params.buildIndexFile,
+            await convertIndexFile(data, pkg.version, params.baseUrl, path.parse(input[0]).name, inject),
+          )
+        })
+      }
     }
   })
 

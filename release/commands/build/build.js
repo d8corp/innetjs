@@ -114,11 +114,13 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 		const bundle = await (0, rolldown.rolldown)(options);
 		await bundle.write(outputOptions);
 		await bundle.close();
-		if (!node) {
-			await copyFiles(params.publicFolder, params.buildFolder);
-			const data = await node_fs.promises.readFile(params.publicIndexFile);
-			const pkg = await instance.getPackage();
-			await node_fs.promises.writeFile(params.buildIndexFile, await require_helpers.convertIndexFile(data, pkg.version, params.baseUrl, node_path.default.parse(input[0]).name, inject));
+		if (!node && fs_extra.default.existsSync(params.publicFolder)) {
+			await _cantinc_logger.logger.start("Copy public files", () => copyFiles(params.publicFolder, params.buildFolder));
+			if (fs_extra.default.existsSync(params.publicIndexFile)) await _cantinc_logger.logger.start("Copy index.html", async () => {
+				const data = await node_fs.promises.readFile(params.publicIndexFile);
+				const pkg = await instance.getPackage();
+				await node_fs.promises.writeFile(params.buildIndexFile, await require_helpers.convertIndexFile(data, pkg.version, params.baseUrl, node_path.default.parse(input[0]).name, inject));
+			});
 		}
 	});
 	if (pkg) {
