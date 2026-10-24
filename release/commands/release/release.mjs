@@ -154,6 +154,15 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 	if (fs.existsSync(instance.params.declarationFile)) await logger.start("Copy declaration", async () => {
 		await promises$1.copyFile(instance.params.declarationFile, instance.params.declarationReleaseFile);
 	});
+	if (instance.params.releaseCopyFiles) await logger.start("Copy files", async () => {
+		const { projectFolder } = instance.params;
+		const files = glob.sync(instance.params.releaseCopyFiles, {
+			cwd: projectFolder,
+			dot: true,
+			nodir: true
+		});
+		for (const file of files) await fs.copy(path.resolve(projectFolder, file), path.join(releaseFolder, file));
+	});
 	if (pub) {
 		const date = Date.now() / 1e3 | 0;
 		await logger.start(`publishing v${pkg.version} ${date}`, async () => {

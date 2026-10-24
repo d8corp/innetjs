@@ -23,6 +23,7 @@ export function getDefaultOptions ({
   tsconfig = process.env.TSCONFIG,
   buildTSConfig = process.env.BUILD_TSCONFIG ?? tsconfig,
   releaseTSConfig = process.env.RELEASE_TSCONFIG ?? tsconfig,
+  releaseCopyFiles = process.env.RELEASE_COPY_FILES || '',
   startTSConfig = process.env.START_TSCONFIG ?? tsconfig,
   indexExt = SCRIPT_EXTENSIONS.join(','),
 }: InnetJSParams): Required<InnetJSParams> {
@@ -58,6 +59,7 @@ export function getDefaultOptions ({
     tsconfig,
     buildTSConfig,
     releaseTSConfig,
+    releaseCopyFiles,
     startTSConfig,
     indexExt,
   }

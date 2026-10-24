@@ -163,6 +163,15 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 	if (fs_extra.default.existsSync(instance.params.declarationFile)) await _cantinc_logger.logger.start("Copy declaration", async () => {
 		await node_fs.promises.copyFile(instance.params.declarationFile, instance.params.declarationReleaseFile);
 	});
+	if (instance.params.releaseCopyFiles) await _cantinc_logger.logger.start("Copy files", async () => {
+		const { projectFolder } = instance.params;
+		const files = glob.default.sync(instance.params.releaseCopyFiles, {
+			cwd: projectFolder,
+			dot: true,
+			nodir: true
+		});
+		for (const file of files) await fs_extra.default.copy(node_path.default.resolve(projectFolder, file), node_path.default.join(releaseFolder, file));
+	});
 	if (pub) {
 		const date = Date.now() / 1e3 | 0;
 		await _cantinc_logger.logger.start(`publishing v${pkg.version} ${date}`, async () => {

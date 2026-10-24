@@ -19,6 +19,7 @@ export interface InnetJSParams {
   startTSConfig?: string
   buildTSConfig?: string
   releaseTSConfig?: string
+  releaseCopyFiles?: string
   licenseFile?: string
   licenseReleaseFile?: string
   readmeFile?: string
