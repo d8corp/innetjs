@@ -120,7 +120,7 @@ const stringExcludeDom = [
 const stringExcludeNode = [...lintInclude, "**/*.json"];
 //#endregion
 //#region src/utils/getDefaultOptions/getDefaultOptions.ts
-function getDefaultOptions({ envPrefix = process.env.INNETJS_ENV_PREFIX || "INNETJS_", projectFolder = process.env.PROJECT_FOLDER || "", baseUrl = process.env.BASE_URL || "", publicFolder = process.env.PUBLIC_FOLDER || "public", releaseFolder = process.env.RELEASE_FOLDER || "release", buildFolder = process.env.BUILD_FOLDER || "build", srcFolder = process.env.SRC_FOLDER || "src", sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === "true" : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === "true" : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === "true" : true, sslKey = process.env.SSL_KEY || "localhost.key", sslCrt = process.env.SSL_CRT || "localhost.crt", proxy = process.env.PROXY || "", simulateIP = process.env.IP, port = process.env.PORT ? +process.env.PORT : 3e3, api = process.env.API || "/api/?*", tsconfig = process.env.TSCONFIG, buildTSConfig = process.env.BUILD_TSCONFIG ?? tsconfig, releaseTSConfig = process.env.RELEASE_TSCONFIG ?? tsconfig, releaseCopyFiles = process.env.RELEASE_COPY_FILES || "", startTSConfig = process.env.START_TSCONFIG ?? tsconfig, indexExt = SCRIPT_EXTENSIONS.join(",") }) {
+function getDefaultOptions({ envPrefix = process.env.INNETJS_ENV_PREFIX || "INNETJS_", projectFolder = process.env.PROJECT_FOLDER || "", baseUrl = process.env.BASE_URL || "", publicFolder = process.env.PUBLIC_FOLDER || "public", releaseFolder = process.env.RELEASE_FOLDER || "release", buildFolder = process.env.BUILD_FOLDER || "build", srcFolder = process.env.SRC_FOLDER || "src", sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === "true" : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === "true" : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === "true" : true, sslKey = process.env.SSL_KEY || "localhost.key", sslCrt = process.env.SSL_CRT || "localhost.crt", proxy = process.env.PROXY || "", simulateIP = process.env.IP, port = process.env.PORT ? +process.env.PORT : 3e3, api = process.env.API || "/api/?*", tsconfig = process.env.TSCONFIG, buildTSConfig = process.env.BUILD_TSCONFIG ?? tsconfig, releaseTSConfig = process.env.RELEASE_TSCONFIG ?? tsconfig, releaseCopyFiles = process.env.RELEASE_COPY_FILES || "", startTSConfig = process.env.START_TSCONFIG ?? tsconfig, indexExt = SCRIPT_EXTENSIONS.join(","), banner = process.env.BUILD_BANNER, footer = process.env.BUILD_FOOTER, buildFormat = process.env.BUILD_FORMAT }) {
 	const devBuildFolder = node_path.default.resolve(projectFolder, "node_modules", ".cache", "innetjs", "build");
 	return {
 		projectFolder: node_path.default.resolve(projectFolder),
@@ -154,7 +154,10 @@ function getDefaultOptions({ envPrefix = process.env.INNETJS_ENV_PREFIX || "INNE
 		releaseTSConfig,
 		releaseCopyFiles,
 		startTSConfig,
-		indexExt
+		indexExt,
+		banner,
+		footer,
+		buildFormat
 	};
 }
 //#endregion
@@ -304,10 +307,12 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 	};
 	const outputOptions = {
 		dir: params.buildFolder,
-		sourcemap: params.sourcemap
+		sourcemap: params.sourcemap,
+		banner: instance.params.banner,
+		footer: instance.params.footer,
+		format: instance.params.buildFormat ?? (node ? "cjs" : "es")
 	};
 	if (node) {
-		outputOptions.format = "cjs";
 		options.external = Object.keys(pkg?.dependencies || {});
 		plugins.push((0, rollup_plugin_string.string)({
 			include: "**/*.*",
@@ -335,7 +340,6 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 			include: "**/*.*",
 			exclude: stringExcludeDom
 		}));
-		outputOptions.format = "es";
 		outputOptions.minify = true;
 		outputOptions.plugins = [(0, rollup_plugin_filesize.default)({ reporter })];
 	}
@@ -678,7 +682,9 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 	const plugins = [];
 	const output = {
 		dir: params.devBuildFolder,
-		sourcemap: true
+		sourcemap: true,
+		banner: instance.params.banner,
+		footer: instance.params.footer
 	};
 	const transformVariables = {};
 	for (const [key, value] of Object.entries(instance.getSharedEnv({ DEV: "true" }))) transformVariables[`import.meta.env.${key}`] = JSON.stringify(value);
@@ -894,7 +900,7 @@ var InnetJS = class {
 //#endregion
 //#region src/bin/innet.ts
 (function() {
-	const env = { "__INNETJS__PACKAGE_VERSION": "4.0.0-beta.10" };
+	const env = { "__INNETJS__PACKAGE_VERSION": "4.0.0-beta.11" };
 	if (typeof process === "undefined") globalThis.process = { env };
 	else if (process.env) Object.assign(process.env, env);
 	else process.env = env;

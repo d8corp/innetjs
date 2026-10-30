@@ -26,6 +26,9 @@ export function getDefaultOptions ({
   releaseCopyFiles = process.env.RELEASE_COPY_FILES || '',
   startTSConfig = process.env.START_TSCONFIG ?? tsconfig,
   indexExt = SCRIPT_EXTENSIONS.join(','),
+  banner = process.env.BUILD_BANNER,
+  footer = process.env.BUILD_FOOTER,
+  buildFormat = process.env.BUILD_FORMAT,
 }: InnetJSParams): Required<InnetJSParams> {
   const devBuildFolder = path.resolve(projectFolder, 'node_modules', '.cache', 'innetjs', 'build')
 
@@ -62,5 +65,8 @@ export function getDefaultOptions ({
     releaseCopyFiles,
     startTSConfig,
     indexExt,
+    banner,
+    footer,
+    buildFormat,
   }
 }

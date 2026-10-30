@@ -112,10 +112,12 @@ export async function build ({ node = false, inject = false, index = 'index', ty
   const outputOptions: OutputOptions = {
     dir: params.buildFolder,
     sourcemap: params.sourcemap,
+    banner: instance.params.banner,
+    footer: instance.params.footer,
+    format: instance.params.buildFormat as any ?? (node ? 'cjs' : 'es'),
   }
 
   if (node) {
-    outputOptions.format = 'cjs'
     options.external = Object.keys(pkg?.dependencies || {})
 
     plugins.push(
@@ -152,7 +154,6 @@ export async function build ({ node = false, inject = false, index = 'index', ty
       }),
     )
 
-    outputOptions.format = 'es'
     outputOptions.minify = true
 
     outputOptions.plugins = [

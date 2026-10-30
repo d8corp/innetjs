@@ -75,10 +75,12 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 	};
 	const outputOptions = {
 		dir: params.buildFolder,
-		sourcemap: params.sourcemap
+		sourcemap: params.sourcemap,
+		banner: instance.params.banner,
+		footer: instance.params.footer,
+		format: instance.params.buildFormat ?? (node ? "cjs" : "es")
 	};
 	if (node) {
-		outputOptions.format = "cjs";
 		options.external = Object.keys(pkg?.dependencies || {});
 		plugins.push((0, rollup_plugin_string.string)({
 			include: "**/*.*",
@@ -106,7 +108,6 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 			include: "**/*.*",
 			exclude: require_constants.stringExcludeDom
 		}));
-		outputOptions.format = "es";
 		outputOptions.minify = true;
 		outputOptions.plugins = [(0, rollup_plugin_filesize.default)({ reporter: require_helpers.reporter })];
 	}

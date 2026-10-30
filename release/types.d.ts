@@ -31,6 +31,9 @@ export interface InnetJSParams {
     buildIndexFile?: string;
     devBuildIndexFile?: string;
     indexExt?: string;
+    banner?: string;
+    footer?: string;
+    buildFormat?: string;
 }
 export interface InitOptions {
     template?: string;

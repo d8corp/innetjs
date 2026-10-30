@@ -98,6 +98,8 @@ export async function start ({
   const output: OutputOptions = {
     dir: params.devBuildFolder,
     sourcemap: true,
+    banner: instance.params.banner,
+    footer: instance.params.footer,
   }
 
   const transformVariables = {}

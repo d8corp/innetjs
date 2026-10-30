@@ -72,7 +72,9 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 	const plugins = [];
 	const output = {
 		dir: params.devBuildFolder,
-		sourcemap: true
+		sourcemap: true,
+		banner: instance.params.banner,
+		footer: instance.params.footer
 	};
 	const transformVariables = {};
 	for (const [key, value] of Object.entries(instance.getSharedEnv({ DEV: "true" }))) transformVariables[`import.meta.env.${key}`] = JSON.stringify(value);

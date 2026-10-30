@@ -66,10 +66,12 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 	};
 	const outputOptions = {
 		dir: params.buildFolder,
-		sourcemap: params.sourcemap
+		sourcemap: params.sourcemap,
+		banner: instance.params.banner,
+		footer: instance.params.footer,
+		format: instance.params.buildFormat ?? (node ? "cjs" : "es")
 	};
 	if (node) {
-		outputOptions.format = "cjs";
 		options.external = Object.keys(pkg?.dependencies || {});
 		plugins.push(string({
 			include: "**/*.*",
@@ -97,7 +99,6 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 			include: "**/*.*",
 			exclude: stringExcludeDom
 		}));
-		outputOptions.format = "es";
 		outputOptions.minify = true;
 		outputOptions.plugins = [filesize({ reporter })];
 	}
