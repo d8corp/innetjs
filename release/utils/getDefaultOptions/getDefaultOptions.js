@@ -3,7 +3,7 @@ const require_constants = require("../../constants.js");
 let node_path = require("node:path");
 node_path = require_runtime.__toESM(node_path);
 //#region src/utils/getDefaultOptions/getDefaultOptions.ts
-function getDefaultOptions({ envPrefix = process.env.INNETJS_ENV_PREFIX || "INNETJS_", projectFolder = process.env.PROJECT_FOLDER || "", baseUrl = process.env.BASE_URL || "", publicFolder = process.env.PUBLIC_FOLDER || "public", releaseFolder = process.env.RELEASE_FOLDER || "release", buildFolder = process.env.BUILD_FOLDER || "build", srcFolder = process.env.SRC_FOLDER || "src", sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === "true" : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === "true" : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === "true" : true, sslKey = process.env.SSL_KEY || "localhost.key", sslCrt = process.env.SSL_CRT || "localhost.crt", proxy = process.env.PROXY || "", simulateIP = process.env.IP, port = process.env.PORT ? +process.env.PORT : 3e3, api = process.env.API || "/api/?*", tsconfig = process.env.TSCONFIG, buildTSConfig = process.env.BUILD_TSCONFIG ?? tsconfig, releaseTSConfig = process.env.RELEASE_TSCONFIG ?? tsconfig, releaseCopyFiles = process.env.RELEASE_COPY_FILES || "", startTSConfig = process.env.START_TSCONFIG ?? tsconfig, indexExt = require_constants.SCRIPT_EXTENSIONS.join(","), banner = process.env.BUILD_BANNER, footer = process.env.BUILD_FOOTER, buildFormat = process.env.BUILD_FORMAT }) {
+function getDefaultOptions({ envPrefix = process.env.INNETJS_ENV_PREFIX || "INNETJS_", projectFolder = process.env.PROJECT_FOLDER || "", baseUrl = process.env.BASE_URL || "", publicFolder = process.env.PUBLIC_FOLDER || "public", releaseFolder = process.env.RELEASE_FOLDER || "release", buildFolder = process.env.BUILD_FOLDER || "build", srcFolder = process.env.SRC_FOLDER || "src", sourcemap = process.env.SOURCEMAP ? process.env.SOURCEMAP === "true" : false, cssModules = process.env.CSS_MODULES ? process.env.CSS_MODULES === "true" : true, cssInJs = process.env.CSS_IN_JS ? process.env.CSS_IN_JS === "true" : true, sslKey = process.env.SSL_KEY || "localhost.key", sslCrt = process.env.SSL_CRT || "localhost.crt", proxy = process.env.PROXY || "", simulateIP = process.env.IP, port = process.env.PORT ? +process.env.PORT : 3e3, api = process.env.API || "/api/?*", tsconfig = process.env.TSCONFIG, buildTSConfig = process.env.BUILD_TSCONFIG ?? tsconfig, releaseTSConfig = process.env.RELEASE_TSCONFIG ?? tsconfig, releaseCopyFiles = process.env.RELEASE_COPY_FILES || "", startTSConfig = process.env.START_TSCONFIG ?? tsconfig, indexExt = require_constants.SCRIPT_EXTENSIONS.join(","), banner = process.env.BUILD_BANNER, footer = process.env.BUILD_FOOTER, buildFormat = process.env.BUILD_FORMAT, buildExternal = process.env.BUILD_EXTERNAL ? process.env.BUILD_EXTERNAL.split(",") : [] }) {
 	const devBuildFolder = node_path.default.resolve(projectFolder, "node_modules", ".cache", "innetjs", "build");
 	return {
 		projectFolder: node_path.default.resolve(projectFolder),
@@ -40,7 +40,8 @@ function getDefaultOptions({ envPrefix = process.env.INNETJS_ENV_PREFIX || "INNE
 		indexExt,
 		banner,
 		footer,
-		buildFormat
+		buildFormat,
+		buildExternal
 	};
 }
 //#endregion

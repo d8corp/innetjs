@@ -62,7 +62,8 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 			"process.env.DEV": "false",
 			"import.meta.require": "require",
 			...transformVariables
-		} }
+		} },
+		external: instance.params.buildExternal
 	};
 	const outputOptions = {
 		dir: params.buildFolder,
@@ -72,7 +73,7 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 		format: instance.params.buildFormat ?? (node ? "cjs" : "es")
 	};
 	if (node) {
-		options.external = Object.keys(pkg?.dependencies || {});
+		options.external = [...instance.params.buildExternal, ...Object.keys(pkg?.dependencies || {})];
 		plugins.push(string({
 			include: "**/*.*",
 			exclude: stringExcludeNode

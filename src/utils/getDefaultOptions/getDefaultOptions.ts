@@ -29,6 +29,7 @@ export function getDefaultOptions ({
   banner = process.env.BUILD_BANNER,
   footer = process.env.BUILD_FOOTER,
   buildFormat = process.env.BUILD_FORMAT,
+  buildExternal = process.env.BUILD_EXTERNAL ? process.env.BUILD_EXTERNAL.split(',') : [],
 }: InnetJSParams): Required<InnetJSParams> {
   const devBuildFolder = path.resolve(projectFolder, 'node_modules', '.cache', 'innetjs', 'build')
 
@@ -68,5 +69,6 @@ export function getDefaultOptions ({
     banner,
     footer,
     buildFormat,
+    buildExternal,
   }
 }

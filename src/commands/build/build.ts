@@ -107,6 +107,7 @@ export async function build ({ node = false, inject = false, index = 'index', ty
         ...transformVariables,
       },
     },
+    external: instance.params.buildExternal,
   }
 
   const outputOptions: OutputOptions = {
@@ -118,7 +119,7 @@ export async function build ({ node = false, inject = false, index = 'index', ty
   }
 
   if (node) {
-    options.external = Object.keys(pkg?.dependencies || {})
+    options.external = [...instance.params.buildExternal, ...Object.keys(pkg?.dependencies || {})]
 
     plugins.push(
       string({

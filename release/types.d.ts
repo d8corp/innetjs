@@ -34,6 +34,7 @@ export interface InnetJSParams {
     banner?: string;
     footer?: string;
     buildFormat?: string;
+    buildExternal?: string[];
 }
 export interface InitOptions {
     template?: string;
