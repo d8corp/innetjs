@@ -9,7 +9,6 @@ import autoprefixer from "autoprefixer";
 import { promises as promises$1 } from "node:fs";
 import glob from "glob";
 import { rolldown } from "rolldown";
-import env from "rollup-plugin-process-env";
 import { string } from "rollup-plugin-string";
 import styles from "rollup-plugin-styles";
 import { promisify } from "node:util";
@@ -51,6 +50,8 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 		await promise;
 	});
 	const pkg = await instance.getPackage();
+	const transformVariables = {};
+	for (const [key, value] of Object.entries(instance.getSharedEnv({ DEV: "false" }))) transformVariables[`import.meta.env.${key}`] = JSON.stringify(value);
 	const build = async (format) => {
 		const ext = format === "es" ? (pkg.module || pkg.esnext || pkg["jsnext:main"])?.replace("index", "") || ".mjs" : pkg.main?.replace("index", "") || ".js";
 		const input = glob.sync(`src/${index}.{${instance.params.indexExt}}`);
@@ -83,11 +84,7 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 				autoModules: cssModules ? (id) => !id.includes(".global.") : true,
 				minimize: true
 			}),
-			external(),
-			env(instance.params.envPrefix, {
-				include: input,
-				virtual: true
-			})
+			external()
 		];
 		const options = {
 			input,
@@ -98,6 +95,11 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 				...output,
 				format
 			},
+			transform: { define: {
+				"process.env.DEV": "false",
+				"import.meta.require": "require",
+				...transformVariables
+			} },
 			plugins
 		};
 		const bundle = await rolldown(options);
@@ -125,11 +127,7 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 			const value = bin[name];
 			const input = glob.sync(`src/${value}.{${instance.params.indexExt}}`);
 			const file = path.join(instance.params.releaseFolder, value);
-			const plugins = [
-				preserveShebangs(),
-				externals(),
-				env(instance.params.envPrefix, { include: input })
-			];
+			const plugins = [preserveShebangs(), externals()];
 			const options = {
 				input,
 				external: [...Object.keys(pkg.dependencies), "tslib"],
@@ -138,7 +136,12 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 					file,
 					format: type === "module" ? "es" : "cjs"
 				},
-				plugins
+				plugins,
+				transform: { define: {
+					"process.env.DEV": "false",
+					"import.meta.require": "require",
+					...transformVariables
+				} }
 			};
 			const bundle = await rolldown(options);
 			await bundle.write(options.output);

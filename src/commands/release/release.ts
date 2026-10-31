@@ -11,7 +11,6 @@ import { rolldown } from 'rolldown'
 import external from 'rollup-plugin-external-node-modules'
 import { externals } from 'rollup-plugin-node-externals'
 import { preserveShebangs } from 'rollup-plugin-preserve-shebangs'
-import env from 'rollup-plugin-process-env'
 import { string } from 'rollup-plugin-string'
 import styles from 'rollup-plugin-styles'
 import { promisify } from 'util'
@@ -76,6 +75,11 @@ export async function release ({ index = 'index', pub, min, typeCheck, lintCheck
   }
 
   const pkg = await instance.getPackage()
+  const transformVariables = {}
+
+  for (const [key, value] of Object.entries(instance.getSharedEnv({ DEV: 'false' }))) {
+    transformVariables[`import.meta.env.${key}`] = JSON.stringify(value)
+  }
 
   const build = async (format: ModuleFormat) => {
     const ext: string = format === 'es'
@@ -127,10 +131,6 @@ export async function release ({ index = 'index', pub, min, typeCheck, lintCheck
         minimize: true,
       }),
       external(),
-      env(instance.params.envPrefix, {
-        include: input,
-        virtual: true,
-      }),
     ]
 
     const options: RolldownOptions = {
@@ -141,6 +141,13 @@ export async function release ({ index = 'index', pub, min, typeCheck, lintCheck
       output: {
         ...output,
         format,
+      },
+      transform: {
+        define: {
+          'process.env.DEV': 'false',
+          'import.meta.require': 'require',
+          ...transformVariables,
+        },
       },
       plugins,
     }
@@ -193,9 +200,6 @@ export async function release ({ index = 'index', pub, min, typeCheck, lintCheck
         const plugins: RolldownPluginOption[] = [
           preserveShebangs(),
           externals(),
-          env(instance.params.envPrefix, {
-            include: input,
-          }),
         ]
 
         const options: RolldownOptions = {
@@ -207,6 +211,13 @@ export async function release ({ index = 'index', pub, min, typeCheck, lintCheck
             format: type === 'module' ? 'es' : 'cjs',
           },
           plugins,
+          transform: {
+            define: {
+              'process.env.DEV': 'false',
+              'import.meta.require': 'require',
+              ...transformVariables,
+            },
+          },
         }
 
         const bundle = await rolldown(options)

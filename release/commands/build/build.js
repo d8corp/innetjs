@@ -19,8 +19,6 @@ let rollup_plugin_import_assets = require("rollup-plugin-import-assets");
 rollup_plugin_import_assets = require_runtime.__toESM(rollup_plugin_import_assets);
 let rollup_plugin_polyfill_node = require("rollup-plugin-polyfill-node");
 rollup_plugin_polyfill_node = require_runtime.__toESM(rollup_plugin_polyfill_node);
-let rollup_plugin_process_env = require("rollup-plugin-process-env");
-rollup_plugin_process_env = require_runtime.__toESM(rollup_plugin_process_env);
 let rollup_plugin_string = require("rollup-plugin-string");
 let rollup_plugin_styles = require("rollup-plugin-styles");
 rollup_plugin_styles = require_runtime.__toESM(rollup_plugin_styles);
@@ -56,10 +54,7 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 	});
 	await _cantinc_logger.logger.start("Remove build", () => fs_extra.default.remove(params.buildFolder));
 	const pkg = node && await instance.getPackage();
-	const plugins = [(0, rollup_plugin_process_env.default)(instance.params.envPrefix, {
-		include: input,
-		virtual: true
-	})];
+	const plugins = [];
 	const transformVariables = {};
 	for (const [key, value] of Object.entries(instance.getSharedEnv({ DEV: "false" }))) transformVariables[`import.meta.env.${key}`] = JSON.stringify(value);
 	const options = {

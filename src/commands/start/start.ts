@@ -9,8 +9,6 @@ import { watch } from 'rolldown'
 import importAssets from 'rollup-plugin-import-assets'
 import livereload from 'rollup-plugin-livereload'
 import polyfill from 'rollup-plugin-polyfill-node'
-import type { EnvValues } from 'rollup-plugin-process-env'
-import env from 'rollup-plugin-process-env'
 import { string } from 'rollup-plugin-string'
 import styles from 'rollup-plugin-styles'
 
@@ -123,10 +121,7 @@ export async function start ({
     },
   }
 
-  let preset: EnvValues
-
   if (node) {
-    preset = { NODE_ENV: 'dev' }
     output.format = 'cjs'
     options.external = Object.keys(pkg?.dependencies || {})
 
@@ -192,12 +187,6 @@ export async function start ({
   if (lintCheck) {
     plugins.push(lintCheckWatchPlugin())
   }
-
-  plugins.push(env(instance.params.envPrefix, {
-    include: input,
-    virtual: true,
-    preset,
-  }))
 
   const watcher = watch(options)
 

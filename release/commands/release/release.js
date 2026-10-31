@@ -14,8 +14,6 @@ let node_fs = require("node:fs");
 let glob = require("glob");
 glob = require_runtime.__toESM(glob);
 let rolldown = require("rolldown");
-let rollup_plugin_process_env = require("rollup-plugin-process-env");
-rollup_plugin_process_env = require_runtime.__toESM(rollup_plugin_process_env);
 let rollup_plugin_string = require("rollup-plugin-string");
 let rollup_plugin_styles = require("rollup-plugin-styles");
 rollup_plugin_styles = require_runtime.__toESM(rollup_plugin_styles);
@@ -60,6 +58,8 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 		await promise;
 	});
 	const pkg = await instance.getPackage();
+	const transformVariables = {};
+	for (const [key, value] of Object.entries(instance.getSharedEnv({ DEV: "false" }))) transformVariables[`import.meta.env.${key}`] = JSON.stringify(value);
 	const build = async (format) => {
 		const ext = format === "es" ? (pkg.module || pkg.esnext || pkg["jsnext:main"])?.replace("index", "") || ".mjs" : pkg.main?.replace("index", "") || ".js";
 		const input = glob.default.sync(`src/${index}.{${instance.params.indexExt}}`);
@@ -92,11 +92,7 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 				autoModules: cssModules ? (id) => !id.includes(".global.") : true,
 				minimize: true
 			}),
-			(0, rollup_plugin_external_node_modules.default)(),
-			(0, rollup_plugin_process_env.default)(instance.params.envPrefix, {
-				include: input,
-				virtual: true
-			})
+			(0, rollup_plugin_external_node_modules.default)()
 		];
 		const options = {
 			input,
@@ -107,6 +103,11 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 				...output,
 				format
 			},
+			transform: { define: {
+				"process.env.DEV": "false",
+				"import.meta.require": "require",
+				...transformVariables
+			} },
 			plugins
 		};
 		const bundle = await (0, rolldown.rolldown)(options);
@@ -134,11 +135,7 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 			const value = bin[name];
 			const input = glob.default.sync(`src/${value}.{${instance.params.indexExt}}`);
 			const file = node_path.default.join(instance.params.releaseFolder, value);
-			const plugins = [
-				(0, rollup_plugin_preserve_shebangs.preserveShebangs)(),
-				(0, rollup_plugin_node_externals.externals)(),
-				(0, rollup_plugin_process_env.default)(instance.params.envPrefix, { include: input })
-			];
+			const plugins = [(0, rollup_plugin_preserve_shebangs.preserveShebangs)(), (0, rollup_plugin_node_externals.externals)()];
 			const options = {
 				input,
 				external: [...Object.keys(pkg.dependencies), "tslib"],
@@ -147,7 +144,12 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 					file,
 					format: type === "module" ? "es" : "cjs"
 				},
-				plugins
+				plugins,
+				transform: { define: {
+					"process.env.DEV": "false",
+					"import.meta.require": "require",
+					...transformVariables
+				} }
 			};
 			const bundle = await (0, rolldown.rolldown)(options);
 			await bundle.write(options.output);

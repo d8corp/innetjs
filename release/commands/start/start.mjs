@@ -8,7 +8,6 @@ import glob from "glob";
 import { watch } from "rolldown";
 import importAssets from "rollup-plugin-import-assets";
 import polyfill from "rollup-plugin-polyfill-node";
-import env from "rollup-plugin-process-env";
 import { string } from "rollup-plugin-string";
 import styles from "rollup-plugin-styles";
 import livereload from "rollup-plugin-livereload";
@@ -90,9 +89,7 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 			...transformVariables
 		} }
 	};
-	let preset;
 	if (node) {
-		preset = { NODE_ENV: "dev" };
 		output.format = "cjs";
 		options.external = Object.keys(pkg?.dependencies || {});
 		plugins.push(string({
@@ -141,11 +138,6 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 	}
 	if (typeCheck) typecheckWatchPlugin(instance);
 	if (lintCheck) plugins.push(lintCheckWatchPlugin());
-	plugins.push(env(instance.params.envPrefix, {
-		include: input,
-		virtual: true,
-		preset
-	}));
 	watch(options).on("event", async (e) => {
 		if (e.code === "ERROR") logger.end("Bundling", error ? e.error.stack : e.error.message);
 		else if (e.code === "BUNDLE_START") logger.start("Bundling");

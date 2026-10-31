@@ -11,7 +11,6 @@ import { rolldown } from "rolldown";
 import filesize from "rollup-plugin-filesize";
 import importAssets from "rollup-plugin-import-assets";
 import polyfill from "rollup-plugin-polyfill-node";
-import env from "rollup-plugin-process-env";
 import { string } from "rollup-plugin-string";
 import styles from "rollup-plugin-styles";
 import { promisify } from "node:util";
@@ -47,10 +46,7 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 	});
 	await logger.start("Remove build", () => fs.remove(params.buildFolder));
 	const pkg = node && await instance.getPackage();
-	const plugins = [env(instance.params.envPrefix, {
-		include: input,
-		virtual: true
-	})];
+	const plugins = [];
 	const transformVariables = {};
 	for (const [key, value] of Object.entries(instance.getSharedEnv({ DEV: "false" }))) transformVariables[`import.meta.env.${key}`] = JSON.stringify(value);
 	const options = {

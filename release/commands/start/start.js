@@ -15,8 +15,6 @@ let rollup_plugin_import_assets = require("rollup-plugin-import-assets");
 rollup_plugin_import_assets = require_runtime.__toESM(rollup_plugin_import_assets);
 let rollup_plugin_polyfill_node = require("rollup-plugin-polyfill-node");
 rollup_plugin_polyfill_node = require_runtime.__toESM(rollup_plugin_polyfill_node);
-let rollup_plugin_process_env = require("rollup-plugin-process-env");
-rollup_plugin_process_env = require_runtime.__toESM(rollup_plugin_process_env);
 let rollup_plugin_string = require("rollup-plugin-string");
 let rollup_plugin_styles = require("rollup-plugin-styles");
 rollup_plugin_styles = require_runtime.__toESM(rollup_plugin_styles);
@@ -100,9 +98,7 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 			...transformVariables
 		} }
 	};
-	let preset;
 	if (node) {
-		preset = { NODE_ENV: "dev" };
 		output.format = "cjs";
 		options.external = Object.keys(pkg?.dependencies || {});
 		plugins.push((0, rollup_plugin_string.string)({
@@ -151,11 +147,6 @@ async function start({ node = false, inject = false, error = false, typeCheck = 
 	}
 	if (typeCheck) typecheckWatchPlugin(instance);
 	if (lintCheck) plugins.push(lintCheckWatchPlugin());
-	plugins.push((0, rollup_plugin_process_env.default)(instance.params.envPrefix, {
-		include: input,
-		virtual: true,
-		preset
-	}));
 	(0, rolldown.watch)(options).on("event", async (e) => {
 		if (e.code === "ERROR") _cantinc_logger.logger.end("Bundling", error ? e.error.stack : e.error.message);
 		else if (e.code === "BUNDLE_START") _cantinc_logger.logger.start("Bundling");
