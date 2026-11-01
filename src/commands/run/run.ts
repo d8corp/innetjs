@@ -1,5 +1,5 @@
 import { logger } from '@cantinc/logger'
-import { spawn } from 'child_process'
+import { spawn } from 'cross-spawn'
 import type { InputOptions, OutputOptions } from 'rolldown'
 import { rolldown } from 'rolldown'
 import tmp from 'tmp'
@@ -24,12 +24,11 @@ export async function run (file: string, { config = '', exposeGc = false, typeCh
         params.push('-p', config)
       }
 
-      const process = spawn('tsc', params, {
+      const childProcess = spawn('tsc', params, {
         stdio: 'inherit',
-        shell: true,
       })
 
-      process.on('close', (code: number) => {
+      childProcess.on('close', (code: number) => {
         if (code) {
           reject()
         } else {

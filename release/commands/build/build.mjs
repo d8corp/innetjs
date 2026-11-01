@@ -1,7 +1,7 @@
 import { imageInclude, stringExcludeDom, stringExcludeNode } from "../../constants.mjs";
 import { convertIndexFile, reporter } from "../../helpers.mjs";
 import { logger } from "@cantinc/logger";
-import { spawn } from "node:child_process";
+import { spawn } from "cross-spawn";
 import fs from "fs-extra";
 import path from "node:path";
 import autoprefixer from "autoprefixer";
@@ -24,10 +24,7 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 		const { resolve, reject, promise } = Promise.withResolvers();
 		const params = ["--noEmit"];
 		if (instance.params.buildTSConfig) params.push("-p", instance.params.buildTSConfig);
-		spawn("tsc", params, {
-			stdio: "inherit",
-			shell: true
-		}).on("close", (code) => {
+		spawn("tsc", params, { stdio: "inherit" }).on("close", (code) => {
 			if (code) reject();
 			else resolve(void 0);
 		});
@@ -35,10 +32,7 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 	});
 	if (lintCheck) await logger.start("Check ESLint", async () => {
 		const { resolve, reject, promise } = Promise.withResolvers();
-		spawn("eslint", ["src"], {
-			stdio: "inherit",
-			shell: true
-		}).on("close", (code) => {
+		spawn("eslint", ["src"], { stdio: "inherit" }).on("close", (code) => {
 			if (code) reject();
 			else resolve(void 0);
 		});

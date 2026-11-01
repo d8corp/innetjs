@@ -1,6 +1,6 @@
 import { getFile } from "../../helpers.mjs";
 import { logger } from "@cantinc/logger";
-import { spawn } from "node:child_process";
+import { spawn } from "cross-spawn";
 import { rolldown } from "rolldown";
 import tmp from "tmp";
 //#region src/commands/run/run.ts
@@ -11,10 +11,7 @@ async function run(file, { config = "", exposeGc = false, typeCheck } = {}) {
 		const { resolve, reject, promise } = Promise.withResolvers();
 		const params = ["--noEmit"];
 		if (config) params.push("-p", config);
-		spawn("tsc", params, {
-			stdio: "inherit",
-			shell: true
-		}).on("close", (code) => {
+		spawn("tsc", params, { stdio: "inherit" }).on("close", (code) => {
 			if (code) reject();
 			else resolve(void 0);
 		});

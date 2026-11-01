@@ -1,6 +1,6 @@
 import { imageInclude, stringExcludeDom, stringExcludeNode } from "../../constants.mjs";
 import { logger } from "@cantinc/logger";
-import { spawn } from "node:child_process";
+import { spawn } from "cross-spawn";
 import fs from "fs-extra";
 import path from "node:path";
 import autoprefixer from "autoprefixer";
@@ -19,14 +19,11 @@ function typecheckWatchPlugin(instance) {
 		"--preserveWatchOutput"
 	];
 	if (instance.params.startTSConfig) params.push("-p", instance.params.startTSConfig);
-	const tscProcess = spawn("tsc", params, {
-		stdio: [
-			"ignore",
-			"pipe",
-			"inherit"
-		],
-		shell: true
-	});
+	const tscProcess = spawn("tsc", params, { stdio: [
+		"ignore",
+		"pipe",
+		"inherit"
+	] });
 	tscProcess.stdout.setEncoding("utf8");
 	tscProcess.stdout.on("data", (data) => {
 		if (data.includes("Starting compilation") || data.includes("Starting incremental compilation")) logger.start("Check TypeScript");
@@ -52,10 +49,7 @@ function lintCheckWatchPlugin() {
 				"--cache",
 				"--cache-file",
 				"node_modules/.cache/.eslintcache"
-			], {
-				stdio: "inherit",
-				shell: true
-			});
+			], { stdio: "inherit" });
 			lintProcess.on("close", (code) => {
 				logger.end("Check ESLint", code ? "ESLint has errors" : void 0);
 			});

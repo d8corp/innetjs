@@ -1,6 +1,6 @@
 import { logger } from '@cantinc/logger'
 import autoprefixer from 'autoprefixer'
-import { spawn } from 'child_process'
+import { spawn } from 'cross-spawn'
 import fs from 'fs-extra'
 import glob from 'glob'
 import path from 'path'
@@ -25,7 +25,6 @@ export function typecheckWatchPlugin (instance: InnetJS) {
 
   const tscProcess = spawn('tsc', params, {
     stdio: ['ignore', 'pipe', 'inherit'],
-    shell: true,
   })
 
   tscProcess.stdout.setEncoding('utf8')
@@ -62,7 +61,6 @@ export function lintCheckWatchPlugin (): Plugin {
 
       lintProcess = spawn('eslint', ['src', '--cache', '--cache-file', 'node_modules/.cache/.eslintcache'], {
         stdio: 'inherit',
-        shell: true,
       })
 
       lintProcess.on('close', (code: number) => {

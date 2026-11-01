@@ -2,7 +2,7 @@ const require_runtime = require("../../_virtual/_rolldown/runtime.js");
 const require_constants = require("../../constants.js");
 const require_helpers = require("../../helpers.js");
 let _cantinc_logger = require("@cantinc/logger");
-let node_child_process = require("node:child_process");
+let cross_spawn = require("cross-spawn");
 let fs_extra = require("fs-extra");
 fs_extra = require_runtime.__toESM(fs_extra);
 let node_path = require("node:path");
@@ -32,10 +32,7 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 		const { resolve, reject, promise } = Promise.withResolvers();
 		const params = ["--noEmit"];
 		if (instance.params.buildTSConfig) params.push("-p", instance.params.buildTSConfig);
-		(0, node_child_process.spawn)("tsc", params, {
-			stdio: "inherit",
-			shell: true
-		}).on("close", (code) => {
+		(0, cross_spawn.spawn)("tsc", params, { stdio: "inherit" }).on("close", (code) => {
 			if (code) reject();
 			else resolve(void 0);
 		});
@@ -43,10 +40,7 @@ async function build({ node = false, inject = false, index = "index", typeCheck,
 	});
 	if (lintCheck) await _cantinc_logger.logger.start("Check ESLint", async () => {
 		const { resolve, reject, promise } = Promise.withResolvers();
-		(0, node_child_process.spawn)("eslint", ["src"], {
-			stdio: "inherit",
-			shell: true
-		}).on("close", (code) => {
+		(0, cross_spawn.spawn)("eslint", ["src"], { stdio: "inherit" }).on("close", (code) => {
 			if (code) reject();
 			else resolve(void 0);
 		});

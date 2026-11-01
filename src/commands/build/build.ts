@@ -1,6 +1,6 @@
 import { logger } from '@cantinc/logger'
 import autoprefixer from 'autoprefixer'
-import { spawn } from 'child_process'
+import { spawn } from 'cross-spawn'
 import { promises as fsx } from 'fs'
 import fs from 'fs-extra'
 import glob from 'glob'
@@ -39,12 +39,11 @@ export async function build ({ node = false, inject = false, index = 'index', ty
         params.push('-p', instance.params.buildTSConfig)
       }
 
-      const process = spawn('tsc', params, {
+      const childProcess = spawn('tsc', params, {
         stdio: 'inherit',
-        shell: true,
       })
 
-      process.on('close', (code: number) => {
+      childProcess.on('close', (code: number) => {
         if (code) {
           reject()
         } else {
@@ -60,12 +59,11 @@ export async function build ({ node = false, inject = false, index = 'index', ty
     await logger.start('Check ESLint', async () => {
       const { resolve, reject, promise } = Promise.withResolvers()
 
-      const process = spawn('eslint', ['src'], {
+      const childProcess = spawn('eslint', ['src'], {
         stdio: 'inherit',
-        shell: true,
       })
 
-      process.on('close', (code: number) => {
+      childProcess.on('close', (code: number) => {
         if (code) {
           reject()
         } else {

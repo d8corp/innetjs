@@ -1,11 +1,11 @@
 import { logger } from "@cantinc/logger";
 import chalk from "chalk";
-import { exec } from "node:child_process";
 import fs from "fs-extra";
 import path from "node:path";
 import { promisify } from "node:util";
 import Zip from "adm-zip";
 import axios from "axios";
+import { exec } from "node:child_process";
 import selector from "cli-select";
 import { tmpdir } from "node:os";
 import readline from "node:readline";

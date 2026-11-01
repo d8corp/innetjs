@@ -14,7 +14,7 @@ let address = require("address");
 address = require_runtime.__toESM(address);
 let chalk = require("chalk");
 chalk = require_runtime.__toESM(chalk);
-let node_child_process = require("node:child_process");
+let cross_spawn = require("cross-spawn");
 let express = require("express");
 express = require_runtime.__toESM(express);
 let express_http_proxy = require("express-http-proxy");
@@ -138,14 +138,14 @@ var InnetJS = class {
 					apps[name]?.kill();
 					const filePath = node_path.default.resolve(this.params.devBuildFolder, `${name}.js`);
 					if (usualConsoleOutput) {
-						apps[name] = (0, node_child_process.spawn)("node", [
+						apps[name] = (0, cross_spawn.spawn)("node", [
 							"-r",
 							"source-map-support/register",
 							filePath
 						], { stdio: "inherit" });
 						return;
 					}
-					const child = (0, node_child_process.spawn)("node", [
+					const child = (0, cross_spawn.spawn)("node", [
 						"-r",
 						"source-map-support/register",
 						filePath

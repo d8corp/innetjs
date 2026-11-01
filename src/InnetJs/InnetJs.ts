@@ -1,7 +1,7 @@
 import { logger } from '@cantinc/logger'
 import address from 'address'
 import chalk from 'chalk'
-import { spawn } from 'child_process'
+import { spawn } from 'cross-spawn'
 import express from 'express'
 import proxy from 'express-http-proxy'
 import fs, { promises as fsx } from 'fs-extra'

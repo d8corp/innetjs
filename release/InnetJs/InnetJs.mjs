@@ -11,7 +11,7 @@ import "../commands/index.mjs";
 import { logger } from "@cantinc/logger";
 import address from "address";
 import chalk from "chalk";
-import { spawn } from "node:child_process";
+import { spawn } from "cross-spawn";
 import express from "express";
 import proxy from "express-http-proxy";
 import fs, { promises } from "fs-extra";

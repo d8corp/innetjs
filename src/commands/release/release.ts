@@ -1,7 +1,8 @@
 import { logger } from '@cantinc/logger'
 import image from '@rollup/plugin-image'
 import autoprefixer from 'autoprefixer'
-import { exec, spawn } from 'child_process'
+import { exec } from 'child_process'
+import { spawn } from 'cross-spawn'
 import { promises as fsx } from 'fs'
 import fs from 'fs-extra'
 import glob from 'glob'
@@ -28,12 +29,11 @@ export async function release ({ index = 'index', pub, min, typeCheck, lintCheck
     await logger.start('Check ESLint', async () => {
       const { resolve, reject, promise } = Promise.withResolvers()
 
-      const process = spawn('eslint', ['src'], {
+      const childProcess = spawn('eslint', ['src'], {
         stdio: 'inherit',
-        shell: true,
       })
 
-      process.on('close', (code: number) => {
+      childProcess.on('close', (code: number) => {
         if (code) {
           reject()
         } else {
@@ -57,12 +57,11 @@ export async function release ({ index = 'index', pub, min, typeCheck, lintCheck
         params.push('-p', instance.params.releaseTSConfig)
       }
 
-      const process = spawn('tsc', params, {
+      const childProcess = spawn('tsc', params, {
         stdio: 'inherit',
-        shell: true,
       })
 
-      process.on('close', (code: number) => {
+      childProcess.on('close', (code: number) => {
         if (code) {
           reject()
         } else {
@@ -265,7 +264,7 @@ export async function release ({ index = 'index', pub, min, typeCheck, lintCheck
     const date = (Date.now() / 1000) | 0
 
     await logger.start(`publishing v${pkg.version} ${date}`, async () => {
-      await execAsync(`npm publish ${instance.params.releaseFolder} --tag ${getNpmTag(pkg.version)}`)
+      await execAsync(`npm stage publish ${instance.params.releaseFolder} --tag ${getNpmTag(pkg.version)}`)
     })
   }
 }

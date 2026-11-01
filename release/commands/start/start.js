@@ -1,7 +1,7 @@
 const require_runtime = require("../../_virtual/_rolldown/runtime.js");
 const require_constants = require("../../constants.js");
 let _cantinc_logger = require("@cantinc/logger");
-let node_child_process = require("node:child_process");
+let cross_spawn = require("cross-spawn");
 let fs_extra = require("fs-extra");
 fs_extra = require_runtime.__toESM(fs_extra);
 let node_path = require("node:path");
@@ -28,14 +28,11 @@ function typecheckWatchPlugin(instance) {
 		"--preserveWatchOutput"
 	];
 	if (instance.params.startTSConfig) params.push("-p", instance.params.startTSConfig);
-	const tscProcess = (0, node_child_process.spawn)("tsc", params, {
-		stdio: [
-			"ignore",
-			"pipe",
-			"inherit"
-		],
-		shell: true
-	});
+	const tscProcess = (0, cross_spawn.spawn)("tsc", params, { stdio: [
+		"ignore",
+		"pipe",
+		"inherit"
+	] });
 	tscProcess.stdout.setEncoding("utf8");
 	tscProcess.stdout.on("data", (data) => {
 		if (data.includes("Starting compilation") || data.includes("Starting incremental compilation")) _cantinc_logger.logger.start("Check TypeScript");
@@ -56,15 +53,12 @@ function lintCheckWatchPlugin() {
 				lintProcess.kill();
 			}
 			_cantinc_logger.logger.start("Check ESLint");
-			lintProcess = (0, node_child_process.spawn)("eslint", [
+			lintProcess = (0, cross_spawn.spawn)("eslint", [
 				"src",
 				"--cache",
 				"--cache-file",
 				"node_modules/.cache/.eslintcache"
-			], {
-				stdio: "inherit",
-				shell: true
-			});
+			], { stdio: "inherit" });
 			lintProcess.on("close", (code) => {
 				_cantinc_logger.logger.end("Check ESLint", code ? "ESLint has errors" : void 0);
 			});

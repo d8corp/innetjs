@@ -3,7 +3,7 @@ const require_constants = require("../../constants.js");
 const require_getNpmTag = require("../../utils/getNpmTag/getNpmTag.js");
 require("../../utils/index.js");
 let _cantinc_logger = require("@cantinc/logger");
-let node_child_process = require("node:child_process");
+let cross_spawn = require("cross-spawn");
 let fs_extra = require("fs-extra");
 fs_extra = require_runtime.__toESM(fs_extra);
 let node_path = require("node:path");
@@ -18,6 +18,7 @@ let rollup_plugin_string = require("rollup-plugin-string");
 let rollup_plugin_styles = require("rollup-plugin-styles");
 rollup_plugin_styles = require_runtime.__toESM(rollup_plugin_styles);
 let node_util = require("node:util");
+let node_child_process = require("node:child_process");
 let _rollup_plugin_image = require("@rollup/plugin-image");
 _rollup_plugin_image = require_runtime.__toESM(_rollup_plugin_image);
 let rollup_plugin_external_node_modules = require("rollup-plugin-external-node-modules");
@@ -30,10 +31,7 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 	const { releaseFolder, cssModules } = instance.params;
 	if (lintCheck) await _cantinc_logger.logger.start("Check ESLint", async () => {
 		const { resolve, reject, promise } = Promise.withResolvers();
-		(0, node_child_process.spawn)("eslint", ["src"], {
-			stdio: "inherit",
-			shell: true
-		}).on("close", (code) => {
+		(0, cross_spawn.spawn)("eslint", ["src"], { stdio: "inherit" }).on("close", (code) => {
 			if (code) reject();
 			else resolve(void 0);
 		});
@@ -48,10 +46,7 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 			releaseFolder
 		];
 		if (instance.params.releaseTSConfig) params.push("-p", instance.params.releaseTSConfig);
-		(0, node_child_process.spawn)("tsc", params, {
-			stdio: "inherit",
-			shell: true
-		}).on("close", (code) => {
+		(0, cross_spawn.spawn)("tsc", params, { stdio: "inherit" }).on("close", (code) => {
 			if (code) reject();
 			else resolve(void 0);
 		});
@@ -177,7 +172,7 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 	if (pub) {
 		const date = Date.now() / 1e3 | 0;
 		await _cantinc_logger.logger.start(`publishing v${pkg.version} ${date}`, async () => {
-			await execAsync(`npm publish ${instance.params.releaseFolder} --tag ${require_getNpmTag.getNpmTag(pkg.version)}`);
+			await execAsync(`npm stage publish ${instance.params.releaseFolder} --tag ${require_getNpmTag.getNpmTag(pkg.version)}`);
 		});
 	}
 }

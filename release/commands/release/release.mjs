@@ -2,7 +2,7 @@ import { REG_EXT, REG_TJSX, stringExcludeDom } from "../../constants.mjs";
 import { getNpmTag } from "../../utils/getNpmTag/getNpmTag.mjs";
 import "../../utils/index.mjs";
 import { logger } from "@cantinc/logger";
-import { exec, spawn } from "node:child_process";
+import { spawn } from "cross-spawn";
 import fs from "fs-extra";
 import path from "node:path";
 import autoprefixer from "autoprefixer";
@@ -12,6 +12,7 @@ import { rolldown } from "rolldown";
 import { string } from "rollup-plugin-string";
 import styles from "rollup-plugin-styles";
 import { promisify } from "node:util";
+import { exec } from "node:child_process";
 import image from "@rollup/plugin-image";
 import external from "rollup-plugin-external-node-modules";
 import { externals } from "rollup-plugin-node-externals";
@@ -22,10 +23,7 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 	const { releaseFolder, cssModules } = instance.params;
 	if (lintCheck) await logger.start("Check ESLint", async () => {
 		const { resolve, reject, promise } = Promise.withResolvers();
-		spawn("eslint", ["src"], {
-			stdio: "inherit",
-			shell: true
-		}).on("close", (code) => {
+		spawn("eslint", ["src"], { stdio: "inherit" }).on("close", (code) => {
 			if (code) reject();
 			else resolve(void 0);
 		});
@@ -40,10 +38,7 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 			releaseFolder
 		];
 		if (instance.params.releaseTSConfig) params.push("-p", instance.params.releaseTSConfig);
-		spawn("tsc", params, {
-			stdio: "inherit",
-			shell: true
-		}).on("close", (code) => {
+		spawn("tsc", params, { stdio: "inherit" }).on("close", (code) => {
 			if (code) reject();
 			else resolve(void 0);
 		});
@@ -169,7 +164,7 @@ async function release({ index = "index", pub, min, typeCheck, lintCheck }, inst
 	if (pub) {
 		const date = Date.now() / 1e3 | 0;
 		await logger.start(`publishing v${pkg.version} ${date}`, async () => {
-			await execAsync(`npm publish ${instance.params.releaseFolder} --tag ${getNpmTag(pkg.version)}`);
+			await execAsync(`npm stage publish ${instance.params.releaseFolder} --tag ${getNpmTag(pkg.version)}`);
 		});
 	}
 }

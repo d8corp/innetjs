@@ -1,7 +1,7 @@
 const require_runtime = require("../../_virtual/_rolldown/runtime.js");
 const require_helpers = require("../../helpers.js");
 let _cantinc_logger = require("@cantinc/logger");
-let node_child_process = require("node:child_process");
+let cross_spawn = require("cross-spawn");
 let rolldown = require("rolldown");
 let tmp = require("tmp");
 tmp = require_runtime.__toESM(tmp);
@@ -13,10 +13,7 @@ async function run(file, { config = "", exposeGc = false, typeCheck } = {}) {
 		const { resolve, reject, promise } = Promise.withResolvers();
 		const params = ["--noEmit"];
 		if (config) params.push("-p", config);
-		(0, node_child_process.spawn)("tsc", params, {
-			stdio: "inherit",
-			shell: true
-		}).on("close", (code) => {
+		(0, cross_spawn.spawn)("tsc", params, { stdio: "inherit" }).on("close", (code) => {
 			if (code) reject();
 			else resolve(void 0);
 		});
@@ -45,7 +42,7 @@ async function run(file, { config = "", exposeGc = false, typeCheck } = {}) {
 	await _cantinc_logger.logger.start("Running of the script", async () => {
 		const flags = [];
 		if (exposeGc) flags.push("--expose-gc");
-		(0, node_child_process.spawn)("node", [
+		(0, cross_spawn.spawn)("node", [
 			...flags,
 			"-r",
 			"source-map-support/register",
