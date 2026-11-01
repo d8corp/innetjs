@@ -873,12 +873,6 @@ var InnetJS = class {
 };
 //#endregion
 //#region src/bin/innet.ts
-(function() {
-	const env = { "__INNETJS__PACKAGE_VERSION": "4.0.0-beta.14" };
-	if (typeof process === "undefined") globalThis.process = { env };
-	else if (process.env) Object.assign(process.env, env);
-	else process.env = env;
-})();
 const errorOption = new commander.Option("-e, --error", "Show error details");
 const checkError = (flag) => (error) => {
 	if (flag) {
@@ -886,7 +880,7 @@ const checkError = (flag) => (error) => {
 		process.exit(1);
 	}
 };
-commander.program.version(process.env.__INNETJS__PACKAGE_VERSION, "-v, --version");
+commander.program.version("4.0.0-beta.15", "-v, --version");
 commander.program.command("init <app-name>").description("Create innet boilerplate").option("-t, --template <template>", "Select template fe or be").addOption(errorOption).action((appName, { error, template }) => {
 	updateDotenv("init");
 	new InnetJS().init(appName, { template }).catch(checkError(error));

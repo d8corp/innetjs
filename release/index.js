@@ -1,5 +1,4 @@
 Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
-require("./_virtual/_rollup-plugin-process-env.js");
 const require_constants = require("./constants.js");
 const require_getDefaultOptions = require("./utils/getDefaultOptions/getDefaultOptions.js");
 const require_getNpmTag = require("./utils/getNpmTag/getNpmTag.js");

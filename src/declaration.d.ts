@@ -45,3 +45,8 @@ declare module '*.webp' {
   // eslint-disable-next-line import/no-unused-modules
   export default content
 }
+
+interface ImportMeta {
+  readonly env: Record<string, string>;
+  readonly require: (src?: string) => any
+}

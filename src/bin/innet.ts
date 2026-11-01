@@ -16,7 +16,7 @@ const checkError = (flag: boolean) => (error: any) => {
 }
 
 program
-  .version(process.env.__INNETJS__PACKAGE_VERSION, '-v, --version')
+  .version(import.meta.env.INNETJS__PACKAGE_VERSION, '-v, --version')
 
 program
   .command('init <app-name>')

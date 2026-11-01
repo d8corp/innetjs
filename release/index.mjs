@@ -1,4 +1,3 @@
-import "./_virtual/_rollup-plugin-process-env.mjs";
 import { NPM_TAG, REG_EXT, REG_TJSX, SCRIPT_EXTENSIONS, imageInclude, lintInclude, stringExcludeDom, stringExcludeNode } from "./constants.mjs";
 import { getDefaultOptions } from "./utils/getDefaultOptions/getDefaultOptions.mjs";
 import { getNpmTag } from "./utils/getNpmTag/getNpmTag.mjs";
